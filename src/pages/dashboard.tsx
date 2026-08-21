@@ -37,6 +37,7 @@ import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
 import { percentDelta } from "@/lib/date-range";
 import { formatCurrencyCompact, formatNumber, formatPercent } from "@/lib/utils";
 import { getTasks, CLIENTS } from "@/data/mock";
+import type { SalesPoint } from "@/data/types";
 
 const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
@@ -168,7 +169,7 @@ export default function Dashboard() {
         </Card>
 
         <div className="flex flex-col gap-4">
-          <DailySummaryCard />
+          <DailySummaryCard yesterday={current[current.length - 1]} />
           <AttentionCard clients={attentionClients} />
         </div>
       </div>
@@ -298,8 +299,13 @@ function PriorityDot({ priority }: { priority: string }) {
   return <span className={`size-1.5 shrink-0 rounded-full ${map[priority]}`} />;
 }
 
-function DailySummaryCard() {
+function DailySummaryCard({ yesterday }: { yesterday?: SalesPoint }) {
   const { client, isAllClients } = useApp();
+  const orders = yesterday?.orders ?? 0;
+  const netSales = yesterday?.netSales ?? 0;
+  const rtoPercent = yesterday && yesterday.orders > 0 ? (yesterday.rtoOrders / yesterday.orders) * 100 : 0;
+  const roas = yesterday && yesterday.adSpend > 0 ? yesterday.netSales / yesterday.adSpend : 0;
+
   return (
     <Card className="relative overflow-hidden bg-gradient-to-br from-brand to-[oklch(0.42_0.2_290)] text-white">
       <div className="absolute -right-6 -top-6 size-32 rounded-full bg-white/10 blur-2xl" />
@@ -310,19 +316,19 @@ function DailySummaryCard() {
           Daily summary — Yesterday
         </div>
         <p className="text-[13px] font-semibold leading-snug">
-          {isAllClients ? "All clients" : client?.name}: 184 orders, ₹4.82L net sales, blended ROAS at 3.18x.
+          {isAllClients ? "All clients" : client?.name}: {formatNumber(orders)} orders, {formatCurrencyCompact(netSales)} net sales, blended ROAS at {roas.toFixed(2)}x.
         </p>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div className="rounded-lg bg-white/10 py-1.5">
-            <p className="text-[13px] font-bold">184</p>
+            <p className="text-[13px] font-bold">{formatNumber(orders)}</p>
             <p className="text-[10px] text-white/70">Orders</p>
           </div>
           <div className="rounded-lg bg-white/10 py-1.5">
-            <p className="text-[13px] font-bold">21.4%</p>
+            <p className="text-[13px] font-bold">{formatPercent(rtoPercent)}</p>
             <p className="text-[10px] text-white/70">RTO</p>
           </div>
           <div className="rounded-lg bg-white/10 py-1.5">
-            <p className="text-[13px] font-bold">3.18x</p>
+            <p className="text-[13px] font-bold">{roas.toFixed(2)}x</p>
             <p className="text-[10px] text-white/70">ROAS</p>
           </div>
         </div>
