@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/store/app-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppShell } from "@/components/layout/app-shell";
@@ -28,7 +28,7 @@ export default function App() {
   return (
     <AppProvider>
       <TooltipProvider delayDuration={150}>
-        <BrowserRouter>
+        <HashRouter>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route element={<AppShell />}>
@@ -46,7 +46,7 @@ export default function App() {
               </Route>
             </Routes>
           </Suspense>
-        </BrowserRouter>
+        </HashRouter>
       </TooltipProvider>
     </AppProvider>
   );
