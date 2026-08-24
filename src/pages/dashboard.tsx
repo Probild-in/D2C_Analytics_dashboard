@@ -307,7 +307,7 @@ function DailySummaryCard({ yesterday }: { yesterday?: SalesPoint }) {
   const roas = yesterday && yesterday.adSpend > 0 ? yesterday.netSales / yesterday.adSpend : 0;
 
   return (
-    <Card className="relative overflow-hidden bg-gradient-to-br from-brand to-[oklch(0.42_0.2_290)] text-white">
+    <Card className="relative overflow-hidden bg-gradient-to-br from-brand to-[oklch(0.4_0.15_25)] text-white">
       <div className="absolute -right-6 -top-6 size-32 rounded-full bg-white/10 blur-2xl" />
       <div className="absolute -bottom-8 -left-4 size-28 rounded-full bg-white/10 blur-2xl" />
       <CardContent className="relative space-y-3 p-4">

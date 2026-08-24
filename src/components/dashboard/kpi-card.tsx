@@ -19,7 +19,7 @@ export interface KpiCardProps {
 const accentMap: Record<NonNullable<KpiCardProps["accent"]>, string> = {
   brand: "bg-brand-subtle text-brand",
   cyan: "bg-info-subtle text-info",
-  violet: "bg-[oklch(0.94_0.03_302)] text-accent-violet dark:bg-[oklch(0.3_0.08_302)]",
+  violet: "bg-[oklch(0.94_0.03_170)] text-accent-violet dark:bg-[oklch(0.28_0.06_170)]",
   positive: "bg-positive-subtle text-positive",
   warning: "bg-warning-subtle text-warning",
 };

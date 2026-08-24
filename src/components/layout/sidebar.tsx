@@ -30,7 +30,7 @@ export function Sidebar() {
           </div>
           {(!sidebarCollapsed || mobileNavOpen) && (
             <span className="text-[14.5px] font-semibold tracking-[-0.01em] text-text-primary lg:not-sr-only">
-              <span className={cn(sidebarCollapsed && "lg:hidden")}>Orbit</span>
+              <span className={cn(sidebarCollapsed && "lg:hidden")}>D2C</span>
             </span>
           )}
           <button

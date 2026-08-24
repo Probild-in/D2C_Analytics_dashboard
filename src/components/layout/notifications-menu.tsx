@@ -16,7 +16,7 @@ const KIND_META: Record<AlertKind, { icon: React.ElementType; className: string 
   ads: { icon: Wallet, className: "bg-info-subtle text-info" },
   roas: { icon: TrendingDown, className: "bg-negative-subtle text-negative" },
   task: { icon: ListChecks, className: "bg-brand-subtle text-brand" },
-  campaign: { icon: Megaphone, className: "bg-[oklch(0.94_0.03_302)] text-accent-violet dark:bg-[oklch(0.3_0.08_302)]" },
+  campaign: { icon: Megaphone, className: "bg-[oklch(0.94_0.03_170)] text-accent-violet dark:bg-[oklch(0.28_0.06_170)]" },
   system: { icon: Info, className: "bg-bg-subtle text-text-secondary" },
 };
 

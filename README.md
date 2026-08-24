@@ -1,4 +1,4 @@
-# Orbit — D2C Analytics & Operations Dashboard
+# D2C Analytics & Operations Dashboard
 
 Multi-client D2C business management dashboard UI, built from the product SRS. This is the **UI/frontend layer** — screens are wired to a deterministic mock data layer so every view is fully interactive and populated, ready to swap in real integrations (Shopify, Meta Ads, Google Ads, shipping) later.
 

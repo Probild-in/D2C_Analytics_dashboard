@@ -23,10 +23,7 @@ const AppContext = React.createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [clientId, setClientId] = React.useState<string>(DEFAULT_CLIENT_ID);
-  const [theme, setTheme] = React.useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
-    return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  });
+  const [theme, setTheme] = React.useState<Theme>("light");
   const [dateRange, setDateRange] = React.useState<DateRangeKey>("30d");
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
