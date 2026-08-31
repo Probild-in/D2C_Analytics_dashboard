@@ -1,5 +1,6 @@
 import pg from "pg";
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const connectionString = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
+const pool = new pg.Pool({ connectionString });
 
 export default pool;

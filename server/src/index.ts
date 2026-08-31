@@ -1,8 +1,10 @@
 import express from "express";
 import { HttpError } from "./lib/http-error.js";
+import clientsRouter from "./routes/clients.js";
 
 const app = express();
 app.use(express.json());
+app.use("/api/clients", clientsRouter);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
