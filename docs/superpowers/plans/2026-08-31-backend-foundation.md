@@ -1721,7 +1721,7 @@ export default function Login() {
 
 - [ ] **Step 9: Wire real clients into `src/store/app-context.tsx`**
 
-Modify `src/store/app-context.tsx`: replace the `import { CLIENTS, DEFAULT_CLIENT_ID } from "@/data/mock";` line and the client lookup with a Supabase-session-aware fetch. Add near the top of `AppProvider`:
+Modify `src/store/app-context.tsx`: replace the `import { CLIENTS, DEFAULT_CLIENT_ID } from "@/data/mock";` line with `import type { Client } from "@/data/types";` (the `Client` type already exists there — this is what makes the swap mechanical) plus the Supabase-session-aware fetch below. Add near the top of `AppProvider`:
 
 ```typescript
 import { supabase } from "@/lib/supabase";
@@ -1729,7 +1729,7 @@ import type { Session } from "@supabase/supabase-js";
 
 // inside AppProvider, alongside the other useState calls:
 const [session, setSession] = React.useState<Session | null>(null);
-const [clients, setClients] = React.useState<typeof CLIENTS>([]);
+const [clients, setClients] = React.useState<Client[]>([]);
 
 React.useEffect(() => {
   supabase.auth.getSession().then(({ data }) => setSession(data.session));
