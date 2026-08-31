@@ -1,5 +1,7 @@
 import * as React from "react";
-import { CLIENTS, DEFAULT_CLIENT_ID } from "@/data/mock";
+import type { Client } from "@/data/types";
+import { supabase } from "@/lib/supabase";
+import type { Session } from "@supabase/supabase-js";
 
 type Theme = "light" | "dark";
 export type DateRangeKey = "today" | "yesterday" | "7d" | "30d" | "mtd" | "ytd" | "custom";
@@ -7,7 +9,7 @@ export type DateRangeKey = "today" | "yesterday" | "7d" | "30d" | "mtd" | "ytd" 
 interface AppContextValue {
   clientId: string;
   setClientId: (id: string) => void;
-  client: (typeof CLIENTS)[number] | null;
+  client: Client | null;
   isAllClients: boolean;
   theme: Theme;
   toggleTheme: () => void;
@@ -22,7 +24,9 @@ interface AppContextValue {
 const AppContext = React.createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [clientId, setClientId] = React.useState<string>(DEFAULT_CLIENT_ID);
+  const [session, setSession] = React.useState<Session | null>(null);
+  const [clients, setClients] = React.useState<Client[]>([]);
+  const [clientId, setClientId] = React.useState<string>(clients[0]?.id ?? "");
   const [theme, setTheme] = React.useState<Theme>(() => {
     if (typeof window === "undefined") return "light";
     return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -35,10 +39,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
+  React.useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => setSession(newSession));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  React.useEffect(() => {
+    if (!session) return;
+    fetch(`${import.meta.env.VITE_API_URL}/api/clients`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+      .then((r) => r.json())
+      .then(setClients);
+  }, [session]);
+
   const value: AppContextValue = {
     clientId,
     setClientId,
-    client: CLIENTS.find((c) => c.id === clientId) ?? null,
+    client: clients.find((c) => c.id === clientId) ?? null,
     isAllClients: clientId === "all",
     theme,
     toggleTheme: () => setTheme((t) => (t === "light" ? "dark" : "light")),
