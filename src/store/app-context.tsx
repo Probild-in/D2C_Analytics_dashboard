@@ -10,6 +10,7 @@ interface AppContextValue {
   clientId: string;
   setClientId: (id: string) => void;
   client: Client | null;
+  clients: Client[];
   isAllClients: boolean;
   theme: Theme;
   toggleTheme: () => void;
@@ -64,6 +65,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clientId,
     setClientId,
     client: clients.find((c) => c.id === clientId) ?? null,
+    clients,
     isAllClients: clientId === "all",
     theme,
     toggleTheme: () => setTheme((t) => (t === "light" ? "dark" : "light")),

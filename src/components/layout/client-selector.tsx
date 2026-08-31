@@ -1,5 +1,4 @@
 import { Building2, Check, ChevronsUpDown, Globe2 } from "lucide-react";
-import { CLIENTS } from "@/data/mock";
 import { useApp } from "@/store/app-context";
 import { cn } from "@/lib/utils";
 import {
@@ -18,7 +17,7 @@ const statusDot: Record<string, string> = {
 };
 
 export function ClientSelector() {
-  const { clientId, setClientId, client, isAllClients } = useApp();
+  const { clientId, setClientId, client, isAllClients, clients } = useApp();
 
   return (
     <DropdownMenu>
@@ -54,7 +53,7 @@ export function ClientSelector() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuLabel>Clients</DropdownMenuLabel>
-        {CLIENTS.map((c) => (
+        {clients.map((c) => (
           <DropdownMenuItem key={c.id} onSelect={() => setClientId(c.id)} className="justify-between">
             <span className="flex items-center gap-2">
               <span className={cn("flex size-6 items-center justify-center rounded-md text-[11px] font-bold text-white", c.logoColor)}>
