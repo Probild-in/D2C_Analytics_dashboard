@@ -52,3 +52,42 @@ describe("GET /api/clients/:id/subscription", () => {
     expect(res.body.overOrderLimit).toBe(true);
   });
 });
+
+describe("POST /api/clients/:id/subscription", () => {
+  beforeEach(async () => {
+    await resetTestDb();
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('11111111-1111-1111-1111-111111111111', 'Riya Kapoor', 'riya@agency.com', 'owner', true)`,
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('abc-fashion', 'ABC Fashion', 'Fashion & Apparel', 'bg-violet-500', 'A')`,
+    );
+  });
+
+  it("creates a subscription and a pending invoice via the stub gateway", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/subscription")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ planId: "medium" });
+
+    expect(res.status).toBe(201);
+    expect(res.body.subscription.status).toBe("active");
+
+    const invoices = await testPool.query("select * from invoices");
+    expect(invoices.rowCount).toBe(1);
+    expect(invoices.rows[0].status).toBe("pending");
+    expect(invoices.rows[0].amount_inr).toBe(2999);
+  });
+
+  it("rejects an unknown plan id", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/subscription")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ planId: "does-not-exist" });
+    expect(res.status).toBe(400);
+  });
+});
