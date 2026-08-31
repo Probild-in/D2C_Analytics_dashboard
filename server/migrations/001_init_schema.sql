@@ -102,9 +102,11 @@ create table shopify_orders (
 create table shopify_order_line_items (
   id uuid primary key default gen_random_uuid(),
   order_id uuid not null references shopify_orders(id) on delete cascade,
+  shopify_line_item_id text not null,
   product_name text not null,
   quantity integer not null,
-  price integer not null
+  price integer not null,
+  unique (order_id, shopify_line_item_id)
 );
 
 create table meta_campaign_metrics (
@@ -143,5 +145,6 @@ create table courier_shipments (
   connection_id uuid not null references platform_connections(id) on delete cascade,
   order_reference text not null,
   status text not null,
-  synced_at timestamptz not null default now()
+  synced_at timestamptz not null default now(),
+  unique (connection_id, order_reference)
 );
