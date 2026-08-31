@@ -148,3 +148,9 @@ create table courier_shipments (
   synced_at timestamptz not null default now(),
   unique (connection_id, order_reference)
 );
+
+insert into plans (id, name, order_limit, monthly_fee_inr, included_meta_accounts, included_google_accounts) values
+  ('small', 'Small', 300, 1499, 1, 1),
+  ('medium', 'Medium', 1500, 2999, 2, 2),
+  ('large', 'Large', 5000, 5999, 4, 4),
+  ('enterprise', 'Enterprise', null, 9999, 0, 0);
