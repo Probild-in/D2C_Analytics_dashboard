@@ -54,6 +54,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       .then(setClients);
   }, [session]);
 
+  React.useEffect(() => {
+    if (clients.length > 0 && !clientId) {
+      setClientId(clients[0].id);
+    }
+  }, [clients, clientId]);
+
   const value: AppContextValue = {
     clientId,
     setClientId,
