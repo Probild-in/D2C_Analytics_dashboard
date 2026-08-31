@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     environment: "node",
     hookTimeout: 20000,
+    setupFiles: ["./test/setup.ts"],
     // Every test file that touches the database calls resetTestDb(), which
     // drops and recreates the shared `public` schema against ONE real
     // Postgres database (no per-worker isolation). Running test files in
