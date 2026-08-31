@@ -28,8 +28,8 @@ create table plans (
   name text not null,
   order_limit integer,
   monthly_fee_inr integer not null,
-  included_meta_accounts integer not null,
-  included_google_accounts integer not null
+  included_meta_accounts integer,
+  included_google_accounts integer
 );
 
 create table subscriptions (
@@ -153,4 +153,4 @@ insert into plans (id, name, order_limit, monthly_fee_inr, included_meta_account
   ('small', 'Small', 300, 1499, 1, 1),
   ('medium', 'Medium', 1500, 2999, 2, 2),
   ('large', 'Large', 5000, 5999, 4, 4),
-  ('enterprise', 'Enterprise', null, 9999, 0, 0);
+  ('enterprise', 'Enterprise', null, 9999, null, null);

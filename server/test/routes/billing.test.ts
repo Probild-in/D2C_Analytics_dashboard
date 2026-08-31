@@ -51,6 +51,34 @@ describe("GET /api/clients/:id/subscription", () => {
     expect(res.body.plan.id).toBe("small");
     expect(res.body.overOrderLimit).toBe(true);
   });
+
+  it("excludes orders dated after the current period end from the count", async () => {
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, current_period_start, current_period_end)
+       values ('abc-fashion', 'small', 'active', now() - interval '1 day', now())`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('99999999-9999-9999-9999-999999999999', 'abc-fashion', 'shopify', 'connected', 'abc-fashion.myshopify.com')`,
+    );
+    // All orders are dated after current_period_end, so none should count toward the limit.
+    const orderInserts = Array.from({ length: 301 }, (_, i) =>
+      testPool.query(
+        `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method)
+         values ('abc-fashion', '99999999-9999-9999-9999-999999999999', $1, 'Test Customer', now() + interval '1 day', 1000, 'Delivered', 'Prepaid')`,
+        [`order-${i}`],
+      ),
+    );
+    await Promise.all(orderInserts);
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/subscription")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.plan.id).toBe("small");
+    expect(res.body.overOrderLimit).toBe(false);
+  });
 });
 
 describe("POST /api/clients/:id/subscription", () => {
@@ -80,6 +108,15 @@ describe("POST /api/clients/:id/subscription", () => {
     expect(invoices.rowCount).toBe(1);
     expect(invoices.rows[0].status).toBe("pending");
     expect(invoices.rows[0].amount_inr).toBe(2999);
+  });
+
+  it("returns 404 for a nonexistent client id", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/does-not-exist/subscription")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ planId: "medium" });
+    expect(res.status).toBe(404);
   });
 
   it("rejects an unknown plan id", async () => {

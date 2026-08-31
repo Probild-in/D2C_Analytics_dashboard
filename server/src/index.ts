@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import { HttpError } from "./lib/http-error.js";
 import clientsRouter from "./routes/clients.js";

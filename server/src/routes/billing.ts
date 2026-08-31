@@ -1,24 +1,16 @@
 import { Router } from "express";
 import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { getAccessibleClientIds } from "../lib/access.js";
+import { assertClientAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
 import { stubPaymentGateway } from "../integrations/payment-gateway.js";
 
 const router = Router({ mergeParams: true });
 
-async function assertClientAccess(userId: string, clientId: string) {
-  const accessible = await getAccessibleClientIds(pool, userId);
-  if (accessible === "all") return;
-  if (!accessible.includes(clientId)) {
-    throw new HttpError(404, "not_found", "Client not found");
-  }
-}
-
 router.get("/", requireAuth, async (req, res, next) => {
   try {
     const clientId = req.params.id;
-    await assertClientAccess(req.auth!.userId, clientId);
+    await assertClientAccess(pool, req.auth!.userId, clientId);
 
     const subResult = await pool.query(
       `select s.*, p.name as plan_name, p.order_limit, p.monthly_fee_inr, p.included_meta_accounts, p.included_google_accounts
@@ -35,8 +27,8 @@ router.get("/", requireAuth, async (req, res, next) => {
     const sub = subResult.rows[0];
     const orderCount = await pool.query(
       `select count(*)::int as count from shopify_orders
-       where client_id = $1 and order_date >= $2`,
-      [clientId, sub.current_period_start],
+       where client_id = $1 and order_date >= $2 and order_date < $3`,
+      [clientId, sub.current_period_start, sub.current_period_end],
     );
 
     res.json({
@@ -66,7 +58,7 @@ router.get("/", requireAuth, async (req, res, next) => {
 router.post("/", requireAuth, async (req, res, next) => {
   try {
     const clientId = req.params.id;
-    await assertClientAccess(req.auth!.userId, clientId);
+    await assertClientAccess(pool, req.auth!.userId, clientId);
 
     const { planId } = req.body as { planId?: string };
     const plan = await pool.query("select * from plans where id = $1", [planId]);
@@ -79,7 +71,7 @@ router.post("/", requireAuth, async (req, res, next) => {
       "select plan_id from subscriptions where client_id = $1",
       [clientId],
     );
-    const existingPlanId = existingSubResult.rowCount > 0 ? existingSubResult.rows[0].plan_id : null;
+    const existingPlanId = (existingSubResult.rowCount ?? 0) > 0 ? existingSubResult.rows[0].plan_id : null;
 
     const { gatewayCustomerId } = await stubPaymentGateway.createSubscription(clientId, planId!);
 

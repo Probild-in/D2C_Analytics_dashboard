@@ -51,8 +51,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     fetch(`${import.meta.env.VITE_API_URL}/api/clients`, {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
-      .then((r) => r.json())
-      .then(setClients);
+      .then((r) => {
+        if (!r.ok) throw new Error(`Failed to fetch clients: ${r.status}`);
+        return r.json();
+      })
+      .then((data) => setClients(Array.isArray(data) ? data : []))
+      .catch((err) => {
+        console.error(err);
+        setClients([]);
+      });
   }, [session]);
 
   React.useEffect(() => {
