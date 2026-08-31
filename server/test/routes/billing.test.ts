@@ -90,4 +90,26 @@ describe("POST /api/clients/:id/subscription", () => {
       .send({ planId: "does-not-exist" });
     expect(res.status).toBe(400);
   });
+
+  it("does not create duplicate invoices when re-posting with same plan", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+
+    // First POST to create subscription
+    const res1 = await request(app)
+      .post("/api/clients/abc-fashion/subscription")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ planId: "medium" });
+    expect(res1.status).toBe(201);
+
+    // Second POST with same planId (retry or duplicate)
+    const res2 = await request(app)
+      .post("/api/clients/abc-fashion/subscription")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ planId: "medium" });
+    expect(res2.status).toBe(201);
+
+    // Verify only 1 invoice exists, not 2
+    const invoices = await testPool.query("select count(*) from invoices");
+    expect(invoices.rows[0].count).toBe("1");
+  });
 });

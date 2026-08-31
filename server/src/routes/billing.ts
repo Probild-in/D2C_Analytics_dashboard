@@ -74,6 +74,13 @@ router.post("/", requireAuth, async (req, res, next) => {
       throw new HttpError(400, "invalid_plan", `No plan with id ${planId}`);
     }
 
+    // Check if subscription already exists for this client
+    const existingSubResult = await pool.query(
+      "select plan_id from subscriptions where client_id = $1",
+      [clientId],
+    );
+    const existingPlanId = existingSubResult.rowCount > 0 ? existingSubResult.rows[0].plan_id : null;
+
     const { gatewayCustomerId } = await stubPaymentGateway.createSubscription(clientId, planId!);
 
     const subResult = await pool.query(
@@ -85,11 +92,16 @@ router.post("/", requireAuth, async (req, res, next) => {
     );
     const subscription = subResult.rows[0];
 
-    await pool.query(
-      `insert into invoices (subscription_id, amount_inr, status, period_start, period_end)
-       values ($1, $2, 'pending', $3, $4)`,
-      [subscription.id, plan.rows[0].monthly_fee_inr, subscription.current_period_start, subscription.current_period_end],
-    );
+    // Only insert a new invoice if:
+    // 1. No subscription existed before (genuinely new), OR
+    // 2. A subscription existed but the plan_id has changed (real plan change)
+    if (existingPlanId === null || existingPlanId !== planId) {
+      await pool.query(
+        `insert into invoices (subscription_id, amount_inr, status, period_start, period_end)
+         values ($1, $2, 'pending', $3, $4)`,
+        [subscription.id, plan.rows[0].monthly_fee_inr, subscription.current_period_start, subscription.current_period_end],
+      );
+    }
 
     res.status(201).json({ subscription: { status: subscription.status, planId: subscription.plan_id } });
   } catch (err) {
