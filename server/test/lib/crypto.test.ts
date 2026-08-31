@@ -23,4 +23,33 @@ describe("token encryption", () => {
     const tampered = ciphertext.slice(0, -2) + "00";
     expect(() => decryptToken(tampered)).toThrow();
   });
+
+  it("round-trips an empty plaintext value", () => {
+    const ciphertext = encryptToken("");
+    expect(decryptToken(ciphertext)).toBe("");
+  });
+
+  it("throws if the IV segment has been tampered with", () => {
+    const ciphertext = encryptToken("test-token");
+    const parts = ciphertext.split(".");
+    const tampered = "AAA" + parts[0].slice(3) + "." + parts[1] + "." + parts[2];
+    expect(() => decryptToken(tampered)).toThrow();
+  });
+
+  it("throws if the auth tag segment has been tampered with", () => {
+    const ciphertext = encryptToken("test-token");
+    const parts = ciphertext.split(".");
+    const tampered = parts[0] + "." + "AAA" + parts[1].slice(3) + "." + parts[2];
+    expect(() => decryptToken(tampered)).toThrow();
+  });
+
+  it("throws if CREDENTIAL_ENCRYPTION_KEY is invalid length", () => {
+    const oldKey = process.env.CREDENTIAL_ENCRYPTION_KEY;
+    try {
+      process.env.CREDENTIAL_ENCRYPTION_KEY = "abc"; // Not 64 hex chars
+      expect(() => encryptToken("test")).toThrow(/64 hex char/);
+    } finally {
+      process.env.CREDENTIAL_ENCRYPTION_KEY = oldKey;
+    }
+  });
 });

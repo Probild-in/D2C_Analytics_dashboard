@@ -18,8 +18,12 @@ export function encryptToken(plaintext: string): string {
 }
 
 export function decryptToken(stored: string): string {
-  const [ivB64, authTagB64, ciphertextB64] = stored.split(".");
-  if (!ivB64 || !authTagB64 || !ciphertextB64) {
+  const parts = stored.split(".");
+  if (parts.length !== 3) {
+    throw new Error("Malformed ciphertext");
+  }
+  const [ivB64, authTagB64, ciphertextB64] = parts;
+  if (!ivB64 || !authTagB64) {
     throw new Error("Malformed ciphertext");
   }
   const decipher = createDecipheriv("aes-256-gcm", getKey(), Buffer.from(ivB64, "base64"));
