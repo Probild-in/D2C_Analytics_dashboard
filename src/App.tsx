@@ -15,6 +15,7 @@ const GoogleAds = lazy(() => import("@/pages/google-ads"));
 const BlendedMarketing = lazy(() => import("@/pages/blended-marketing"));
 const Tasks = lazy(() => import("@/pages/tasks"));
 const ManageClients = lazy(() => import("@/pages/manage-clients"));
+const Login = lazy(() => import("@/pages/login"));
 
 function RouteFallback() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
         <HashRouter>
           <Suspense fallback={<RouteFallback />}>
             <Routes>
+              <Route path="/login" element={<Login />} />
               <Route element={<AppShell />}>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/clients" element={<AllClients />} />
