@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/store/app-context";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppShell } from "@/components/layout/app-shell";
+import { RequireAuth } from "@/components/layout/require-auth";
 
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 const AllClients = lazy(() => import("@/pages/all-clients"));
@@ -33,18 +34,20 @@ export default function App() {
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route element={<AppShell />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/clients" element={<AllClients />} />
-                <Route path="/sales" element={<Sales />} />
-                <Route path="/operations" element={<Operations />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/geography" element={<Geography />} />
-                <Route path="/marketing/meta" element={<MetaAds />} />
-                <Route path="/marketing/google" element={<GoogleAds />} />
-                <Route path="/marketing/blended" element={<BlendedMarketing />} />
-                <Route path="/tasks" element={<Tasks />} />
-                <Route path="/manage-clients" element={<ManageClients />} />
+              <Route element={<RequireAuth />}>
+                <Route element={<AppShell />}>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/clients" element={<AllClients />} />
+                  <Route path="/sales" element={<Sales />} />
+                  <Route path="/operations" element={<Operations />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/geography" element={<Geography />} />
+                  <Route path="/marketing/meta" element={<MetaAds />} />
+                  <Route path="/marketing/google" element={<GoogleAds />} />
+                  <Route path="/marketing/blended" element={<BlendedMarketing />} />
+                  <Route path="/tasks" element={<Tasks />} />
+                  <Route path="/manage-clients" element={<ManageClients />} />
+                </Route>
               </Route>
             </Routes>
           </Suspense>

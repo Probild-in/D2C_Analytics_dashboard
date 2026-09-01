@@ -1,4 +1,5 @@
 import { Menu, Moon, Search, Sun } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useApp } from "@/store/app-context";
 import { ClientSelector } from "./client-selector";
 import { DateRangePicker } from "./date-range-picker";
@@ -14,7 +15,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Topbar({ title, description }: { title: string; description?: string }) {
-  const { theme, toggleTheme, setMobileNavOpen } = useApp();
+  const { theme, toggleTheme, setMobileNavOpen, userEmail, signOut } = useApp();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
+  };
 
   return (
     <header className="sticky top-0 z-30 border-b border-border-subtle bg-surface/85 backdrop-blur-md">
@@ -55,12 +62,12 @@ export function Topbar({ title, description }: { title: string; description?: st
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="ml-0.5 flex items-center gap-2 rounded-full outline-none ring-brand/40 focus-visible:ring-2">
-              <NameAvatar name="Aishant Verma" className="size-8" />
+              <NameAvatar name={userEmail ?? "?"} className="size-8" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="normal-case tracking-normal text-text-primary">
-              <span className="block text-[12.5px] font-semibold">Aishant Verma</span>
+              <span className="block truncate text-[12.5px] font-semibold">{userEmail ?? "Not signed in"}</span>
               <span className="block text-[11px] font-normal text-text-tertiary">Agency Owner</span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -68,7 +75,7 @@ export function Topbar({ title, description }: { title: string; description?: st
             <DropdownMenuItem>Billing</DropdownMenuItem>
             <DropdownMenuItem>Team members</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Log out</DropdownMenuItem>
+            <DropdownMenuItem onSelect={handleLogout}>Log out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

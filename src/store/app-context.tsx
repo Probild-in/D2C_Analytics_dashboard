@@ -20,12 +20,16 @@ interface AppContextValue {
   setSidebarCollapsed: (v: boolean) => void;
   mobileNavOpen: boolean;
   setMobileNavOpen: (v: boolean) => void;
+  userEmail: string | null;
+  authReady: boolean;
+  signOut: () => Promise<void>;
 }
 
 const AppContext = React.createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = React.useState<Session | null>(null);
+  const [authReady, setAuthReady] = React.useState(false);
   const [clients, setClients] = React.useState<Client[]>([]);
   const [clientId, setClientId] = React.useState<string>(clients[0]?.id ?? "");
   const [theme, setTheme] = React.useState<Theme>("light");
@@ -38,7 +42,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   React.useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSession(data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setAuthReady(true);
+    });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => setSession(newSession));
     return () => sub.subscription.unsubscribe();
   }, []);
@@ -65,6 +72,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [clients, clientId]);
 
+  React.useEffect(() => {
+    if (!session) {
+      setClients([]);
+      setClientId("");
+    }
+  }, [session]);
+
   const value: AppContextValue = {
     clientId,
     setClientId,
@@ -79,6 +93,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setSidebarCollapsed,
     mobileNavOpen,
     setMobileNavOpen,
+    userEmail: session?.user.email ?? null,
+    authReady,
+    signOut: async () => {
+      await supabase.auth.signOut();
+    },
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
