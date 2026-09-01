@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import cors from "cors";
 import { HttpError } from "./lib/http-error.js";
 import clientsRouter from "./routes/clients.js";
 import connectionsRouter from "./routes/connections.js";
@@ -7,6 +8,7 @@ import billingRouter from "./routes/billing.js";
 import couriersRouter from "./routes/couriers.js";
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 app.use("/api/clients", clientsRouter);
 app.use("/api/clients/:id/connections", connectionsRouter);

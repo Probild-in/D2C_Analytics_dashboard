@@ -83,7 +83,7 @@ const CLIENT_BASE: Record<string, { orders: number; aov: number; rto: number; ro
 
 function generateSalesSeries(clientId: string, days: number): SalesPoint[] {
   const rand = mulberry32(seedFromString(clientId));
-  const base = CLIENT_BASE[clientId];
+  const base = CLIENT_BASE[clientId] ?? CLIENT_BASE["abc-fashion"];
   const points: SalesPoint[] = [];
   const today = new Date("2026-08-21T00:00:00Z");
 
