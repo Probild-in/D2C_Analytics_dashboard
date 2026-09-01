@@ -8,7 +8,8 @@ import billingRouter from "./routes/billing.js";
 import couriersRouter from "./routes/couriers.js";
 
 const app = express();
-app.use(cors());
+const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
+app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
 app.use(express.json());
 app.use("/api/clients", clientsRouter);
 app.use("/api/clients/:id/connections", connectionsRouter);
