@@ -1,8 +1,10 @@
+import crypto from "node:crypto";
 import type { Connector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
 
 const SHOPIFY_SCOPES = "read_orders,read_products,read_customers";
+const SHOP_DOMAIN_RE = /^[a-z0-9-]+\.myshopify\.com$/;
 
 interface ShopifyOrder {
   id: number;
@@ -50,6 +52,22 @@ function getCredentials(): { apiKey: string; apiSecret: string } {
   return { apiKey, apiSecret };
 }
 
+// Verifies the callback query genuinely came from Shopify, per Shopify's documented
+// algorithm: HMAC-SHA256 over the sorted, `&`-joined `key=value` pairs of every query
+// param EXCEPT hmac/signature, keyed with our app's API secret, compared timing-safe.
+function verifyCallbackHmac(query: Record<string, string>, secret: string): boolean {
+  const { hmac, signature, ...rest } = query;
+  if (!hmac) return false;
+  const message = Object.keys(rest)
+    .sort()
+    .map((key) => `${key}=${rest[key]}`)
+    .join("&");
+  const computed = crypto.createHmac("sha256", secret).update(message).digest("hex");
+  const computedBuf = Buffer.from(computed, "utf8");
+  const providedBuf = Buffer.from(hmac, "utf8");
+  return computedBuf.length === providedBuf.length && crypto.timingSafeEqual(computedBuf, providedBuf);
+}
+
 export const shopifyConnector: Connector = {
   platform: "shopify",
 
@@ -69,7 +87,13 @@ export const shopifyConnector: Connector = {
     if (!shop || !code) {
       throw new Error("Shopify callback missing shop or code query parameter");
     }
+    if (!SHOP_DOMAIN_RE.test(shop)) {
+      throw new Error("Shopify callback shop parameter is not a valid *.myshopify.com domain");
+    }
     const { apiKey, apiSecret } = getCredentials();
+    if (!verifyCallbackHmac(query, apiSecret)) {
+      throw new Error("Shopify callback failed HMAC verification");
+    }
     const res = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -147,7 +171,7 @@ export const shopifyConnector: Connector = {
       recordsSynced++;
     }
 
-    await pool.query("update platform_connections set last_synced_at = now() where id = $1", [connectionId]);
+    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);
     return { recordsSynced };
   },
 

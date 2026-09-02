@@ -1,7 +1,17 @@
+import crypto from "node:crypto";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { shopifyConnector } from "../../src/integrations/shopify.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
 import { encryptToken } from "../../src/lib/crypto.js";
+
+function computeTestHmac(query: Record<string, string>, secret: string): string {
+  const { hmac, signature, ...rest } = query;
+  const message = Object.keys(rest)
+    .sort()
+    .map((key) => `${key}=${rest[key]}`)
+    .join("&");
+  return crypto.createHmac("sha256", secret).update(message).digest("hex");
+}
 
 beforeEach(() => {
   process.env.SHOPIFY_API_KEY = "test-api-key";
@@ -35,17 +45,43 @@ describe("shopifyConnector.handleCallback", () => {
         return new Response(JSON.stringify({ access_token: "shpat_real_token", scope: "read_orders,read_products,read_customers" }), { status: 200 });
       }),
     );
-    const result = await shopifyConnector.handleCallback({ shop: "test-shop.myshopify.com", code: "auth-code-123" });
+    const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    const result = await shopifyConnector.handleCallback({ ...query, hmac });
     expect(result).toEqual({ externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
   });
 
   it("throws if the token exchange fails", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("invalid request", { status: 400 })));
-    await expect(shopifyConnector.handleCallback({ shop: "test-shop.myshopify.com", code: "bad-code" })).rejects.toThrow();
+    const query = { shop: "test-shop.myshopify.com", code: "bad-code" };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    await expect(shopifyConnector.handleCallback({ ...query, hmac })).rejects.toThrow();
   });
 
   it("throws if the shop query param is missing", async () => {
     await expect(shopifyConnector.handleCallback({ code: "auth-code-123" })).rejects.toThrow();
+  });
+
+  it("throws if shop is not a valid *.myshopify.com domain", async () => {
+    const query = { shop: "attacker-controlled-server.example", code: "auth-code-123" };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    await expect(shopifyConnector.handleCallback({ ...query, hmac })).rejects.toThrow(/myshopify\.com/);
+  });
+
+  it("throws if the hmac is missing", async () => {
+    const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
+    await expect(shopifyConnector.handleCallback(query)).rejects.toThrow(/HMAC/);
+  });
+
+  it("throws if the hmac doesn't match", async () => {
+    const query = { shop: "test-shop.myshopify.com", code: "auth-code-123", hmac: "0".repeat(64) };
+    await expect(shopifyConnector.handleCallback(query)).rejects.toThrow(/HMAC/);
+  });
+
+  it("throws if the hmac was computed with the wrong secret", async () => {
+    const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
+    const hmac = computeTestHmac(query, "wrong-secret");
+    await expect(shopifyConnector.handleCallback({ ...query, hmac })).rejects.toThrow(/HMAC/);
   });
 });
 
@@ -203,11 +239,13 @@ describe("shopifyConnector.sync", () => {
     expect(orders.rowCount).toBe(1);
   });
 
-  it("updates last_synced_at on the connection", async () => {
+  it("updates last_synced_at and resets status to connected on the connection", async () => {
+    await testPool.query("update platform_connections set status = 'error' where id = $1", ["55555555-5555-5555-5555-555555555555"]);
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ orders: [] }), { status: 200 })));
     await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
-    const conn = await testPool.query("select last_synced_at from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    const conn = await testPool.query("select last_synced_at, status from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
     expect(conn.rows[0].last_synced_at).not.toBeNull();
+    expect(conn.rows[0].status).toBe("connected");
   });
 });
 

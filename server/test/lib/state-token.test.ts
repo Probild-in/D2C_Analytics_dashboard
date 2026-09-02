@@ -23,4 +23,15 @@ describe("state-token", () => {
     process.env.STATE_SIGNING_SECRET = "a-completely-different-secret-value";
     await expect(verifyState(token)).rejects.toThrow();
   });
+
+  it("round-trips an optional shopDomain", async () => {
+    const token = await signState({
+      clientId: "abc-fashion",
+      platform: "shopify",
+      teamMemberId: "11111111-1111-1111-1111-111111111111",
+      shopDomain: "abc-fashion.myshopify.com",
+    });
+    const payload = await verifyState(token);
+    expect(payload.shopDomain).toBe("abc-fashion.myshopify.com");
+  });
 });

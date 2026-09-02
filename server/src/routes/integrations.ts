@@ -29,6 +29,11 @@ router.get("/:platform/callback", async (req, res) => {
     return;
   }
 
+  if (statePayload.shopDomain && query.shop !== statePayload.shopDomain) {
+    redirectError("Shop domain mismatch");
+    return;
+  }
+
   const connector = connectors[platform];
   if (!connector) {
     redirectError("Unknown platform");

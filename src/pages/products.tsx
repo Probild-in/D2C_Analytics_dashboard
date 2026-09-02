@@ -23,7 +23,7 @@ export default function Products() {
 
   const totalOrders = products.reduce((s, p) => s + p.orders, 0);
   const totalNetSales = products.reduce((s, p) => s + p.netSales, 0);
-  const avgRto = products.reduce((s, p) => s + p.rtoPercent, 0) / products.length;
+  const avgRto = products.length > 0 ? products.reduce((s, p) => s + p.rtoPercent, 0) / products.length : 0;
 
   return (
     <Page title="Products" description={isAllClients ? "Product performance (showing ABC Fashion catalog)" : `${client?.name} — product performance`}>

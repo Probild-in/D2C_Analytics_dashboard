@@ -4,6 +4,7 @@ export interface StatePayload {
   clientId: string;
   platform: string;
   teamMemberId: string;
+  shopDomain?: string;
 }
 
 function getSecret(): Uint8Array {
@@ -28,5 +29,6 @@ export async function verifyState(token: string): Promise<StatePayload> {
     clientId: payload.clientId as string,
     platform: payload.platform as string,
     teamMemberId: payload.teamMemberId as string,
+    shopDomain: payload.shopDomain as string | undefined,
   };
 }

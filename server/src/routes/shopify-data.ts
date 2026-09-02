@@ -24,14 +24,14 @@ router.get("/sales", requireAuth, async (req, res, next) => {
            count(*) filter (where status = 'Cancelled') as cancelled_orders,
            count(*) filter (where payment_method = 'COD') as cod_orders,
            count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
-           count(*) filter (
+           count(distinct shopify_customer_id) filter (
              where shopify_customer_id is not null
              and order_date::date = (
                select min(o2.order_date)::date from shopify_orders o2
                where o2.client_id = shopify_orders.client_id and o2.shopify_customer_id = shopify_orders.shopify_customer_id
              )
            ) as new_customers,
-           count(*) filter (
+           count(distinct shopify_customer_id) filter (
              where shopify_customer_id is not null
              and order_date::date <> (
                select min(o2.order_date)::date from shopify_orders o2

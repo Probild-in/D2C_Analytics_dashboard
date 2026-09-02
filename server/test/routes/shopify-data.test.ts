@@ -98,6 +98,21 @@ describe("GET /api/clients/:id/sales", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(404);
   });
+
+  it("counts a new customer once even if they place multiple orders on their first day", async () => {
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, shopify_customer_id) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '101', 'New Customer', now(), 400, 'Delivered', 'Prepaid', '9099'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '102', 'New Customer', now(), 600, 'Delivered', 'Prepaid', '9099')`,
+    );
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].newCustomers).toBe(1);
+  });
 });
 
 describe("GET /api/clients/:id/orders", () => {

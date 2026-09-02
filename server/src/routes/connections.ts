@@ -46,7 +46,12 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
       throw new HttpError(400, "invalid_shop_domain", "shopDomain must be a valid *.myshopify.com domain");
     }
 
-    const state = await signState({ clientId, platform, teamMemberId: req.auth!.userId });
+    const state = await signState({
+      clientId,
+      platform,
+      teamMemberId: req.auth!.userId,
+      shopDomain: platform === "shopify" ? shopDomain : undefined,
+    });
     const authorizeUrl = connector.getAuthUrl(shopDomain ?? clientId, state);
     res.json({ authorizeUrl });
   } catch (err) {
