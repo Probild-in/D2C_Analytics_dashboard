@@ -16,18 +16,29 @@ export async function runScheduledSyncs(platform: string) {
     try {
       await connector.sync(row.id);
     } catch (err) {
-      await pool.query("update platform_connections set status = 'error' where id = $1", [row.id]);
-      await pool.query(
-        "insert into sync_logs (connection_id, started_at, finished_at, error) values ($1, $2, now(), $3)",
-        [row.id, startedAt, err instanceof Error ? err.message : String(err)],
-      );
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error(`Sync failed for connection ${row.id}:`, err);
+      try {
+        await pool.query("update platform_connections set status = 'error' where id = $1", [row.id]);
+        await pool.query(
+          "insert into sync_logs (connection_id, started_at, finished_at, error) values ($1, $2, now(), $3)",
+          [row.id, startedAt, errorMessage],
+        );
+      } catch (recoveryErr) {
+        console.error(`Failed to record sync failure for connection ${row.id}:`, recoveryErr);
+      }
     }
   }
 }
 
 export function startScheduler() {
-  // Shopify order data is time-sensitive — hourly.
-  cron.schedule("0 * * * *", () => {
-    runScheduledSyncs("shopify").catch((err) => console.error("Shopify scheduled sync failed:", err));
-  });
+  // Shopify order data is time-sensitive — hourly. noOverlap prevents a slow run
+  // (e.g. a large historical backlog during onboarding) from double-firing.
+  cron.schedule(
+    "0 * * * *",
+    () => {
+      runScheduledSyncs("shopify").catch((err) => console.error("Shopify scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
 }
