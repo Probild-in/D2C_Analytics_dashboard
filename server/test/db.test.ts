@@ -180,4 +180,26 @@ describe("schema", () => {
     );
     expect(result.rowCount).toBe(1);
   });
+
+  it("shopify_orders has a nullable shopify_customer_id column", async () => {
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('test-client', 'Test', 'Fashion', 'bg-violet-500', 'T')`,
+    );
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('33333333-3333-3333-3333-333333333333', 'Owner', 'owner@agency.com', 'owner', true)`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('44444444-4444-4444-4444-444444444444', 'test-client', 'shopify', 'connected', 'test.myshopify.com')`,
+    );
+    const result = await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, shopify_customer_id)
+       values ('test-client', '44444444-4444-4444-4444-444444444444', '1001', 'Guest Checkout', now(), 500, 'Delivered', 'Prepaid', null)
+       returning shopify_customer_id`,
+    );
+    expect(result.rows[0].shopify_customer_id).toBeNull();
+  });
 });
