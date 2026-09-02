@@ -27,3 +27,6 @@ dist-ssr
 *.sln
 *.sw?
 artifact-dist
+
+# SDD scratch workspace (ledgers, briefs, review packages) — not part of the record
+.superpowers/
