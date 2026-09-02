@@ -2072,7 +2072,10 @@ git commit -m "feat(server): add GET /api/clients/:id/geography real endpoint"
 - Create: `src/hooks/use-client-resource.ts`
 
 **Interfaces:**
-- Consumes: `session` from `useApp()` (`src/store/app-context.tsx`, already exists).
+- Consumes: `supabase` from `src/lib/supabase.ts` (already exists, already imported by
+  `app-context.tsx` the same way) — not `useApp()`, which doesn't expose the raw `Session`
+  object today (only `userEmail`/`authReady`), and adding that would touch
+  `app-context.tsx`'s public interface for every consumer, out of scope here.
 - Produces: `useClientResource<T>(path: string | null, fallback: T): { data: T; loading: boolean }`. Tasks 13 and 14 are the only consumers.
 
 - [ ] **Step 1: Write the implementation**
@@ -2084,16 +2087,13 @@ use it in Tasks 13-14, exactly as `app-context.tsx`'s own fetch effect was verif
 ```typescript
 // src/hooks/use-client-resource.ts
 import * as React from "react";
-import { useApp } from "@/store/app-context";
+import { supabase } from "@/lib/supabase";
 
-interface SessionLike {
-  access_token: string;
-}
-
-// Mirrors app-context.tsx's own session-aware fetch effect, generalized so every page
-// in this plan doesn't repeat the same fetch/loading-state boilerplate. `path` is the
-// full request path (e.g. "/api/clients/abc-fashion/orders?limit=40"); pass null to skip
-// fetching (e.g. while the client id isn't known yet).
+// Generalizes app-context.tsx's own session-aware fetch effect (which calls
+// `supabase.auth.getSession()` the same way) so every page in this plan doesn't repeat
+// the same fetch/loading-state boilerplate. `path` is the full request path (e.g.
+// "/api/clients/abc-fashion/orders?limit=40"); pass null to skip fetching (e.g. while the
+// client id isn't known yet).
 export function useClientResource<T>(path: string | null, fallback: T): { data: T; loading: boolean } {
   const [data, setData] = React.useState<T>(fallback);
   const [loading, setLoading] = React.useState(true);
@@ -2107,33 +2107,32 @@ export function useClientResource<T>(path: string | null, fallback: T): { data: 
     let cancelled = false;
     setLoading(true);
 
-    const raw = localStorage.getItem(
-      Object.keys(localStorage).find((k) => k.startsWith("sb-") && k.endsWith("-auth-token")) ?? "",
-    );
-    const session: SessionLike | null = raw ? JSON.parse(raw) : null;
-    if (!session) {
-      setData(fallback);
-      setLoading(false);
-      return;
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
+      if (!session) {
+        setData(fallback);
+        setLoading(false);
+        return;
+      }
 
-    fetch(`${import.meta.env.VITE_API_URL}${path}`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    })
-      .then((r) => {
-        if (!r.ok) throw new Error(`Failed to fetch ${path}: ${r.status}`);
-        return r.json();
+      fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
       })
-      .then((json) => {
-        if (!cancelled) setData(json);
-      })
-      .catch((err) => {
-        console.error(err);
-        if (!cancelled) setData(fallback);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        .then((r) => {
+          if (!r.ok) throw new Error(`Failed to fetch ${path}: ${r.status}`);
+          return r.json();
+        })
+        .then((json) => {
+          if (!cancelled) setData(json);
+        })
+        .catch((err) => {
+          console.error(err);
+          if (!cancelled) setData(fallback);
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    });
 
     return () => {
       cancelled = true;
@@ -2145,12 +2144,12 @@ export function useClientResource<T>(path: string | null, fallback: T): { data: 
 }
 ```
 
-This reads the Supabase session straight from `localStorage` rather than importing
-`useApp()`'s internal session state, because `useApp()` doesn't expose the raw `Session`
-object today (only `userEmail`/`authReady`) — adding that would touch `app-context.tsx`'s
-public interface for every consumer, which is out of scope here. The `SessionLike`
-type/localStorage-key lookup mirrors exactly what `app-context.tsx`'s own fetch effect
-already does internally.
+This calls `supabase.auth.getSession()` — the same official Supabase client method
+`app-context.tsx` already uses (`src/store/app-context.tsx:45`) — rather than parsing
+Supabase's internal `localStorage` key format by hand. That would have been a fragile,
+undocumented dependency on Supabase's storage-key naming convention (`sb-<project>-auth-
+token`), and it doesn't actually match what `app-context.tsx` does today (it uses
+`supabase.auth.getSession()`/`onAuthStateChange`, never touches `localStorage` directly).
 
 - [ ] **Step 2: Commit**
 
