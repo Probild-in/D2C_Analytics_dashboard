@@ -41,7 +41,9 @@ router.get("/:platform/callback", async (req, res) => {
   }
 
   try {
-    const { externalAccountId, accessToken, refreshToken, expiresAt } = await connector.handleCallback(query);
+    const { externalAccountId, accessToken, refreshToken, expiresAt } = await connector.handleCallback(query, {
+      clientId: statePayload.clientId,
+    });
     await pool.query(
       `insert into platform_connections
          (client_id, platform, status, access_token, refresh_token, token_expires_at, external_account_id, connected_by)

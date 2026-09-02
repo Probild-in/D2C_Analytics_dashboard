@@ -47,7 +47,7 @@ describe("shopifyConnector.handleCallback", () => {
     );
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
     const hmac = computeTestHmac(query, "test-api-secret");
-    const result = await shopifyConnector.handleCallback({ ...query, hmac });
+    const result = await shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" });
     expect(result).toEqual({ externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
   });
 
@@ -55,33 +55,33 @@ describe("shopifyConnector.handleCallback", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("invalid request", { status: 400 })));
     const query = { shop: "test-shop.myshopify.com", code: "bad-code" };
     const hmac = computeTestHmac(query, "test-api-secret");
-    await expect(shopifyConnector.handleCallback({ ...query, hmac })).rejects.toThrow();
+    await expect(shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" })).rejects.toThrow();
   });
 
   it("throws if the shop query param is missing", async () => {
-    await expect(shopifyConnector.handleCallback({ code: "auth-code-123" })).rejects.toThrow();
+    await expect(shopifyConnector.handleCallback({ code: "auth-code-123" }, { clientId: "abc-fashion" })).rejects.toThrow();
   });
 
   it("throws if shop is not a valid *.myshopify.com domain", async () => {
     const query = { shop: "attacker-controlled-server.example", code: "auth-code-123" };
     const hmac = computeTestHmac(query, "test-api-secret");
-    await expect(shopifyConnector.handleCallback({ ...query, hmac })).rejects.toThrow(/myshopify\.com/);
+    await expect(shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" })).rejects.toThrow(/myshopify\.com/);
   });
 
   it("throws if the hmac is missing", async () => {
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
-    await expect(shopifyConnector.handleCallback(query)).rejects.toThrow(/HMAC/);
+    await expect(shopifyConnector.handleCallback(query, { clientId: "abc-fashion" })).rejects.toThrow(/HMAC/);
   });
 
   it("throws if the hmac doesn't match", async () => {
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123", hmac: "0".repeat(64) };
-    await expect(shopifyConnector.handleCallback(query)).rejects.toThrow(/HMAC/);
+    await expect(shopifyConnector.handleCallback(query, { clientId: "abc-fashion" })).rejects.toThrow(/HMAC/);
   });
 
   it("throws if the hmac was computed with the wrong secret", async () => {
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
     const hmac = computeTestHmac(query, "wrong-secret");
-    await expect(shopifyConnector.handleCallback({ ...query, hmac })).rejects.toThrow(/HMAC/);
+    await expect(shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" })).rejects.toThrow(/HMAC/);
   });
 });
 

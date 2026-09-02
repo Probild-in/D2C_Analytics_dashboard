@@ -1,7 +1,7 @@
 export interface Connector {
   platform: string;
   getAuthUrl(clientId: string, state: string): string;
-  handleCallback(query: Record<string, string>): Promise<{
+  handleCallback(query: Record<string, string>, context: { clientId: string }): Promise<{
     externalAccountId: string;
     accessToken: string;
     refreshToken?: string;

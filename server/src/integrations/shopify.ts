@@ -92,7 +92,7 @@ export const shopifyConnector: Connector = {
     return url.toString();
   },
 
-  async handleCallback(query: Record<string, string>) {
+  async handleCallback(query: Record<string, string>, _context: { clientId: string }) {
     const shop = query.shop;
     const code = query.code;
     if (!shop || !code) {
