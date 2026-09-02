@@ -24,7 +24,7 @@ import {
 import { CLIENTS, TEAM } from "@/data/mock";
 import type { Client } from "@/data/types";
 import { cn } from "@/lib/utils";
-import { CircleSlash, MoreHorizontal, PenLine, Plus, ShoppingBag, Megaphone, Search as SearchIcon, Truck } from "lucide-react";
+import { CircleSlash, MoreHorizontal, PenLine, Plus, ShoppingBag, Megaphone, Search as SearchIcon, Truck, CheckCircle2, XCircle, X } from "lucide-react";
 import { useClientResource } from "@/hooks/use-client-resource";
 import { supabase } from "@/lib/supabase";
 
@@ -118,6 +118,71 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
   );
 }
 
+type ConnectionResult = { type: "success" } | { type: "error"; message: string };
+
+function readConnectionResult(): ConnectionResult | null {
+  const hash = window.location.hash;
+  const queryIndex = hash.indexOf("?");
+  if (queryIndex === -1) return null;
+  const params = new URLSearchParams(hash.slice(queryIndex + 1));
+  const connection = params.get("connection");
+  if (connection === "success") return { type: "success" };
+  if (connection === "error") {
+    return { type: "error", message: params.get("message") || "Failed to connect. Please try again." };
+  }
+  return null;
+}
+
+function clearConnectionResultFromUrl() {
+  const hash = window.location.hash;
+  const queryIndex = hash.indexOf("?");
+  if (queryIndex === -1) return;
+  const path = hash.slice(0, queryIndex);
+  const params = new URLSearchParams(hash.slice(queryIndex + 1));
+  params.delete("connection");
+  params.delete("message");
+  const rest = params.toString();
+  const newHash = rest ? `${path}?${rest}` : path;
+  const url = `${window.location.pathname}${window.location.search}${newHash}`;
+  window.history.replaceState(null, "", url);
+}
+
+function ConnectionResultBanner() {
+  // Lazy-init reads the result once on first render; StrictMode's double effect
+  // invocation would otherwise re-read the (already cleared) URL and null out the banner.
+  const [result, setResult] = React.useState<ConnectionResult | null>(() => readConnectionResult());
+  const cleared = React.useRef(false);
+
+  React.useEffect(() => {
+    if (result && !cleared.current) {
+      cleared.current = true;
+      clearConnectionResultFromUrl();
+    }
+  }, [result]);
+
+  if (!result) return null;
+
+  const isSuccess = result.type === "success";
+  return (
+    <div
+      className={cn(
+        "mb-4 flex items-start gap-2 rounded-[var(--radius-md)] border px-3 py-2.5 text-[12.5px]",
+        isSuccess ? "border-transparent bg-positive-subtle text-positive" : "border-transparent bg-negative-subtle text-negative",
+      )}
+    >
+      {isSuccess ? <CheckCircle2 className="mt-0.5 size-4 shrink-0" /> : <XCircle className="mt-0.5 size-4 shrink-0" />}
+      <p className="flex-1">{isSuccess ? "Shopify connected successfully." : result.message}</p>
+      <button
+        onClick={() => setResult(null)}
+        className="shrink-0 rounded p-0.5 opacity-70 hover:opacity-100"
+        aria-label="Dismiss"
+      >
+        <X className="size-3.5" />
+      </button>
+    </div>
+  );
+}
+
 export default function ManageClients() {
   const [selectedClient, setSelectedClient] = React.useState<Client | null>(null);
   return (
@@ -126,6 +191,7 @@ export default function ManageClients() {
       description="Add clients, manage integrations, and control team access"
       actions={<AddClientDialog />}
     >
+      <ConnectionResultBanner />
       <Card>
         <CardHeader>
           <CardTitle>Clients</CardTitle>
