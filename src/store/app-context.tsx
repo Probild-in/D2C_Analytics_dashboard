@@ -23,6 +23,7 @@ interface AppContextValue {
   userEmail: string | null;
   authReady: boolean;
   signOut: () => Promise<void>;
+  refreshClients: () => void;
 }
 
 const AppContext = React.createContext<AppContextValue | null>(null);
@@ -50,10 +51,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  React.useEffect(() => {
-    if (!session) return;
+  const fetchClients = React.useCallback((currentSession: Session) => {
     fetch(`${import.meta.env.VITE_API_URL}/api/clients`, {
-      headers: { Authorization: `Bearer ${session.access_token}` },
+      headers: { Authorization: `Bearer ${currentSession.access_token}` },
     })
       .then((r) => {
         if (!r.ok) throw new Error(`Failed to fetch clients: ${r.status}`);
@@ -64,7 +64,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         console.error(err);
         setClients([]);
       });
-  }, [session]);
+  }, []);
+
+  React.useEffect(() => {
+    if (!session) return;
+    fetchClients(session);
+  }, [session, fetchClients]);
 
   React.useEffect(() => {
     if (clients.length > 0 && !clientId) {
@@ -97,6 +102,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     authReady,
     signOut: async () => {
       await supabase.auth.signOut();
+    },
+    refreshClients: () => {
+      if (session) fetchClients(session);
     },
   };
 

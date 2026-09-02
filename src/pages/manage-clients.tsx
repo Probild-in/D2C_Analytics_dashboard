@@ -208,6 +208,7 @@ function ConnectionResultBanner() {
 export default function ManageClients() {
   const { clients } = useApp();
   const [selectedClient, setSelectedClient] = React.useState<Client | null>(null);
+  const [editingClient, setEditingClient] = React.useState<Client | null>(null);
   return (
     <Page
       title="Manage Clients"
@@ -279,7 +280,12 @@ export default function ManageClients() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingClient(c);
+                            }}
+                          >
                             <PenLine className="size-3.5" /> Edit client
                           </DropdownMenuItem>
                           <DropdownMenuItem>Manage integrations</DropdownMenuItem>
@@ -352,6 +358,7 @@ export default function ManageClients() {
       </Card>
 
       <ClientDetailDialog client={selectedClient} onOpenChange={(open) => !open && setSelectedClient(null)} />
+      <EditClientDialog client={editingClient} onOpenChange={(open) => !open && setEditingClient(null)} />
     </Page>
   );
 }
@@ -416,10 +423,143 @@ function ClientDetailDialog({ client, onOpenChange }: { client: Client | null; o
   );
 }
 
-function AddClientDialog() {
-  const [open, setOpen] = React.useState(false);
+function EditClientDialog({ client, onOpenChange }: { client: Client | null; onOpenChange: (open: boolean) => void }) {
+  const { refreshClients } = useApp();
+  const [name, setName] = React.useState("");
+  const [category, setCategory] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (client) {
+      setName(client.name);
+      setCategory(client.category);
+      setError(null);
+    }
+  }, [client]);
+
+  const handleSave = async () => {
+    if (!client || !name.trim() || !category.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      setSubmitting(false);
+      setError("You're not signed in. Please log in again.");
+      return;
+    }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${client.id}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), category: category.trim() }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error?.message ?? "Failed to update client. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+      refreshClients();
+      setSubmitting(false);
+      onOpenChange(false);
+    } catch {
+      setError("Failed to update client. Please check your connection and try again.");
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={!!client} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Edit client</DialogTitle>
+          <DialogDescription>Update this client's name and category.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 px-5">
+          <div>
+            <label className="mb-1 block text-[12px] font-medium text-text-secondary">Client / Brand name</label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+          <div>
+            <label className="mb-1 block text-[12px] font-medium text-text-secondary">Category</label>
+            <Input value={category} onChange={(e) => setCategory(e.target.value)} />
+          </div>
+          {error && <p className="text-[11px] text-negative">{error}</p>}
+        </div>
+        <DialogFooter>
+          <Button variant="secondary" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave} disabled={submitting || !name.trim() || !category.trim()}>
+            {submitting ? "Saving…" : "Save changes"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddClientDialog() {
+  const { refreshClients, setClientId } = useApp();
+  const [open, setOpen] = React.useState(false);
+  const [name, setName] = React.useState("");
+  const [category, setCategory] = React.useState("");
+  const [submitting, setSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const reset = () => {
+    setName("");
+    setCategory("");
+    setError(null);
+  };
+
+  const handleCreate = async () => {
+    if (!name.trim() || !category.trim()) return;
+    setSubmitting(true);
+    setError(null);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      setSubmitting(false);
+      setError("You're not signed in. Please log in again.");
+      return;
+    }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), category: category.trim() }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error?.message ?? "Failed to create client. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+      const created = await res.json();
+      refreshClients();
+      setClientId(created.id);
+      setSubmitting(false);
+      setOpen(false);
+      reset();
+    } catch {
+      setError("Failed to create client. Please check your connection and try again.");
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next) reset();
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm">
           <Plus className="size-3.5" />
@@ -434,22 +574,21 @@ function AddClientDialog() {
         <div className="space-y-3 px-5">
           <div>
             <label className="mb-1 block text-[12px] font-medium text-text-secondary">Client / Brand name</label>
-            <Input placeholder="e.g. Studio Nine Apparel" />
+            <Input placeholder="e.g. Studio Nine Apparel" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
             <label className="mb-1 block text-[12px] font-medium text-text-secondary">Category</label>
-            <Input placeholder="e.g. Fashion & Apparel" />
+            <Input placeholder="e.g. Fashion & Apparel" value={category} onChange={(e) => setCategory(e.target.value)} />
           </div>
-          <div>
-            <label className="mb-1 block text-[12px] font-medium text-text-secondary">Owner / point of contact</label>
-            <Input placeholder="e.g. Riya Kapoor" />
-          </div>
+          {error && <p className="text-[11px] text-negative">{error}</p>}
         </div>
         <DialogFooter>
           <Button variant="secondary" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={() => setOpen(false)}>Create client</Button>
+          <Button onClick={handleCreate} disabled={submitting || !name.trim() || !category.trim()}>
+            {submitting ? "Creating…" : "Create client"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
