@@ -303,6 +303,7 @@ import { shopifyConnector } from "../../src/integrations/shopify.js";
 beforeEach(() => {
   process.env.SHOPIFY_API_KEY = "test-api-key";
   process.env.SHOPIFY_API_SECRET = "test-api-secret";
+  process.env.PUBLIC_API_URL = "https://d2c.probild.in";
 });
 
 afterEach(() => {
@@ -1591,21 +1592,21 @@ router.get("/sales", requireAuth, async (req, res, next) => {
        orders_by_day as (
          select
            order_date::date as day,
-           count(*) filter (where status <> 'Cancelled') as orders,
+           count(*) as orders,
            coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
            coalesce(sum(amount), 0) as gross_sales,
            count(*) filter (where status = 'Cancelled') as cancelled_orders,
-           count(*) filter (where payment_method = 'COD' and status <> 'Cancelled') as cod_orders,
-           count(*) filter (where payment_method = 'Prepaid' and status <> 'Cancelled') as prepaid_orders,
+           count(*) filter (where payment_method = 'COD') as cod_orders,
+           count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
            count(*) filter (
-             where status <> 'Cancelled' and shopify_customer_id is not null
+             where shopify_customer_id is not null
              and order_date::date = (
                select min(o2.order_date)::date from shopify_orders o2
                where o2.client_id = shopify_orders.client_id and o2.shopify_customer_id = shopify_orders.shopify_customer_id
              )
            ) as new_customers,
            count(*) filter (
-             where status <> 'Cancelled' and shopify_customer_id is not null
+             where shopify_customer_id is not null
              and order_date::date <> (
                select min(o2.order_date)::date from shopify_orders o2
                where o2.client_id = shopify_orders.client_id and o2.shopify_customer_id = shopify_orders.shopify_customer_id
@@ -1875,9 +1876,8 @@ router.get("/products", requireAuth, async (req, res, next) => {
          sum(li.quantity)::int as orders,
          sum(li.quantity * li.price)::int as sales,
          sum(li.quantity * li.price) filter (where o.status <> 'Cancelled')::int as net_sales,
-         count(*) filter (where o.status = 'RTO Initiated' or o.status = 'RTO Delivered')::int as rto_count,
-         count(*) filter (where o.status = 'Cancelled')::int as cancelled_count,
-         count(*)::int as total_count
+         coalesce(sum(li.quantity) filter (where o.status = 'RTO Initiated' or o.status = 'RTO Delivered'), 0)::int as rto_quantity,
+         coalesce(sum(li.quantity) filter (where o.status = 'Cancelled'), 0)::int as cancelled_quantity
        from shopify_order_line_items li
        join shopify_orders o on o.id = li.order_id
        where o.client_id = $1
@@ -1895,8 +1895,8 @@ router.get("/products", requireAuth, async (req, res, next) => {
         orders: r.orders,
         sales: r.sales,
         netSales: r.net_sales ?? 0,
-        rtoPercent: r.total_count > 0 ? (r.rto_count / r.total_count) * 100 : 0,
-        cancellationPercent: r.total_count > 0 ? (r.cancelled_count / r.total_count) * 100 : 0,
+        rtoPercent: r.orders > 0 ? (r.rto_quantity / r.orders) * 100 : 0,
+        cancellationPercent: r.orders > 0 ? (r.cancelled_quantity / r.orders) * 100 : 0,
         trend: [],
       })),
     );
