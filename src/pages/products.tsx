@@ -6,15 +6,19 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ChartTooltip } from "@/components/dashboard/chart-tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useApp } from "@/store/app-context";
-import { getProducts } from "@/data/mock";
+import { useClientResource } from "@/hooks/use-client-resource";
 import type { Product } from "@/data/types";
 import { formatCurrencyCompact, formatNumber, formatPercent, cn } from "@/lib/utils";
 import { Package, ShoppingBag, TrendingUp, Undo2 } from "lucide-react";
 
+const EMPTY_PRODUCTS: Product[] = [];
+
 export default function Products() {
   const { client, isAllClients } = useApp();
-  const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
-  const products = React.useMemo(() => getProducts(cid), [cid]);
+  const { data: products } = useClientResource<Product[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/products` : null,
+    EMPTY_PRODUCTS,
+  );
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
 
   const totalOrders = products.reduce((s, p) => s + p.orders, 0);

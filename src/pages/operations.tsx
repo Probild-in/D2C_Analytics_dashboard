@@ -11,9 +11,13 @@ import { useApp } from "@/store/app-context";
 import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
 import { percentDelta } from "@/lib/date-range";
 import { formatCurrencyCompact, formatNumber, formatPercent, cn } from "@/lib/utils";
-import { getOrders, getGeoBreakdown, getCourierBreakdown } from "@/data/mock";
-import type { OrderStatus, GeoRow } from "@/data/types";
+import { getCourierBreakdown } from "@/data/mock";
+import { useClientResource } from "@/hooks/use-client-resource";
+import type { OrderStatus, GeoRow, Order } from "@/data/types";
 import { Truck as TruckIcon } from "lucide-react";
+
+const EMPTY_ORDERS: Order[] = [];
+const EMPTY_GEO: GeoRow[] = [];
 
 const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
@@ -35,7 +39,10 @@ export default function Operations() {
   const metrics = deriveMetrics(currentSum);
   const prevMetrics = deriveMetrics(previousSum);
 
-  const orders = React.useMemo(() => getOrders(cid, 200), [cid]);
+  const { data: orders } = useClientResource<Order[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/orders?limit=200` : null,
+    EMPTY_ORDERS,
+  );
   const statusCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
     for (const o of orders) counts[o.status] = (counts[o.status] ?? 0) + 1;
@@ -43,7 +50,11 @@ export default function Operations() {
   }, [orders]);
   const maxCount = Math.max(...Object.values(statusCounts), 1);
 
-  const states = React.useMemo(() => getGeoBreakdown(cid, "state").slice(0, 8), [cid]);
+  const { data: statesRaw } = useClientResource<GeoRow[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/geography?level=state` : null,
+    EMPTY_GEO,
+  );
+  const states = statesRaw.slice(0, 8);
   const couriers = React.useMemo(() => getCourierBreakdown(cid), [cid]);
   const [selectedState, setSelectedState] = React.useState<GeoRow | null>(null);
   const [selectedCourier, setSelectedCourier] = React.useState<(typeof couriers)[number] | null>(null);

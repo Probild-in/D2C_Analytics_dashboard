@@ -4,16 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LocationDetailDialog } from "@/components/dashboard/location-detail-dialog";
 import { useApp } from "@/store/app-context";
-import { getGeoBreakdown } from "@/data/mock";
+import { useClientResource } from "@/hooks/use-client-resource";
 import type { GeoRow } from "@/data/types";
 import { formatCurrencyCompact, formatNumber, formatPercent, cn } from "@/lib/utils";
 import { MapPin } from "lucide-react";
 
+const EMPTY_GEO: GeoRow[] = [];
+
 export default function Geography() {
   const { client, isAllClients } = useApp();
-  const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
   const [level, setLevel] = React.useState<"state" | "city">("state");
-  const rows = React.useMemo(() => getGeoBreakdown(cid, level), [cid, level]);
+  const { data: rows } = useClientResource<GeoRow[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/geography?level=${level}` : null,
+    EMPTY_GEO,
+  );
   const maxSales = Math.max(...rows.map((r) => r.sales));
   const [selectedRow, setSelectedRow] = React.useState<GeoRow | null>(null);
 

@@ -28,9 +28,12 @@ import { useApp } from "@/store/app-context";
 import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
 import { percentDelta } from "@/lib/date-range";
 import { cn, formatCurrency, formatCurrencyCompact, formatNumber, formatPercent } from "@/lib/utils";
-import { getOrders, getProducts } from "@/data/mock";
-import type { Order, OrderStatus } from "@/data/types";
+import { useClientResource } from "@/hooks/use-client-resource";
+import type { Order, OrderStatus, Product } from "@/data/types";
 import { Search } from "lucide-react";
+
+const EMPTY_ORDERS: Order[] = [];
+const EMPTY_PRODUCTS: Product[] = [];
 
 const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 const dateFmtLong = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" });
@@ -130,11 +133,13 @@ export default function Sales() {
   const [query, setQuery] = React.useState("");
   const [selectedOrder, setSelectedOrder] = React.useState<Order | null>(null);
 
-  const orders = React.useMemo(() => getOrders(isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion", 40), [client, isAllClients]);
+  const ordersPath = !isAllClients && client ? `/api/clients/${client.id}/orders?limit=40` : null;
+  const { data: orders } = useClientResource<Order[]>(ordersPath, EMPTY_ORDERS);
   const filteredOrders = orders.filter(
     (o) => o.customer.toLowerCase().includes(query.toLowerCase()) || o.id.includes(query) || o.product.toLowerCase().includes(query.toLowerCase()),
   );
-  const products = React.useMemo(() => getProducts(isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion"), [client, isAllClients]);
+  const productsPath = !isAllClients && client ? `/api/clients/${client.id}/products` : null;
+  const { data: products } = useClientResource<Product[]>(productsPath, EMPTY_PRODUCTS);
 
   const chartData = current.map((p) => ({
     date: dateFmt.format(new Date(p.date)),
