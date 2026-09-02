@@ -8,6 +8,7 @@ import syncRouter from "./routes/sync.js";
 import billingRouter from "./routes/billing.js";
 import couriersRouter from "./routes/couriers.js";
 import integrationsRouter from "./routes/integrations.js";
+import { startScheduler } from "./scheduler.js";
 
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
@@ -42,4 +43,5 @@ export default app;
 if (process.env.NODE_ENV !== "test") {
   const port = process.env.PORT ?? 4000;
   app.listen(port, () => console.log(`server listening on ${port}`));
+  startScheduler();
 }
