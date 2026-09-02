@@ -9,7 +9,10 @@ const migrationFiles = readdirSync(migrationsDir)
   .filter((f) => f.endsWith(".sql"))
   .sort();
 
-export const testPool = new pg.Pool({ connectionString: process.env.TEST_DATABASE_URL });
+export const testPool = new pg.Pool({
+  connectionString: process.env.TEST_DATABASE_URL,
+  options: "-c timezone=UTC",
+});
 
 export async function resetTestDb() {
   await testPool.query(`
