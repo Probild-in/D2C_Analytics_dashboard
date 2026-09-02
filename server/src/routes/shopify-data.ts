@@ -115,4 +115,44 @@ router.get("/orders", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/products", requireAuth, async (req, res, next) => {
+  try {
+    const clientId = req.params.id;
+    await assertClientAccess(pool, req.auth!.userId, clientId);
+
+    const result = await pool.query(
+      `select
+         li.product_name,
+         sum(li.quantity)::int as orders,
+         sum(li.quantity * li.price)::int as sales,
+         sum(li.quantity * li.price) filter (where o.status <> 'Cancelled')::int as net_sales,
+         coalesce(sum(li.quantity) filter (where o.status = 'RTO Initiated' or o.status = 'RTO Delivered'), 0)::int as rto_quantity,
+         coalesce(sum(li.quantity) filter (where o.status = 'Cancelled'), 0)::int as cancelled_quantity
+       from shopify_order_line_items li
+       join shopify_orders o on o.id = li.order_id
+       where o.client_id = $1
+       group by li.product_name
+       order by sales desc`,
+      [clientId],
+    );
+
+    res.json(
+      result.rows.map((r) => ({
+        id: r.product_name,
+        name: r.product_name,
+        image: "",
+        category: "",
+        orders: r.orders,
+        sales: r.sales,
+        netSales: r.net_sales ?? 0,
+        rtoPercent: r.orders > 0 ? (r.rto_quantity / r.orders) * 100 : 0,
+        cancellationPercent: r.orders > 0 ? (r.cancelled_quantity / r.orders) * 100 : 0,
+        trend: [],
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

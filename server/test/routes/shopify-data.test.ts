@@ -142,3 +142,33 @@ describe("GET /api/clients/:id/orders", () => {
     expect(res.body).toEqual([]);
   });
 });
+
+describe("GET /api/clients/:id/products", () => {
+  it("aggregates line items into per-product totals", async () => {
+    await testPool.query(
+      `insert into shopify_orders (id, client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1500, 'Delivered', 'Prepaid'),
+       ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'Amit Rao', now(), 500, 'Cancelled', 'COD')`,
+    );
+    await testPool.query(
+      `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price) values
+       ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'li-1', 'Cotton Kurta', 2, 750),
+       ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'li-2', 'Cotton Kurta', 1, 500)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/products")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0]).toMatchObject({
+      name: "Cotton Kurta",
+      orders: 3,
+      sales: 2000,
+      netSales: 1500,
+      cancellationPercent: expect.closeTo(33.33, 1),
+    });
+  });
+});
