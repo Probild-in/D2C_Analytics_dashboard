@@ -25,6 +25,8 @@ import { CLIENTS, TEAM } from "@/data/mock";
 import type { Client } from "@/data/types";
 import { cn } from "@/lib/utils";
 import { CircleSlash, MoreHorizontal, PenLine, Plus, ShoppingBag, Megaphone, Search as SearchIcon, Truck } from "lucide-react";
+import { useClientResource } from "@/hooks/use-client-resource";
+import { supabase } from "@/lib/supabase";
 
 const statusMeta: Record<string, { label: string; variant: "positive" | "warning" | "negative" }> = {
   healthy: { label: "Healthy", variant: "positive" },
@@ -45,6 +47,76 @@ const ROLE_VARIANT: Record<string, "brand" | "info" | "neutral" | "outline"> = {
   Marketer: "neutral",
   "Team Member": "outline",
 };
+
+interface Connection {
+  platform: string;
+  status: "connected" | "disconnected" | "error";
+  externalAccountId: string;
+}
+
+const EMPTY_CONNECTIONS: Connection[] = [];
+
+function ConnectionsPanel({ clientId }: { clientId: string }) {
+  const { data: connections, loading } = useClientResource<Connection[]>(`/api/clients/${clientId}/connections`, EMPTY_CONNECTIONS);
+  const [shopDomain, setShopDomain] = React.useState("");
+  const [connecting, setConnecting] = React.useState(false);
+
+  const shopify = connections.find((c) => c.platform === "shopify");
+
+  const handleConnect = async () => {
+    if (!shopDomain.trim()) return;
+    setConnecting(true);
+    // Uses supabase.auth.getSession() — the same official Supabase client method
+    // useClientResource (Task 12) and app-context.tsx already use — not a hand-parsed
+    // localStorage lookup. See Task 12's plan note (commit 08adb3e) for why that approach
+    // is both fragile (undocumented Supabase storage-key format) and unnecessary.
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      setConnecting(false);
+      return;
+    }
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/shopify/authorize`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ shopDomain: shopDomain.trim() }),
+    });
+    if (!res.ok) {
+      setConnecting(false);
+      return;
+    }
+    const { authorizeUrl } = await res.json();
+    window.location.href = authorizeUrl;
+  };
+
+  if (loading) {
+    return <p className="text-[11px] text-text-tertiary">Loading…</p>;
+  }
+
+  if (shopify && shopify.status === "connected") {
+    return (
+      <span className="flex items-center gap-1 rounded-md bg-bg-subtle px-2 py-1 text-[11px] font-medium text-text-secondary">
+        <ShoppingBag className="size-3.5" />
+        Shopify — {shopify.externalAccountId}
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <Input
+        value={shopDomain}
+        onChange={(e) => setShopDomain(e.target.value)}
+        placeholder="yourstore.myshopify.com"
+        className="h-7 max-w-52 text-[11px]"
+      />
+      <Button size="sm" onClick={handleConnect} disabled={connecting || !shopDomain.trim()}>
+        Connect Shopify
+      </Button>
+    </div>
+  );
+}
 
 export default function ManageClients() {
   const [selectedClient, setSelectedClient] = React.useState<Client | null>(null);
@@ -229,17 +301,7 @@ function ClientDetailDialog({ client, onOpenChange }: { client: Client | null; o
                 </div>
                 <div className="col-span-2">
                   <p className="mb-1.5 text-[10.5px] text-text-tertiary">Connected integrations</p>
-                  <div className="flex items-center gap-1.5">
-                    {client.integrations.map((i) => {
-                      const Icon = INTEGRATION_ICON[i];
-                      return (
-                        <span key={i} className="flex items-center gap-1 rounded-md bg-bg-subtle px-2 py-1 text-[11px] font-medium capitalize text-text-secondary">
-                          <Icon className="size-3.5" />
-                          {i}
-                        </span>
-                      );
-                    })}
-                  </div>
+                  <ConnectionsPanel clientId={client.id} />
                 </div>
               </div>
 
