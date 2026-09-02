@@ -93,6 +93,14 @@ router.get("/:campaignId/creatives", requireAuth, async (req, res, next) => {
         roas: 0,
         hookRate: r.hook_rate !== null ? Number(r.hook_rate) : null,
         holdRate: r.hold_rate !== null ? Number(r.hold_rate) : null,
+        // Local-getter extraction, not .toISOString() — `launched_date` is a Postgres
+        // `date` column with no time/timezone component, and pg's driver parses it into a
+        // JS Date via a local-midnight constructor. .toISOString() would convert that back
+        // to UTC and roll the date back one day on any positive-UTC-offset host (the exact
+        // bug class the Shopify plan's Task 8 found and fixed three times over).
+        launchedDate: r.launched_date
+          ? `${r.launched_date.getFullYear()}-${String(r.launched_date.getMonth() + 1).padStart(2, "0")}-${String(r.launched_date.getDate()).padStart(2, "0")}`
+          : null,
       })),
     );
   } catch (err) {

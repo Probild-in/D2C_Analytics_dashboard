@@ -28,8 +28,8 @@ beforeEach(async () => {
      ('abc-fashion', '55555555-5555-5555-5555-555555555555', 'camp_1', 'Diwali Sale', current_date - 1, 300, 6000, 150, 8)`,
   );
   await testPool.query(
-    `insert into campaign_creatives (id, campaign_id, external_creative_id, name, format, headline, cta, thumbnail_url, status, spend, impressions, clicks, results, hook_rate) values
-     ('77777777-7777-7777-7777-777777777777', '66666666-6666-6666-6666-666666666666', 'creative_1', 'Diwali Carousel', 'CAROUSEL', '50% Off', 'SHOP_NOW', 'https://cdn.example.com/x.jpg', 'active', 120, 3000, 80, 4, 32.5)`,
+    `insert into campaign_creatives (id, campaign_id, external_creative_id, name, format, headline, cta, thumbnail_url, status, spend, impressions, clicks, results, hook_rate, launched_date) values
+     ('77777777-7777-7777-7777-777777777777', '66666666-6666-6666-6666-666666666666', 'creative_1', 'Diwali Carousel', 'CAROUSEL', '50% Off', 'SHOP_NOW', 'https://cdn.example.com/x.jpg', 'active', 120, 3000, 80, 4, 32.5, '2026-08-15')`,
   );
 });
 
@@ -83,6 +83,7 @@ describe("GET /api/clients/:id/campaigns/:campaignId/creatives", () => {
       hookRate: 32.5,
       holdRate: null,
       roas: 0,
+      launchedDate: "2026-08-15",
     });
   });
 });
