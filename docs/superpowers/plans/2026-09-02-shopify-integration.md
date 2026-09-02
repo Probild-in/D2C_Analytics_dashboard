@@ -2261,6 +2261,12 @@ git commit -m "feat: wire usePeriodData to real sales data for single-client vie
 
 - [ ] **Step 1: `src/pages/sales.tsx`**
 
+This file already has `import type { Order, OrderStatus } from "@/data/types";` (verify
+this is still the case before editing — if the exact line has drifted, adapt accordingly).
+Do NOT add a second, separate `import type { Order, ... }` line — TypeScript treats two
+import statements naming the same specifier from the same module as a duplicate-identifier
+error, which fails the build. Instead:
+
 Replace:
 ```typescript
 import { getOrders, getProducts } from "@/data/mock";
@@ -2268,7 +2274,23 @@ import { getOrders, getProducts } from "@/data/mock";
 with:
 ```typescript
 import { useClientResource } from "@/hooks/use-client-resource";
-import type { Order, Product } from "@/data/types";
+```
+
+Replace:
+```typescript
+import type { Order, OrderStatus } from "@/data/types";
+```
+with:
+```typescript
+import type { Order, OrderStatus, Product } from "@/data/types";
+```
+
+Add, near the top of the file, alongside the other module-level constants (or just above
+the component if there are none) — hoisted so `useClientResource`'s fallback param is
+referentially stable across renders (see Task 12's review note):
+```typescript
+const EMPTY_ORDERS: Order[] = [];
+const EMPTY_PRODUCTS: Product[] = [];
 ```
 
 Replace:
@@ -2278,7 +2300,7 @@ const orders = React.useMemo(() => getOrders(isAllClients ? "abc-fashion" : clie
 with:
 ```typescript
 const ordersPath = !isAllClients && client ? `/api/clients/${client.id}/orders?limit=40` : null;
-const { data: orders } = useClientResource<Order[]>(ordersPath, []);
+const { data: orders } = useClientResource<Order[]>(ordersPath, EMPTY_ORDERS);
 ```
 
 Replace:
@@ -2288,7 +2310,7 @@ const products = React.useMemo(() => getProducts(isAllClients ? "abc-fashion" : 
 with:
 ```typescript
 const productsPath = !isAllClients && client ? `/api/clients/${client.id}/products` : null;
-const { data: products } = useClientResource<Product[]>(productsPath, []);
+const { data: products } = useClientResource<Product[]>(productsPath, EMPTY_PRODUCTS);
 ```
 
 `isAllClients` mode still renders empty lists here rather than the old mock fallback —
@@ -2299,6 +2321,10 @@ branch, which was already a pre-existing simplification, not a real aggregate).
 
 - [ ] **Step 2: `src/pages/products.tsx`**
 
+This file already has `import type { Product } from "@/data/types";` on its own line
+(verify before editing). Do NOT add a second one — see Step 1's note on why a duplicate
+type import from the same module fails the build. This file needs no change to that line.
+
 Replace:
 ```typescript
 import { getProducts } from "@/data/mock";
@@ -2306,19 +2332,42 @@ import { getProducts } from "@/data/mock";
 with:
 ```typescript
 import { useClientResource } from "@/hooks/use-client-resource";
-import type { Product } from "@/data/types";
+```
+
+Add a hoisted module-level constant next to the imports (same reason as Step 1):
+```typescript
+const EMPTY_PRODUCTS: Product[] = [];
 ```
 
 Replace:
 ```typescript
+const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
 const products = React.useMemo(() => getProducts(cid), [cid]);
 ```
 with:
 ```typescript
-const { data: products } = useClientResource<Product[]>(cid ? `/api/clients/${cid}/products` : null, []);
+const { data: products } = useClientResource<Product[]>(
+  !isAllClients && client ? `/api/clients/${client.id}/products` : null,
+  EMPTY_PRODUCTS,
+);
 ```
 
+Note this DROPS the `cid` variable entirely, not just its use in this one line — `cid` was
+`isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion"`, which is truthy in every
+case (it falls back to the literal string `"abc-fashion"` even in All Clients mode), so a
+naive `cid ? ... : null` would never skip the fetch in All Clients mode. `"abc-fashion"` is
+purely a frontend mock-data placeholder id (`src/data/mock.ts`) with no corresponding real
+row in the backend database — fetching it for real would 404 and log a console error on
+every page load while in All Clients mode, which the manual verification in Step 5 below
+explicitly checks for. Gate on `!isAllClients && client` instead, matching Step 1's
+already-correct pattern. If `cid` is used elsewhere in this file for a different purpose,
+check before deleting its declaration — for this page it is not.
+
 - [ ] **Step 3: `src/pages/geography.tsx`**
+
+This file already has `import type { GeoRow } from "@/data/types";` on its own line
+(verify before editing). Do NOT add a second one — see Step 1's note on why a duplicate
+type import from the same module fails the build. This file needs no change to that line.
 
 Replace:
 ```typescript
@@ -2327,19 +2376,35 @@ import { getGeoBreakdown } from "@/data/mock";
 with:
 ```typescript
 import { useClientResource } from "@/hooks/use-client-resource";
-import type { GeoRow } from "@/data/types";
+```
+
+Add a hoisted module-level constant next to the imports (same reason as Step 1):
+```typescript
+const EMPTY_GEO: GeoRow[] = [];
 ```
 
 Replace:
 ```typescript
+const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
 const rows = React.useMemo(() => getGeoBreakdown(cid, level), [cid, level]);
 ```
 with:
 ```typescript
-const { data: rows } = useClientResource<GeoRow[]>(cid ? `/api/clients/${cid}/geography?level=${level}` : null, []);
+const { data: rows } = useClientResource<GeoRow[]>(
+  !isAllClients && client ? `/api/clients/${client.id}/geography?level=${level}` : null,
+  EMPTY_GEO,
+);
 ```
 
+Same `cid`-is-always-truthy reasoning as Step 2 applies here — check whether `cid` is used
+elsewhere in this file before deleting its declaration; for this page it is not.
+
 - [ ] **Step 4: `src/pages/operations.tsx`**
+
+This file already has `import type { OrderStatus, GeoRow } from "@/data/types";` on its
+own line (verify before editing) — `GeoRow` is already imported, only `Order` is new. Do
+NOT add a second, separate type import naming `GeoRow` again — see Step 1's note on why a
+duplicate type import from the same module fails the build.
 
 Replace:
 ```typescript
@@ -2349,7 +2414,21 @@ with:
 ```typescript
 import { getCourierBreakdown } from "@/data/mock";
 import { useClientResource } from "@/hooks/use-client-resource";
-import type { Order, GeoRow } from "@/data/types";
+```
+
+Replace:
+```typescript
+import type { OrderStatus, GeoRow } from "@/data/types";
+```
+with:
+```typescript
+import type { OrderStatus, GeoRow, Order } from "@/data/types";
+```
+
+Add hoisted module-level constants next to the imports (same reason as Step 1):
+```typescript
+const EMPTY_ORDERS: Order[] = [];
+const EMPTY_GEO: GeoRow[] = [];
 ```
 
 Replace:
@@ -2358,7 +2437,10 @@ const orders = React.useMemo(() => getOrders(cid, 200), [cid]);
 ```
 with:
 ```typescript
-const { data: orders } = useClientResource<Order[]>(cid ? `/api/clients/${cid}/orders?limit=200` : null, []);
+const { data: orders } = useClientResource<Order[]>(
+  !isAllClients && client ? `/api/clients/${client.id}/orders?limit=200` : null,
+  EMPTY_ORDERS,
+);
 ```
 
 Replace:
@@ -2367,9 +2449,17 @@ const states = React.useMemo(() => getGeoBreakdown(cid, "state").slice(0, 8), [c
 ```
 with:
 ```typescript
-const { data: statesRaw } = useClientResource<GeoRow[]>(cid ? `/api/clients/${cid}/geography?level=state` : null, []);
+const { data: statesRaw } = useClientResource<GeoRow[]>(
+  !isAllClients && client ? `/api/clients/${client.id}/geography?level=state` : null,
+  EMPTY_GEO,
+);
 const states = statesRaw.slice(0, 8);
 ```
+
+Same `cid`-is-always-truthy reasoning as Step 2 applies to the two replacements above. But
+in THIS file, keep the `const cid = ...` declaration — `getCourierBreakdown(cid)` (a few
+lines below, untouched by this step) still uses it, so deleting it would break that call
+and also isn't needed for `noUnusedLocals` purposes since it stays referenced.
 
 `getCourierBreakdown` stays exactly as it was — courier data is stubbed, not part of this
 plan.
