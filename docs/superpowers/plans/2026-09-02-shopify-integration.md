@@ -2495,6 +2495,7 @@ git commit -m "feat: wire Sales/Products/Geography/Operations pages to real Shop
 At the top of `src/pages/manage-clients.tsx`, add:
 ```typescript
 import { useClientResource } from "@/hooks/use-client-resource";
+import { supabase } from "@/lib/supabase";
 ```
 
 - [ ] **Step 2: Replace the static integrations badge block in `ClientDetailDialog`**
@@ -2541,8 +2542,10 @@ interface Connection {
   externalAccountId: string;
 }
 
+const EMPTY_CONNECTIONS: Connection[] = [];
+
 function ConnectionsPanel({ clientId }: { clientId: string }) {
-  const { data: connections, loading } = useClientResource<Connection[]>(`/api/clients/${clientId}/connections`, []);
+  const { data: connections, loading } = useClientResource<Connection[]>(`/api/clients/${clientId}/connections`, EMPTY_CONNECTIONS);
   const [shopDomain, setShopDomain] = React.useState("");
   const [connecting, setConnecting] = React.useState(false);
 
@@ -2551,10 +2554,13 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
   const handleConnect = async () => {
     if (!shopDomain.trim()) return;
     setConnecting(true);
-    const raw = localStorage.getItem(
-      Object.keys(localStorage).find((k) => k.startsWith("sb-") && k.endsWith("-auth-token")) ?? "",
-    );
-    const session = raw ? JSON.parse(raw) : null;
+    // Uses supabase.auth.getSession() — the same official Supabase client method
+    // useClientResource (Task 12) and app-context.tsx already use — not a hand-parsed
+    // localStorage lookup. See Task 12's plan note (commit 08adb3e) for why that approach
+    // is both fragile (undocumented Supabase storage-key format) and unnecessary.
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (!session) {
       setConnecting(false);
       return;
