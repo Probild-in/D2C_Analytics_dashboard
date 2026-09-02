@@ -161,9 +161,7 @@ function CampaignDetailDialog({ campaign, onOpenChange }: { campaign: Campaign |
                   {campaign.status}
                 </Badge>
               </div>
-              <DialogDescription>
-                Started {new Date(campaign.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} · {campaign.resultType}
-              </DialogDescription>
+              <DialogDescription>{campaign.resultType}</DialogDescription>
             </DialogHeader>
 
             <div className="px-5 pb-5">

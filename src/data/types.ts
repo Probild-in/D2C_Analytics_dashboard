@@ -86,26 +86,22 @@ export interface Campaign {
   results: number;
   resultType: string;
   impressions: number;
-  reach: number;
   clicks: number;
   ctr: number;
   cpc: number;
   cpm: number;
   roas: number;
-  thumbnail: string;
-  thumbnailColor: string;
-  startDate: string;
 }
 
 export interface Creative {
   id: string;
   campaignId: string;
   name: string;
-  format: "Image" | "Video" | "Carousel";
+  format: string;
   headline: string;
   primaryText: string;
   cta: string;
-  thumbnailColor: string;
+  thumbnailUrl: string | null;
   status: "Active" | "Paused";
   spend: number;
   impressions: number;
@@ -114,9 +110,9 @@ export interface Creative {
   cpc: number;
   results: number;
   roas: number;
-  hookRate?: number;
-  holdRate?: number;
-  launchedDate: string;
+  hookRate: number | null;
+  holdRate: number | null;
+  launchedDate: string | null;
 }
 
 export interface CampaignActivity {
