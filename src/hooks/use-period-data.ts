@@ -1,15 +1,24 @@
 import * as React from "react";
 import { useApp } from "@/store/app-context";
 import { rangeToDays } from "@/lib/date-range";
-import { getAllClientsSalesSeries, getSalesSeries, sumSeries } from "@/data/mock";
+import { getAllClientsSalesSeries, sumSeries } from "@/data/mock";
+import { useClientResource } from "./use-client-resource";
 import type { SalesPoint } from "@/data/types";
+
+// Hoisted so useClientResource's fallback param is referentially stable across renders
+// (see Task 12's review note on the hook's [path]-only effect deps) — not required for
+// correctness with an empty array specifically, but keeps every call site consistent.
+const EMPTY_SALES: SalesPoint[] = [];
 
 export function usePeriodData() {
   const { clientId, isAllClients, dateRange } = useApp();
   const days = rangeToDays(dateRange);
 
+  const salesPath = !isAllClients && clientId ? `/api/clients/${clientId}/sales?days=${days * 2}` : null;
+  const { data: realSeries, loading } = useClientResource<SalesPoint[]>(salesPath, EMPTY_SALES);
+
   return React.useMemo(() => {
-    const total = isAllClients ? getAllClientsSalesSeries(days * 2) : getSalesSeries(clientId, days * 2);
+    const total = isAllClients ? getAllClientsSalesSeries(days * 2) : realSeries;
     const current = total.slice(days);
     const previous = total.slice(0, days);
     return {
@@ -18,8 +27,9 @@ export function usePeriodData() {
       previous,
       currentSum: sumSeries(current),
       previousSum: sumSeries(previous),
+      loading,
     };
-  }, [clientId, isAllClients, days]);
+  }, [isAllClients, days, realSeries, loading]);
 }
 
 export function deriveMetrics(sum: ReturnType<typeof sumSeries>) {
