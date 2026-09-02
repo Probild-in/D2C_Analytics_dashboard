@@ -172,3 +172,38 @@ describe("GET /api/clients/:id/products", () => {
     });
   });
 });
+
+describe("GET /api/clients/:id/geography", () => {
+  it("groups orders by state", async () => {
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1000, 'Delivered', 'Prepaid', 'Mumbai', 'Maharashtra'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'Amit Rao', now(), 500, 'Cancelled', 'COD', 'Pune', 'Maharashtra'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '3', 'Ravi Kumar', now(), 700, 'Delivered', 'Prepaid', 'Bengaluru', 'Karnataka')`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/geography?level=state")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const maharashtra = res.body.find((r: { name: string }) => r.name === "Maharashtra");
+    expect(maharashtra).toMatchObject({ orders: 2, sales: 1500, cancellationPercent: 50 });
+    const karnataka = res.body.find((r: { name: string }) => r.name === "Karnataka");
+    expect(karnataka).toMatchObject({ orders: 1, sales: 700 });
+  });
+
+  it("groups orders by city when level=city", async () => {
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1000, 'Delivered', 'Prepaid', 'Mumbai', 'Maharashtra')`,
+    );
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/geography?level=city")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].name).toBe("Mumbai");
+  });
+});

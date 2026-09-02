@@ -155,4 +155,43 @@ router.get("/products", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/geography", requireAuth, async (req, res, next) => {
+  try {
+    const clientId = req.params.id;
+    await assertClientAccess(pool, req.auth!.userId, clientId);
+    const level = req.query.level === "city" ? "city" : "state";
+
+    const result = await pool.query(
+      `select
+         ${level} as name,
+         count(*)::int as orders,
+         sum(amount)::int as sales,
+         count(*) filter (where status = 'Delivered')::int as delivered,
+         count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered')::int as rto,
+         count(*) filter (where status = 'Cancelled')::int as cancelled,
+         count(*)::int as total
+       from shopify_orders
+       where client_id = $1 and ${level} is not null
+       group by ${level}
+       order by sales desc`,
+      [clientId],
+    );
+
+    res.json(
+      result.rows.map((r) => ({
+        name: r.name,
+        orders: r.orders,
+        sales: r.sales,
+        delivered: r.delivered,
+        rto: r.rto,
+        rtoPercent: r.total > 0 ? (r.rto / r.total) * 100 : 0,
+        cancellationPercent: r.total > 0 ? (r.cancelled / r.total) * 100 : 0,
+        previousRtoPercent: 0,
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
