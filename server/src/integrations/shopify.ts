@@ -52,6 +52,17 @@ function getCredentials(): { apiKey: string; apiSecret: string } {
   return { apiKey, apiSecret };
 }
 
+// Shopify's REST Admin API paginates via a `Link` response header rather than page
+// numbers/offsets (order results aren't stably offsettable). Extracts the `rel="next"`
+// URL, or null once there are no more pages.
+function parseNextLink(linkHeader: string | null): string | null {
+  if (!linkHeader) return null;
+  const match = linkHeader.split(",").find((part) => part.includes('rel="next"'));
+  if (!match) return null;
+  const urlMatch = match.match(/<([^>]+)>/);
+  return urlMatch ? urlMatch[1] : null;
+}
+
 // Verifies the callback query genuinely came from Shopify, per Shopify's documented
 // algorithm: HMAC-SHA256 over the sorted, `&`-joined `key=value` pairs of every query
 // param EXCEPT hmac/signature, keyed with our app's API secret, compared timing-safe.
@@ -121,54 +132,60 @@ export const shopifyConnector: Connector = {
     if (conn.last_synced_at) {
       params.set("updated_at_min", new Date(conn.last_synced_at).toISOString());
     }
-    const res = await fetch(`https://${conn.external_account_id}/admin/api/2024-10/orders.json?${params}`, {
-      headers: { "X-Shopify-Access-Token": accessToken },
-    });
-    if (!res.ok) {
-      throw new Error(`Shopify orders fetch failed: ${res.status}`);
-    }
-    const body = (await res.json()) as { orders: ShopifyOrder[] };
 
+    let nextUrl: string | null = `https://${conn.external_account_id}/admin/api/2024-10/orders.json?${params}`;
     let recordsSynced = 0;
-    for (const order of body.orders) {
-      const status = mapOrderStatus(order);
-      const paymentMethod = mapPaymentMethod(order.payment_gateway_names);
-      const customerName = order.customer ? `${order.customer.first_name} ${order.customer.last_name}`.trim() : "Guest";
 
-      const orderResult = await pool.query(
-        `insert into shopify_orders
-           (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id)
-         values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-         on conflict (connection_id, shopify_order_id)
-         do update set customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
-           payment_method = excluded.payment_method, city = excluded.city, state = excluded.state
-         returning id`,
-        [
-          conn.client_id,
-          connectionId,
-          String(order.id),
-          customerName,
-          order.created_at,
-          Math.round(parseFloat(order.total_price)),
-          status,
-          paymentMethod,
-          order.shipping_address?.city ?? null,
-          order.shipping_address?.province ?? null,
-          order.customer ? String(order.customer.id) : null,
-        ],
-      );
-      const orderId = orderResult.rows[0].id;
-
-      for (const item of order.line_items) {
-        await pool.query(
-          `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price)
-           values ($1, $2, $3, $4, $5)
-           on conflict (order_id, shopify_line_item_id)
-           do update set product_name = excluded.product_name, quantity = excluded.quantity, price = excluded.price`,
-          [orderId, String(item.id), item.title, item.quantity, Math.round(parseFloat(item.price))],
-        );
+    while (nextUrl) {
+      const res: Response = await fetch(nextUrl, {
+        headers: { "X-Shopify-Access-Token": accessToken },
+      });
+      if (!res.ok) {
+        throw new Error(`Shopify orders fetch failed: ${res.status}`);
       }
-      recordsSynced++;
+      const body = (await res.json()) as { orders: ShopifyOrder[] };
+      nextUrl = parseNextLink(res.headers.get("link"));
+
+      for (const order of body.orders) {
+        const status = mapOrderStatus(order);
+        const paymentMethod = mapPaymentMethod(order.payment_gateway_names);
+        const customerName = order.customer ? `${order.customer.first_name} ${order.customer.last_name}`.trim() : "Guest";
+
+        const orderResult = await pool.query(
+          `insert into shopify_orders
+             (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+           on conflict (connection_id, shopify_order_id)
+           do update set customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
+             payment_method = excluded.payment_method, city = excluded.city, state = excluded.state
+           returning id`,
+          [
+            conn.client_id,
+            connectionId,
+            String(order.id),
+            customerName,
+            order.created_at,
+            Math.round(parseFloat(order.total_price)),
+            status,
+            paymentMethod,
+            order.shipping_address?.city ?? null,
+            order.shipping_address?.province ?? null,
+            order.customer ? String(order.customer.id) : null,
+          ],
+        );
+        const orderId = orderResult.rows[0].id;
+
+        for (const item of order.line_items) {
+          await pool.query(
+            `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price)
+             values ($1, $2, $3, $4, $5)
+             on conflict (order_id, shopify_line_item_id)
+             do update set product_name = excluded.product_name, quantity = excluded.quantity, price = excluded.price`,
+            [orderId, String(item.id), item.title, item.quantity, Math.round(parseFloat(item.price))],
+          );
+        }
+        recordsSynced++;
+      }
     }
 
     await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);

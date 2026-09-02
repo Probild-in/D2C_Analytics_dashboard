@@ -239,6 +239,72 @@ describe("shopifyConnector.sync", () => {
     expect(orders.rowCount).toBe(1);
   });
 
+  it("paginates through multiple pages using the Link header", async () => {
+    let callCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        callCount++;
+        if (callCount === 1) {
+          return new Response(
+            JSON.stringify({
+              orders: [
+                {
+                  id: 2001,
+                  created_at: "2026-08-19T10:00:00Z",
+                  total_price: "100.00",
+                  financial_status: "paid",
+                  fulfillment_status: "fulfilled",
+                  cancelled_at: null,
+                  customer: null,
+                  shipping_address: null,
+                  payment_gateway_names: ["shopify_payments"],
+                  line_items: [],
+                },
+              ],
+            }),
+            {
+              status: 200,
+              headers: {
+                Link: '<https://abc-fashion.myshopify.com/admin/api/2024-10/orders.json?page_info=abc123&limit=250>; rel="next"',
+              },
+            },
+          );
+        }
+        expect(url).toBe("https://abc-fashion.myshopify.com/admin/api/2024-10/orders.json?page_info=abc123&limit=250");
+        return new Response(
+          JSON.stringify({
+            orders: [
+              {
+                id: 2002,
+                created_at: "2026-08-20T10:00:00Z",
+                total_price: "200.00",
+                financial_status: "paid",
+                fulfillment_status: "fulfilled",
+                cancelled_at: null,
+                customer: null,
+                shipping_address: null,
+                payment_gateway_names: ["shopify_payments"],
+                line_items: [],
+              },
+            ],
+          }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const result = await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
+    expect(result.recordsSynced).toBe(2);
+    expect(callCount).toBe(2);
+
+    const orders = await testPool.query(
+      "select shopify_order_id from shopify_orders where connection_id = $1 order by shopify_order_id",
+      ["55555555-5555-5555-5555-555555555555"],
+    );
+    expect(orders.rows.map((r) => r.shopify_order_id)).toEqual(["2001", "2002"]);
+  });
+
   it("updates last_synced_at and resets status to connected on the connection", async () => {
     await testPool.query("update platform_connections set status = 'error' where id = $1", ["55555555-5555-5555-5555-555555555555"]);
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ orders: [] }), { status: 200 })));
