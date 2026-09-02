@@ -55,27 +55,33 @@ describe("GET /api/clients/:id/sales", () => {
   });
 
   it("renders the date field as the correct calendar date regardless of server timezone", async () => {
-    // order_date is a fixed, unambiguous UTC timestamp: 2026-08-15T10:00:00Z is
-    // 2026-08-15 15:30 in Asia/Kolkata (+5:30), so the calendar date is
-    // 2026-08-15 under any timezone offset up to +13/-12. A buggy
-    // `r.day.toISOString().slice(0, 10)` mapping (which reinterprets a
-    // locally-constructed Date as UTC) would roll this back to 2026-08-14
-    // on any host running ahead of UTC.
+    // order_date is set to 30 days ago at noon UTC, making the calendar day
+    // unambiguous across any timezone offset up to +13/-12. The JS-computed
+    // expected date uses the same relative offset and UTC field access to
+    // ensure consistency regardless of when the test runs.
     await testPool.query(
       `insert into shopify_orders
          (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, shopify_customer_id) values
-       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '4', 'Neha Singh', '2026-08-15T10:00:00Z', 1200, 'Delivered', 'Prepaid', '9003')`,
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '4', 'Neha Singh', date_trunc('day', now() - interval '30 days') + interval '12 hours', 1200, 'Delivered', 'Prepaid', '9003')`,
     );
 
+    // Compute expected date: 30 days ago, extracted in UTC
+    const daysAgo = 30;
+    const seedTime = new Date(Date.now() - daysAgo * 24 * 60 * 60 * 1000);
+    const year = seedTime.getUTCFullYear();
+    const month = String(seedTime.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(seedTime.getUTCDate()).padStart(2, '0');
+    const expectedDate = `${year}-${month}-${day}`;
+
     const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
-    // A wide window guarantees 2026-08-15 falls within [current_date - 89, current_date]
-    // without the assertion itself depending on now()/current_date.
+    // A wide window guarantees 30 days ago falls within [current_date - 89, current_date]
+    // without the assertion itself depending on a hardcoded date.
     const res = await request(app)
       .get("/api/clients/abc-fashion/sales?days=90")
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    const seededDay = res.body.find((r: { date: string }) => r.date === "2026-08-15");
+    const seededDay = res.body.find((r: { date: string }) => r.date === expectedDate);
     expect(seededDay).toBeDefined();
     expect(seededDay.orders).toBe(1);
     expect(seededDay.netSales).toBe(1200);
