@@ -116,4 +116,16 @@ describe("POST /api/clients/:id/connections/:platform/authorize", () => {
       .send({ shopDomain: "abc-fashion.myshopify.com" });
     expect(res.status).toBe(404);
   });
+
+  it("resolves the meta connector and returns an authorizeUrl", async () => {
+    process.env.META_APP_ID = "test-app-id";
+    process.env.META_APP_SECRET = "test-app-secret";
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/meta/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({});
+    expect(res.status).toBe(200);
+    expect(res.body.authorizeUrl).toContain("facebook.com");
+  });
 });
