@@ -26,7 +26,7 @@ export default function Products() {
   const avgRto = products.length > 0 ? products.reduce((s, p) => s + p.rtoPercent, 0) / products.length : 0;
 
   return (
-    <Page title="Products" description={isAllClients ? "Product performance (showing ABC Fashion catalog)" : `${client?.name} — product performance`}>
+    <Page title="Products" description={isAllClients ? "Aggregated product performance" : `${client?.name} — product performance`}>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard label="Active Products" value={String(products.length)} icon={<Package />} accent="brand" />
         <KpiCard label="Total Orders" value={formatNumber(totalOrders)} icon={<ShoppingBag />} accent="cyan" />

@@ -22,7 +22,7 @@ export default function Geography() {
   const [selectedRow, setSelectedRow] = React.useState<GeoRow | null>(null);
 
   return (
-    <Page title="Geography" description={isAllClients ? "Location performance (showing ABC Fashion)" : `${client?.name} — performance by location`}>
+    <Page title="Geography" description={isAllClients ? "Location performance across all clients" : `${client?.name} — performance by location`}>
       <Card>
         <CardHeader className="items-center">
           <div>
