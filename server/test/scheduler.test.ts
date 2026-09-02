@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import cron from "node-cron";
 import { testPool, resetTestDb } from "./helpers/test-db.js";
 import { encryptToken } from "../src/lib/crypto.js";
-import { runScheduledSyncs } from "../src/scheduler.js";
+import { runScheduledSyncs, startScheduler } from "../src/scheduler.js";
 import pool from "../src/db.js";
 
 beforeEach(async () => {
@@ -155,5 +156,15 @@ describe("runScheduledSyncs", () => {
     );
 
     consoleErrorSpy.mockRestore();
+  });
+});
+
+describe("startScheduler", () => {
+  it("schedules both the hourly Shopify sync and the 6-hourly Meta sync", () => {
+    const scheduleSpy = vi.spyOn(cron, "schedule");
+    startScheduler();
+    expect(scheduleSpy).toHaveBeenCalledWith("0 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    expect(scheduleSpy).toHaveBeenCalledWith("0 */6 * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    scheduleSpy.mockRestore();
   });
 });

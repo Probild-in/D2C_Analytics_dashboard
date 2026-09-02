@@ -45,4 +45,16 @@ export function startScheduler() {
     },
     { noOverlap: true },
   );
+
+  // Meta's Insights API updates less frequently than Shopify's order stream and is far
+  // more rate-limit-sensitive (this connector's sync makes 3 API calls per campaign, plus
+  // 1 per ad) — 6-hourly keeps well clear of Meta's per-app rate limits even for a client
+  // with dozens of active campaigns.
+  cron.schedule(
+    "0 */6 * * *",
+    () => {
+      runScheduledSyncs("meta").catch((err) => console.error("Meta scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
 }
