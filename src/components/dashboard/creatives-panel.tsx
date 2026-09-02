@@ -1,16 +1,27 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { getCreatives } from "@/data/mock";
-import type { Campaign, Creative } from "@/data/types";
+import type { Creative } from "@/data/types";
 import { cn, formatCurrency, formatCurrencyCompact, formatNumber, formatPercent } from "@/lib/utils";
 import { GalleryHorizontal, Image as ImageIcon, Play, Video } from "lucide-react";
 
-const FORMAT_ICON: Record<Creative["format"], React.ElementType> = {
-  Image: ImageIcon,
-  Video: Video,
-  Carousel: GalleryHorizontal,
-};
+// Real creative formats come from Meta's object_type (e.g. "CAROUSEL", "VIDEO",
+// "SINGLE_IMAGE"), not the old mock's closed Title-Case union — normalize case rather
+// than matching a fixed set of strings, so real synced data still gets the right icon.
+function formatIcon(format: string): React.ElementType {
+  const f = format.toUpperCase();
+  if (f.includes("VIDEO")) return Video;
+  if (f.includes("CAROUSEL")) return GalleryHorizontal;
+  return ImageIcon;
+}
+
+function isVideoFormat(format: string): boolean {
+  return format.toUpperCase().includes("VIDEO");
+}
+
+function isCarouselFormat(format: string): boolean {
+  return format.toUpperCase().includes("CAROUSEL");
+}
 
 // Bundled locally (public/creatives) so they always load — no dependency on
 // reaching an external image host, which isn't guaranteed for every viewer/tunnel.
@@ -26,25 +37,29 @@ function creativeImageUrl(id: string) {
 
 function CreativeThumbnail({ creative, size }: { creative: Creative; size: "sm" | "lg" }) {
   const [failed, setFailed] = React.useState(false);
+  // Prefer the real platform CDN URL (per the design spec's "reference the platform's own
+  // CDN URL, don't re-host it ourselves" decision); fall back to a bundled demo image only
+  // when no real thumbnail exists yet (e.g. an older sync before this field was populated).
+  const imageSrc = creative.thumbnailUrl ?? creativeImageUrl(creative.id);
 
   return (
-    <div className={cn("relative flex items-center justify-center overflow-hidden", size === "sm" ? "aspect-video" : "aspect-[2.2/1]", creative.thumbnailColor)}>
+    <div className={cn("relative flex items-center justify-center overflow-hidden bg-bg-subtle", size === "sm" ? "aspect-video" : "aspect-[2.2/1]")}>
       {!failed && (
         <img
-          src={creativeImageUrl(creative.id)}
+          src={imageSrc}
           alt={creative.headline}
           loading="lazy"
           onError={() => setFailed(true)}
           className="absolute inset-0 size-full object-cover"
         />
       )}
-      {failed && React.createElement(FORMAT_ICON[creative.format], { className: cn("relative text-white/90", size === "sm" ? "size-6" : "size-8") })}
-      {creative.format === "Video" && !failed && (
+      {failed && React.createElement(formatIcon(creative.format), { className: cn("relative text-text-tertiary", size === "sm" ? "size-6" : "size-8") })}
+      {isVideoFormat(creative.format) && !failed && (
         <span className="relative flex size-9 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm">
           <Play className="size-4 fill-white text-white" />
         </span>
       )}
-      {creative.format === "Carousel" && !failed && (
+      {isCarouselFormat(creative.format) && !failed && (
         <span className="absolute bottom-1.5 left-1/2 flex -translate-x-1/2 gap-1">
           <span className="size-1 rounded-full bg-white" />
           <span className="size-1 rounded-full bg-white/50" />
@@ -55,8 +70,7 @@ function CreativeThumbnail({ creative, size }: { creative: Creative; size: "sm" 
   );
 }
 
-export function CreativesGrid({ campaign }: { campaign: Campaign }) {
-  const creatives = React.useMemo(() => getCreatives(campaign), [campaign]);
+export function CreativesGrid({ creatives }: { creatives: Creative[] }) {
   const [selected, setSelected] = React.useState<Creative | null>(null);
 
   return (
@@ -127,8 +141,8 @@ function CreativeDetailDialog({ creative, onOpenChange }: { creative: Creative |
                 <Tile label="CPC" value={formatCurrency(creative.cpc)} />
                 <Tile label="Results" value={formatNumber(creative.results)} />
                 <Tile label="ROAS" value={`${creative.roas.toFixed(2)}x`} tone={creative.roas < 2.5 ? "negative" : "positive"} />
-                {creative.hookRate !== undefined && <Tile label="Hook rate" value={formatPercent(creative.hookRate)} />}
-                {creative.holdRate !== undefined && <Tile label="Hold rate" value={formatPercent(creative.holdRate)} />}
+                {creative.hookRate !== null && <Tile label="Hook rate" value={formatPercent(creative.hookRate)} />}
+                {creative.holdRate !== null && <Tile label="Hold rate" value={formatPercent(creative.holdRate)} />}
               </div>
             </div>
           </>

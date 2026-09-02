@@ -352,7 +352,6 @@ const CAMPAIGN_NAMES = [
   "Lookalike — Top Buyers",
   "Brand Video — Reach",
 ];
-const THUMB_COLORS = ["bg-gradient-to-br from-violet-400 to-indigo-600", "bg-gradient-to-br from-rose-400 to-pink-600", "bg-gradient-to-br from-amber-400 to-orange-600", "bg-gradient-to-br from-cyan-400 to-blue-600", "bg-gradient-to-br from-emerald-400 to-teal-600", "bg-gradient-to-br from-fuchsia-400 to-purple-600"];
 
 export function getCampaigns(clientId: string, platform: "meta" | "google"): Campaign[] {
   const rand = mulberry32(seedFromString(clientId + ":" + platform));
@@ -379,15 +378,11 @@ export function getCampaigns(clientId: string, platform: "meta" | "google"): Cam
       results,
       resultType: platform === "meta" ? "Purchases" : "Conversions",
       impressions,
-      reach: Math.round(impressions * (0.55 + rand() * 0.25)),
       clicks,
       ctr,
       cpc,
       cpm,
       roas: Math.round(roas * 100) / 100,
-      thumbnail: THUMB_COLORS[idx % THUMB_COLORS.length],
-      thumbnailColor: THUMB_COLORS[idx % THUMB_COLORS.length],
-      startDate: "2026-07-" + (10 + (idx % 15)),
     };
   });
 }
@@ -463,7 +458,7 @@ export function getCreatives(campaign: Campaign): Creative[] {
       headline: lib.headline,
       primaryText: lib.primaryText,
       cta: lib.cta,
-      thumbnailColor: THUMB_COLORS[(idx + THUMB_COLORS.indexOf(campaign.thumbnailColor)) % THUMB_COLORS.length],
+      thumbnailUrl: null,
       status: isWeakest && rand() > 0.4 ? "Paused" : "Active",
       spend,
       impressions,
@@ -472,13 +467,9 @@ export function getCreatives(campaign: Campaign): Creative[] {
       cpc,
       results,
       roas,
-      ...(lib.format === "Video"
-        ? {
-            hookRate: Math.round((28 + rand() * 30) * 10) / 10,
-            holdRate: Math.round((8 + rand() * 18) * 10) / 10,
-          }
-        : {}),
-      launchedDate: campaign.startDate,
+      hookRate: lib.format === "Video" ? Math.round((28 + rand() * 30) * 10) / 10 : null,
+      holdRate: lib.format === "Video" ? Math.round((8 + rand() * 18) * 10) / 10 : null,
+      launchedDate: "2026-07-" + (10 + (idx % 15)),
     };
   });
 }

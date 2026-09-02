@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { CreativesGrid } from "@/components/dashboard/creatives-panel";
 import { useApp } from "@/store/app-context";
-import { getCampaigns, getCampaignActivity, relativeTime } from "@/data/mock";
+import { getCampaigns, getCampaignActivity, getCreatives, relativeTime } from "@/data/mock";
 import type { Campaign, CampaignActivity } from "@/data/types";
 import { formatCompact, formatCurrency, formatCurrencyCompact, formatNumber, cn } from "@/lib/utils";
 import {
@@ -226,7 +226,7 @@ function CampaignDetailDialog({ campaign, onOpenChange }: { campaign: Campaign |
 
                   <TabsContent value="creatives" className="mt-3">
                     <div className="scrollbar-thin max-h-[280px] overflow-y-auto pr-1">
-                      <CreativesGrid campaign={campaign} />
+                      <CreativesGrid creatives={getCreatives(campaign)} />
                     </div>
                   </TabsContent>
                 </Tabs>
