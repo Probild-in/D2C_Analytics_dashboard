@@ -502,6 +502,15 @@ describe("POST /api/clients/:id/connections/:platform/authorize", () => {
     expect(res.status).toBe(404);
   });
 
+  it("400s for a shopDomain that isn't a valid *.myshopify.com domain", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "https://evil.example.com" });
+    expect(res.status).toBe(400);
+  });
+
   it("404s for a client the user cannot access", async () => {
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access) values
@@ -663,8 +672,12 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
       throw new HttpError(404, "unknown_platform", `No connector for platform ${platform}`);
     }
 
-    const state = await signState({ clientId, platform, teamMemberId: req.auth!.userId });
     const shopDomain = (req.body as { shopDomain?: string }).shopDomain;
+    if (platform === "shopify" && !/^[a-z0-9-]+\.myshopify\.com$/.test(shopDomain ?? "")) {
+      throw new HttpError(400, "invalid_shop_domain", "shopDomain must be a valid *.myshopify.com domain");
+    }
+
+    const state = await signState({ clientId, platform, teamMemberId: req.auth!.userId });
     const authorizeUrl = connector.getAuthUrl(shopDomain ?? clientId, state);
     res.json({ authorizeUrl });
   } catch (err) {
@@ -674,6 +687,8 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
 
 export default router;
 ```
+
+**Ruling carried from Task 3's review**: Task 3's reviewer found that neither `ShopifyConnector.getAuthUrl` nor this route validated `shopDomain`'s format before using it to construct a URL this server later `fetch()`es against. Fixed here, at the route boundary, since that's where the untrusted request-body input first enters the system — the platform check (`platform === "shopify"`) keeps this from misfiring on a future Meta/Google `authorize` call that has no shop-domain concept at all.
 
 - [ ] **Step 5: Write `server/src/routes/integrations.ts`**
 
