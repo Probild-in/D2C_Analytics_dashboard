@@ -288,7 +288,14 @@ export default function ManageClients() {
                           >
                             <PenLine className="size-3.5" /> Edit client
                           </DropdownMenuItem>
-                          <DropdownMenuItem>Manage integrations</DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedClient(c);
+                            }}
+                          >
+                            Manage integrations
+                          </DropdownMenuItem>
                           <DropdownMenuItem>Assign team members</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem className="text-negative focus:bg-negative-subtle">
