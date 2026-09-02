@@ -57,3 +57,63 @@ describe("GET /api/clients/:id/connections", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("POST /api/clients/:id/connections/:platform/authorize", () => {
+  beforeEach(async () => {
+    await resetTestDb();
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('11111111-1111-1111-1111-111111111111', 'Riya Kapoor', 'riya@agency.com', 'owner', true)`,
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('abc-fashion', 'ABC Fashion', 'Fashion & Apparel', 'bg-violet-500', 'A')`,
+    );
+    process.env.SHOPIFY_API_KEY = "test-api-key";
+    process.env.SHOPIFY_API_SECRET = "test-api-secret";
+    process.env.PUBLIC_API_URL = "https://d2c.probild.in";
+    process.env.STATE_SIGNING_SECRET = "test-state-secret-0123456789abcdef";
+  });
+
+  it("returns an authorize URL for a known platform", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "abc-fashion.myshopify.com" });
+    expect(res.status).toBe(200);
+    expect(res.body.authorizeUrl).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+    expect(res.body.authorizeUrl).toContain("state=");
+  });
+
+  it("404s for an unknown platform", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/not-a-real-platform/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({});
+    expect(res.status).toBe(404);
+  });
+
+  it("400s for a shopDomain that isn't a valid *.myshopify.com domain", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "https://evil.example.com" });
+    expect(res.status).toBe(400);
+  });
+
+  it("404s for a client the user cannot access", async () => {
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('22222222-2222-2222-2222-222222222222', 'Scoped User', 'scoped@agency.com', 'team_member', false)`,
+    );
+    const token = signTestJwt({ sub: "22222222-2222-2222-2222-222222222222", email: "scoped@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "abc-fashion.myshopify.com" });
+    expect(res.status).toBe(404);
+  });
+});

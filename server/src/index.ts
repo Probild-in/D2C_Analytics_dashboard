@@ -6,6 +6,7 @@ import clientsRouter from "./routes/clients.js";
 import connectionsRouter from "./routes/connections.js";
 import billingRouter from "./routes/billing.js";
 import couriersRouter from "./routes/couriers.js";
+import integrationsRouter from "./routes/integrations.js";
 
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
@@ -15,6 +16,7 @@ app.use("/api/clients", clientsRouter);
 app.use("/api/clients/:id/connections", connectionsRouter);
 app.use("/api/clients/:id/subscription", billingRouter);
 app.use("/api/couriers", couriersRouter);
+app.use("/api/integrations", integrationsRouter);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });
