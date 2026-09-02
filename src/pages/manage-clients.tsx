@@ -60,12 +60,14 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
   const { data: connections, loading } = useClientResource<Connection[]>(`/api/clients/${clientId}/connections`, EMPTY_CONNECTIONS);
   const [shopDomain, setShopDomain] = React.useState("");
   const [connecting, setConnecting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   const shopify = connections.find((c) => c.platform === "shopify");
 
   const handleConnect = async () => {
     if (!shopDomain.trim()) return;
     setConnecting(true);
+    setError(null);
     // Uses supabase.auth.getSession() — the same official Supabase client method
     // useClientResource (Task 12) and app-context.tsx already use — not a hand-parsed
     // localStorage lookup. See Task 12's plan note (commit 08adb3e) for why that approach
@@ -75,19 +77,27 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
     } = await supabase.auth.getSession();
     if (!session) {
       setConnecting(false);
+      setError("You're not signed in. Please log in again.");
       return;
     }
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/shopify/authorize`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ shopDomain: shopDomain.trim() }),
-    });
-    if (!res.ok) {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/shopify/authorize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ shopDomain: shopDomain.trim() }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error?.message ?? "Failed to connect Shopify. Please try again.");
+        setConnecting(false);
+        return;
+      }
+      const { authorizeUrl } = await res.json();
+      window.location.href = authorizeUrl;
+    } catch {
+      setError("Failed to connect Shopify. Please check your connection and try again.");
       setConnecting(false);
-      return;
     }
-    const { authorizeUrl } = await res.json();
-    window.location.href = authorizeUrl;
   };
 
   if (loading) {
@@ -103,17 +113,28 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
     );
   }
 
+  const shopDomainValid = /^[a-z0-9-]+\.myshopify\.com$/.test(shopDomain.trim());
+
   return (
-    <div className="flex items-center gap-1.5">
-      <Input
-        value={shopDomain}
-        onChange={(e) => setShopDomain(e.target.value)}
-        placeholder="yourstore.myshopify.com"
-        className="h-7 max-w-52 text-[11px]"
-      />
-      <Button size="sm" onClick={handleConnect} disabled={connecting || !shopDomain.trim()}>
-        Connect Shopify
-      </Button>
+    <div>
+      <div className="flex items-center gap-1.5">
+        <Input
+          value={shopDomain}
+          onChange={(e) => {
+            setShopDomain(e.target.value);
+            setError(null);
+          }}
+          placeholder="yourstore.myshopify.com"
+          className="h-7 max-w-52 text-[11px]"
+        />
+        <Button size="sm" onClick={handleConnect} disabled={connecting || !shopDomain.trim() || !shopDomainValid}>
+          Connect Shopify
+        </Button>
+      </div>
+      {!error && shopDomain.trim() && !shopDomainValid && (
+        <p className="mt-1 text-[11px] text-text-tertiary">Must look like yourstore.myshopify.com</p>
+      )}
+      {error && <p className="mt-1 text-[11px] text-negative">{error}</p>}
     </div>
   );
 }
