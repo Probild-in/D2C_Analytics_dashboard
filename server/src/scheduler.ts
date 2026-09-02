@@ -6,8 +6,12 @@ export async function runScheduledSyncs(platform: string) {
   const connector = connectors[platform];
   if (!connector) return;
 
+  // 'error' connections are included so a transient failure (e.g. a brief Shopify
+  // outage) self-heals on the next hourly run instead of requiring a human to
+  // trigger a manual sync — each connection's own try/catch below still isolates
+  // a connection that's genuinely still broken from affecting its neighbors.
   const result = await pool.query(
-    "select id from platform_connections where platform = $1 and status = 'connected'",
+    "select id from platform_connections where platform = $1 and status in ('connected', 'error')",
     [platform],
   );
 

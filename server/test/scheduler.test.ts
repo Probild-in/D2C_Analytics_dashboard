@@ -32,6 +32,23 @@ describe("runScheduledSyncs", () => {
     expect(conn.rows[0].last_synced_at).not.toBeNull();
   });
 
+  it("retries a connection stuck in error status, and recovers it on success", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, access_token, external_account_id) values
+       ('aaaaaaaa-1111-1111-1111-111111111111', 'abc-fashion', 'shopify', 'error', $1, 'abc-fashion.myshopify.com')`,
+      [encryptToken("shpat_real_token")],
+    );
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ orders: [] }), { status: 200 })));
+
+    await runScheduledSyncs("shopify");
+
+    const conn = await testPool.query("select status, last_synced_at from platform_connections where id = $1", [
+      "aaaaaaaa-1111-1111-1111-111111111111",
+    ]);
+    expect(conn.rows[0].status).toBe("connected");
+    expect(conn.rows[0].last_synced_at).not.toBeNull();
+  });
+
   it("skips disconnected connections", async () => {
     await testPool.query(
       `insert into platform_connections (id, client_id, platform, status, access_token, external_account_id) values
