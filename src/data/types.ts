@@ -6,7 +6,10 @@ export interface Client {
   category: string;
   logoColor: string;
   logoInitial: string;
-  integrations: ("shopify" | "meta" | "google" | "shipping")[];
+  // Optional: the real GET /api/clients endpoint doesn't return this yet (no
+  // per-client connection-status aggregate query exists); only mock.ts's
+  // CLIENTS fixture populates it today.
+  integrations?: ("shopify" | "meta" | "google" | "shipping")[];
   status: "healthy" | "attention" | "critical";
   owner: string;
 }

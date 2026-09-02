@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 import { CircleSlash, MoreHorizontal, PenLine, Plus, ShoppingBag, Megaphone, Search as SearchIcon, Truck, CheckCircle2, XCircle, X } from "lucide-react";
 import { useClientResource } from "@/hooks/use-client-resource";
 import { supabase } from "@/lib/supabase";
+import { useApp } from "@/store/app-context";
 
 const statusMeta: Record<string, { label: string; variant: "positive" | "warning" | "negative" }> = {
   healthy: { label: "Healthy", variant: "positive" },
@@ -205,6 +206,7 @@ function ConnectionResultBanner() {
 }
 
 export default function ManageClients() {
+  const { clients } = useApp();
   const [selectedClient, setSelectedClient] = React.useState<Client | null>(null);
   return (
     <Page
@@ -216,7 +218,7 @@ export default function ManageClients() {
       <Card>
         <CardHeader>
           <CardTitle>Clients</CardTitle>
-          <CardDescription>{CLIENTS.length} clients in your workspace</CardDescription>
+          <CardDescription>{clients.length} clients in your workspace</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <div className="scrollbar-thin overflow-x-auto">
@@ -231,7 +233,7 @@ export default function ManageClients() {
                 </tr>
               </thead>
               <tbody>
-                {CLIENTS.map((c) => (
+                {clients.map((c) => (
                   <tr
                     key={c.id}
                     onClick={() => setSelectedClient(c)}
@@ -250,7 +252,7 @@ export default function ManageClients() {
                     </td>
                     <td className="px-3 py-2.5">
                       <div className="flex items-center gap-1.5">
-                        {c.integrations.map((i) => {
+                        {(c.integrations ?? []).map((i) => {
                           const Icon = INTEGRATION_ICON[i];
                           return (
                             <span key={i} className="flex size-6 items-center justify-center rounded-md bg-bg-subtle text-text-secondary" title={i}>
