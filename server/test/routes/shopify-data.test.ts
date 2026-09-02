@@ -99,3 +99,46 @@ describe("GET /api/clients/:id/sales", () => {
     expect(res.status).toBe(404);
   });
 });
+
+describe("GET /api/clients/:id/orders", () => {
+  it("returns orders newest first, with a representative product name", async () => {
+    await testPool.query(
+      `insert into shopify_orders
+         (id, client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state) values
+       ('88888888-8888-8888-8888-888888888888', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now() - interval '1 day', 1000, 'Delivered', 'Prepaid', 'Mumbai', 'Maharashtra'),
+       ('99999999-9999-9999-9999-999999999999', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'Amit Rao', now(), 500, 'Dispatched', 'COD', 'Pune', 'Maharashtra')`,
+    );
+    await testPool.query(
+      `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price) values
+       ('99999999-9999-9999-9999-999999999999', 'li-1', 'Cotton Kurta', 1, 500)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/orders?limit=10")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(2);
+    expect(res.body[0]).toMatchObject({
+      clientId: "abc-fashion",
+      customer: "Amit Rao",
+      amount: 500,
+      status: "Dispatched",
+      payment: "COD",
+      city: "Pune",
+      state: "Maharashtra",
+      product: "Cotton Kurta",
+    });
+    expect(res.body[1].customer).toBe("Priya Shah");
+  });
+
+  it("returns an empty array for a client with no synced orders", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/orders")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+  });
+});

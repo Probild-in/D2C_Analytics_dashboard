@@ -78,4 +78,41 @@ router.get("/sales", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/orders", requireAuth, async (req, res, next) => {
+  try {
+    const clientId = req.params.id;
+    await assertClientAccess(pool, req.auth!.userId, clientId);
+    const limit = Math.max(1, Math.min(500, Number(req.query.limit) || 60));
+
+    const result = await pool.query(
+      `select
+         o.id, o.customer_name, o.order_date, o.amount, o.status, o.payment_method, o.city, o.state,
+         (select li.product_name from shopify_order_line_items li where li.order_id = o.id order by li.id limit 1) as product_name
+       from shopify_orders o
+       where o.client_id = $1
+       order by o.order_date desc
+       limit $2`,
+      [clientId, limit],
+    );
+
+    res.json(
+      result.rows.map((r) => ({
+        id: r.id,
+        clientId,
+        customer: r.customer_name,
+        date: r.order_date.toISOString(),
+        amount: r.amount,
+        status: r.status,
+        payment: r.payment_method,
+        city: r.city ?? "",
+        state: r.state ?? "",
+        courier: "",
+        product: r.product_name ?? "",
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
