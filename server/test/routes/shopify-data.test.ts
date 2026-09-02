@@ -54,6 +54,33 @@ describe("GET /api/clients/:id/sales", () => {
     expect(threeDaysAgo.netSales).toBe(0);
   });
 
+  it("renders the date field as the correct calendar date regardless of server timezone", async () => {
+    // order_date is a fixed, unambiguous UTC timestamp: 2026-08-15T10:00:00Z is
+    // 2026-08-15 15:30 in Asia/Kolkata (+5:30), so the calendar date is
+    // 2026-08-15 under any timezone offset up to +13/-12. A buggy
+    // `r.day.toISOString().slice(0, 10)` mapping (which reinterprets a
+    // locally-constructed Date as UTC) would roll this back to 2026-08-14
+    // on any host running ahead of UTC.
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, shopify_customer_id) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '4', 'Neha Singh', '2026-08-15T10:00:00Z', 1200, 'Delivered', 'Prepaid', '9003')`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    // A wide window guarantees 2026-08-15 falls within [current_date - 89, current_date]
+    // without the assertion itself depending on now()/current_date.
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=90")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const seededDay = res.body.find((r: { date: string }) => r.date === "2026-08-15");
+    expect(seededDay).toBeDefined();
+    expect(seededDay.orders).toBe(1);
+    expect(seededDay.netSales).toBe(1200);
+  });
+
   it("404s for a client the user cannot access", async () => {
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access) values

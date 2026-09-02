@@ -60,7 +60,7 @@ router.get("/sales", requireAuth, async (req, res, next) => {
 
     res.json(
       result.rows.map((r) => ({
-        date: r.day.toISOString().slice(0, 10),
+        date: `${r.day.getFullYear()}-${String(r.day.getMonth() + 1).padStart(2, "0")}-${String(r.day.getDate()).padStart(2, "0")}`,
         grossSales: r.gross_sales,
         netSales: r.net_sales,
         orders: r.orders,
