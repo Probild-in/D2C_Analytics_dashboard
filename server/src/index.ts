@@ -9,6 +9,7 @@ import billingRouter from "./routes/billing.js";
 import couriersRouter from "./routes/couriers.js";
 import integrationsRouter from "./routes/integrations.js";
 import shopifyDataRouter from "./routes/shopify-data.js";
+import campaignsRouter from "./routes/campaigns.js";
 import { startScheduler } from "./scheduler.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.use("/api/clients/:id/connections", connectionsRouter);
 app.use("/api/clients/:id/connections", syncRouter);
 app.use("/api/clients/:id/subscription", billingRouter);
 app.use("/api/clients/:id", shopifyDataRouter);
+app.use("/api/clients/:id/campaigns", campaignsRouter);
 app.use("/api/couriers", couriersRouter);
 app.use("/api/integrations", integrationsRouter);
 
