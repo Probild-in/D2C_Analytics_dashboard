@@ -65,6 +65,35 @@ describe("GET /api/clients/:id/campaigns", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(404);
   });
+
+  it("returns campaigns for platform=google using the conversions column, not results", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('88888888-8888-8888-8888-888888888888', 'abc-fashion', 'google', 'connected', '1234567890')`,
+    );
+    await testPool.query(
+      `insert into campaigns (id, client_id, connection_id, external_campaign_id, name, status) values
+       ('99999999-9999-9999-9999-999999999999', 'abc-fashion', '88888888-8888-8888-8888-888888888888', 'camp_g1', 'Search - Brand Terms', 'active')`,
+    );
+    await testPool.query(
+      `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions) values
+       ('abc-fashion', '88888888-8888-8888-8888-888888888888', 'camp_g1', 'Search - Brand Terms', current_date, 400, 8000, 200, 15)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/campaigns?platform=google")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0]).toMatchObject({
+      id: "99999999-9999-9999-9999-999999999999",
+      name: "Search - Brand Terms",
+      spend: 400,
+      results: 15,
+      resultType: "Conversions",
+    });
+  });
 });
 
 describe("GET /api/clients/:id/campaigns/:campaignId/creatives", () => {

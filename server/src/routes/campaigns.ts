@@ -19,6 +19,7 @@ router.get("/", requireAuth, async (req, res, next) => {
     await assertClientAccess(pool, req.auth!.userId, clientId);
     const platform = req.query.platform === "google" ? "google" : "meta";
     const metricsTable = platform === "google" ? "google_campaign_metrics" : "meta_campaign_metrics";
+    const resultsColumn = platform === "google" ? "conversions" : "results";
 
     const result = await pool.query(
       `select
@@ -26,7 +27,7 @@ router.get("/", requireAuth, async (req, res, next) => {
          coalesce(sum(m.spend), 0)::int as spend,
          coalesce(sum(m.impressions), 0)::int as impressions,
          coalesce(sum(m.clicks), 0)::int as clicks,
-         coalesce(sum(m.results), 0)::int as results
+         coalesce(sum(m.${resultsColumn}), 0)::int as results
        from campaigns c
        join platform_connections pc on pc.id = c.connection_id
        left join ${metricsTable} m on m.campaign_id = c.external_campaign_id and m.connection_id = c.connection_id
@@ -45,7 +46,7 @@ router.get("/", requireAuth, async (req, res, next) => {
         status: CAMPAIGN_STATUS_DISPLAY[r.status] ?? "Paused",
         spend: r.spend,
         results: r.results,
-        resultType: "Purchases",
+        resultType: platform === "google" ? "Conversions" : "Purchases",
         impressions: r.impressions,
         clicks: r.clicks,
         ctr: r.impressions > 0 ? (r.clicks / r.impressions) * 100 : 0,
