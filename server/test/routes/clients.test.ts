@@ -81,6 +81,59 @@ describe("GET /api/clients", () => {
   });
 });
 
+describe("GET /api/clients/summary", () => {
+  beforeEach(async () => {
+    await resetTestDb();
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('11111111-1111-1111-1111-111111111111', 'Riya Kapoor', 'riya@agency.com', 'owner', true),
+       ('22222222-2222-2222-2222-222222222222', 'Aditya Rao', 'aditya@agency.com', 'manager', false)`,
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('abc-fashion', 'ABC Fashion', 'Fashion & Apparel', 'bg-violet-500', 'A'),
+       ('xyz-cosmetics', 'XYZ Cosmetics', 'Beauty & Cosmetics', 'bg-rose-500', 'X')`,
+    );
+    await testPool.query(
+      `insert into team_member_clients (team_member_id, client_id) values
+       ('22222222-2222-2222-2222-222222222222', 'abc-fashion')`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('55555555-5555-5555-5555-555555555555', 'abc-fashion', 'shopify', 'connected', 'abc-fashion.myshopify.com'),
+       ('55555555-5555-5555-5555-555555555556', 'xyz-cosmetics', 'shopify', 'connected', 'xyz-cosmetics.myshopify.com'),
+       ('55555555-5555-5555-5555-555555555557', 'abc-fashion', 'meta', 'connected', 'act_1')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1000, 'Delivered', 'Prepaid'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'Amit Rao', now(), 500, 'RTO Initiated', 'COD'),
+       ('xyz-cosmetics', '55555555-5555-5555-5555-555555555556', '1', 'Ravi Kumar', now(), 2000, 'Delivered', 'Prepaid')`,
+    );
+    await testPool.query(
+      `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555557', 'camp-1', 'Meta Campaign', current_date, 300, 1000, 20, 2)`,
+    );
+  });
+
+  it("returns per-client totals for every client the caller can access", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients/summary?days=1").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const abc = res.body.find((r: { clientId: string }) => r.clientId === "abc-fashion");
+    const xyz = res.body.find((r: { clientId: string }) => r.clientId === "xyz-cosmetics");
+    expect(abc).toMatchObject({ netSales: 1500, orders: 2, rtoOrders: 1, adSpend: 300 });
+    expect(xyz).toMatchObject({ netSales: 2000, orders: 1, rtoOrders: 0, adSpend: 0 });
+  });
+
+  it("scopes to only the clients a limited team member can access", async () => {
+    const token = signTestJwt({ sub: "22222222-2222-2222-2222-222222222222", email: "aditya@agency.com" });
+    const res = await request(app).get("/api/clients/summary?days=1").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.map((r: { clientId: string }) => r.clientId)).toEqual(["abc-fashion"]);
+  });
+});
+
 describe("POST /api/clients", () => {
   beforeEach(async () => {
     await resetTestDb();

@@ -7,8 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useApp } from "@/store/app-context";
 import { rangeToDays } from "@/lib/date-range";
-import { getSalesSeries, sumSeries, CLIENTS } from "@/data/mock";
-import { deriveMetrics } from "@/hooks/use-period-data";
+import { useClientResource } from "@/hooks/use-client-resource";
 import { formatCurrencyCompact, formatNumber, formatPercent } from "@/lib/utils";
 
 const statusMeta: Record<string, { label: string; variant: "positive" | "warning" | "negative" }> = {
@@ -17,19 +16,33 @@ const statusMeta: Record<string, { label: string; variant: "positive" | "warning
   critical: { label: "Critical", variant: "negative" },
 };
 
+interface ClientSummary {
+  clientId: string;
+  netSales: number;
+  orders: number;
+  rtoOrders: number;
+  adSpend: number;
+}
+
+const EMPTY_SUMMARY: ClientSummary[] = [];
+
 export default function AllClients() {
-  const { dateRange, setClientId } = useApp();
+  const { clients, dateRange, setClientId } = useApp();
   const navigate = useNavigate();
   const days = rangeToDays(dateRange);
+  const { data: summary } = useClientResource<ClientSummary[]>(`/api/clients/summary?days=${days}`, EMPTY_SUMMARY);
 
   const rows = React.useMemo(
     () =>
-      CLIENTS.map((c) => {
-        const sum = sumSeries(getSalesSeries(c.id, days));
-        const metrics = deriveMetrics(sum);
-        return { client: c, sum, metrics };
-      }).sort((a, b) => b.sum.netSales - a.sum.netSales),
-    [days],
+      clients
+        .map((c) => {
+          const sum = summary.find((s) => s.clientId === c.id) ?? { netSales: 0, orders: 0, rtoOrders: 0, adSpend: 0 };
+          const rtoPercent = sum.orders > 0 ? (sum.rtoOrders / sum.orders) * 100 : 0;
+          const blendedRoas = sum.adSpend > 0 ? sum.netSales / sum.adSpend : 0;
+          return { client: c, sum, metrics: { rtoPercent, blendedRoas } };
+        })
+        .sort((a, b) => b.sum.netSales - a.sum.netSales),
+    [clients, summary],
   );
 
   const totals = React.useMemo(
@@ -49,7 +62,12 @@ export default function AllClients() {
 
   const avgRoas = totals.adSpend > 0 ? totals.netSales / totals.adSpend : 0;
   const overallRto = totals.orders > 0 ? (totals.rtoOrders / totals.orders) * 100 : 0;
-  const needsAttention = CLIENTS.filter((c) => c.status !== "healthy").length;
+  const needsAttention = clients.filter((c) => c.status !== "healthy").length;
+  const worstRtoClient = rows.reduce<(typeof rows)[number] | null>(
+    (worst, r) => (!worst || r.metrics.rtoPercent > worst.metrics.rtoPercent ? r : worst),
+    null,
+  );
+  const showRtoAlert = worstRtoClient !== null && worstRtoClient.metrics.rtoPercent > 25;
 
   const openClient = (id: string) => {
     setClientId(id);
@@ -140,10 +158,10 @@ export default function AllClients() {
           <Card>
             <CardHeader>
               <CardTitle>Portfolio health</CardTitle>
-              <CardDescription>{needsAttention} of {CLIENTS.length} clients need attention</CardDescription>
+              <CardDescription>{needsAttention} of {clients.length} clients need attention</CardDescription>
             </CardHeader>
             <CardContent className="space-y-1">
-              {CLIENTS.map((c) => (
+              {clients.map((c) => (
                 <div
                   key={c.id}
                   onClick={() => openClient(c.id)}
@@ -161,12 +179,20 @@ export default function AllClients() {
             </CardContent>
           </Card>
 
-          <Card className="border-warning/30 bg-warning-subtle/40">
+          <Card className={showRtoAlert ? "border-warning/30 bg-warning-subtle/40" : ""}>
             <CardContent className="flex items-start gap-2.5 p-4">
               <TriangleAlert className="mt-0.5 size-4 shrink-0 text-warning" />
               <div className="text-[12px] leading-snug text-text-secondary">
-                <p className="font-semibold text-text-primary">Brand C Electronics needs review</p>
-                <p className="mt-0.5">RTO at 31% and ROAS below target this period. Consider reallocating ad budget.</p>
+                {showRtoAlert && worstRtoClient ? (
+                  <>
+                    <p className="font-semibold text-text-primary">{worstRtoClient.client.name} needs review</p>
+                    <p className="mt-0.5">
+                      RTO at {formatPercent(worstRtoClient.metrics.rtoPercent)} this period. Consider reallocating ad budget.
+                    </p>
+                  </>
+                ) : (
+                  <p>No clients are showing elevated RTO this period.</p>
+                )}
               </div>
             </CardContent>
           </Card>

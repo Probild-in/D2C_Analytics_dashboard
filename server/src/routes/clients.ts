@@ -90,6 +90,66 @@ router.get("/", requireAuth, async (req, res, next) => {
   }
 });
 
+router.get("/summary", requireAuth, async (req, res, next) => {
+  try {
+    const days = Math.max(1, Math.min(730, Number(req.query.days) || 30));
+    const accessible = await getAccessibleClientIds(pool, req.auth!.userId);
+    const clientIds =
+      accessible === "all" ? (await pool.query("select id from clients")).rows.map((r) => r.id) : accessible;
+
+    if (clientIds.length === 0) {
+      res.json([]);
+      return;
+    }
+
+    const result = await pool.query(
+      `with orders_by_client as (
+         select
+           client_id,
+           count(*) as orders,
+           coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
+           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders
+         from shopify_orders
+         where client_id = any($2::text[]) and order_date >= current_date - ($1::int - 1)
+         group by client_id
+       ),
+       ad_spend_by_client as (
+         select client_id, sum(spend) as spend
+         from (
+           select client_id, spend, metric_date from meta_campaign_metrics where client_id = any($2::text[])
+           union all
+           select client_id, spend, metric_date from google_campaign_metrics where client_id = any($2::text[])
+         ) combined
+         where metric_date >= current_date - ($1::int - 1)
+         group by client_id
+       )
+       select
+         c.id as client_id,
+         coalesce(o.net_sales, 0)::int as net_sales,
+         coalesce(o.orders, 0)::int as orders,
+         coalesce(o.rto_orders, 0)::int as rto_orders,
+         coalesce(a.spend, 0)::int as ad_spend
+       from clients c
+       left join orders_by_client o on o.client_id = c.id
+       left join ad_spend_by_client a on a.client_id = c.id
+       where c.id = any($2::text[])`,
+      [days, clientIds],
+    );
+
+    res.json(
+      result.rows.map((r) => ({
+        clientId: r.client_id,
+        netSales: r.net_sales,
+        orders: r.orders,
+        rtoOrders: r.rto_orders,
+        adSpend: r.ad_spend,
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/", requireAuth, async (req, res, next) => {
   try {
     const { name, category } = req.body as { name?: string; category?: string };
