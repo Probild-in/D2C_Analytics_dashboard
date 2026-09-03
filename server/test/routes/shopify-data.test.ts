@@ -113,6 +113,58 @@ describe("GET /api/clients/:id/sales", () => {
     expect(res.status).toBe(200);
     expect(res.body[0].newCustomers).toBe(1);
   });
+
+  it("counts RTO orders per day", async () => {
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '201', 'Priya Shah', now(), 1000, 'RTO Initiated', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '202', 'Amit Rao', now(), 500, 'RTO Delivered', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '203', 'Neha Singh', now(), 700, 'Delivered', 'Prepaid')`,
+    );
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].rtoOrders).toBe(2);
+  });
+
+  it("sums real Meta and Google ad spend for the correct day, scoped to this client", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-0000-0000-0000-000000000001', 'abc-fashion', 'meta', 'connected', 'act_123'),
+       ('66666666-0000-0000-0000-000000000002', 'abc-fashion', 'google', 'connected', 'customers/456')`,
+    );
+    await testPool.query(
+      `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
+       ('abc-fashion', '66666666-0000-0000-0000-000000000001', 'camp-1', 'Meta Campaign', current_date, 3000, 10000, 200, 15)`,
+    );
+    await testPool.query(
+      `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions) values
+       ('abc-fashion', '66666666-0000-0000-0000-000000000002', 'g-camp-1', 'Google Campaign', current_date, 2000, 8000, 150, 10)`,
+    );
+    // A different client's spend must never leak into this client's total.
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('xyz-cosmetics', 'XYZ Cosmetics', 'Beauty', 'bg-rose-500', 'X')`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-0000-0000-0000-000000000003', 'xyz-cosmetics', 'meta', 'connected', 'act_999')`,
+    );
+    await testPool.query(
+      `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
+       ('xyz-cosmetics', '66666666-0000-0000-0000-000000000003', 'camp-9', 'Other Client Campaign', current_date, 9999, 1, 1, 1)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].adSpend).toBe(5000);
+  });
 });
 
 describe("GET /api/clients/:id/orders", () => {
@@ -146,6 +198,19 @@ describe("GET /api/clients/:id/orders", () => {
       product: "Cotton Kurta",
     });
     expect(res.body[1].customer).toBe("Priya Shah");
+  });
+
+  it("returns the real courier field when present", async () => {
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, courier) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1000, 'Dispatched', 'Prepaid', 'Delhivery')`,
+    );
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/orders")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].courier).toBe("Delhivery");
   });
 
   it("returns an empty array for a client with no synced orders", async () => {

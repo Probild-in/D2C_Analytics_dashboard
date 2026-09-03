@@ -22,6 +22,7 @@ router.get("/sales", requireAuth, async (req, res, next) => {
            coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
            coalesce(sum(amount), 0) as gross_sales,
            count(*) filter (where status = 'Cancelled') as cancelled_orders,
+           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders,
            count(*) filter (where payment_method = 'COD') as cod_orders,
            count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
            count(distinct shopify_customer_id) filter (
@@ -41,19 +42,32 @@ router.get("/sales", requireAuth, async (req, res, next) => {
          from shopify_orders
          where client_id = $1 and order_date >= current_date - ($2::int - 1)
          group by order_date::date
+       ),
+       ad_spend_by_day as (
+         select metric_date as day, sum(spend) as spend
+         from (
+           select metric_date, spend from meta_campaign_metrics where client_id = $1
+           union all
+           select metric_date, spend from google_campaign_metrics where client_id = $1
+         ) combined
+         where metric_date >= current_date - ($2::int - 1)
+         group by metric_date
        )
        select
          days.day,
          coalesce(orders_by_day.gross_sales, 0)::int as gross_sales,
          coalesce(orders_by_day.net_sales, 0)::int as net_sales,
          coalesce(orders_by_day.orders, 0)::int as orders,
+         coalesce(ad_spend_by_day.spend, 0)::int as ad_spend,
          coalesce(orders_by_day.new_customers, 0)::int as new_customers,
          coalesce(orders_by_day.returning_customers, 0)::int as returning_customers,
          coalesce(orders_by_day.cod_orders, 0)::int as cod_orders,
          coalesce(orders_by_day.prepaid_orders, 0)::int as prepaid_orders,
-         coalesce(orders_by_day.cancelled_orders, 0)::int as cancelled_orders
+         coalesce(orders_by_day.cancelled_orders, 0)::int as cancelled_orders,
+         coalesce(orders_by_day.rto_orders, 0)::int as rto_orders
        from days
        left join orders_by_day on orders_by_day.day = days.day
+       left join ad_spend_by_day on ad_spend_by_day.day = days.day
        order by days.day`,
       [clientId, days],
     );
@@ -64,13 +78,13 @@ router.get("/sales", requireAuth, async (req, res, next) => {
         grossSales: r.gross_sales,
         netSales: r.net_sales,
         orders: r.orders,
-        adSpend: 0,
+        adSpend: r.ad_spend,
         newCustomers: r.new_customers,
         returningCustomers: r.returning_customers,
         codOrders: r.cod_orders,
         prepaidOrders: r.prepaid_orders,
         cancelledOrders: r.cancelled_orders,
-        rtoOrders: 0,
+        rtoOrders: r.rto_orders,
       })),
     );
   } catch (err) {
@@ -86,7 +100,7 @@ router.get("/orders", requireAuth, async (req, res, next) => {
 
     const result = await pool.query(
       `select
-         o.id, o.customer_name, o.order_date, o.amount, o.status, o.payment_method, o.city, o.state,
+         o.id, o.customer_name, o.order_date, o.amount, o.status, o.payment_method, o.city, o.state, o.courier,
          (select li.product_name from shopify_order_line_items li where li.order_id = o.id order by li.id limit 1) as product_name
        from shopify_orders o
        where o.client_id = $1
@@ -106,7 +120,7 @@ router.get("/orders", requireAuth, async (req, res, next) => {
         payment: r.payment_method,
         city: r.city ?? "",
         state: r.state ?? "",
-        courier: "",
+        courier: r.courier ?? "",
         product: r.product_name ?? "",
       })),
     );
