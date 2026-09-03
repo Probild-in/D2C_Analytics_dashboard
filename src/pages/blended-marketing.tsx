@@ -1,4 +1,3 @@
-import * as React from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { Page } from "@/components/layout/app-shell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -6,18 +5,26 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { ChartTooltip } from "@/components/dashboard/chart-tooltip";
 import { useApp } from "@/store/app-context";
 import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
-import { getCampaigns } from "@/data/mock";
+import { useClientResource } from "@/hooks/use-client-resource";
 import { formatCurrencyCompact, formatNumber } from "@/lib/utils";
 import { Banknote, IndianRupee, Target, Users } from "lucide-react";
+import type { Campaign } from "@/data/types";
+
+const EMPTY_CAMPAIGNS: Campaign[] = [];
 
 export default function BlendedMarketing() {
   const { client, isAllClients } = useApp();
-  const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
   const { currentSum } = usePeriodData();
   const metrics = deriveMetrics(currentSum);
 
-  const metaCampaigns = React.useMemo(() => getCampaigns(cid, "meta"), [cid]);
-  const googleCampaigns = React.useMemo(() => getCampaigns(cid, "google"), [cid]);
+  const { data: metaCampaigns } = useClientResource<Campaign[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/campaigns?platform=meta` : null,
+    EMPTY_CAMPAIGNS,
+  );
+  const { data: googleCampaigns } = useClientResource<Campaign[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/campaigns?platform=google` : null,
+    EMPTY_CAMPAIGNS,
+  );
   const metaSpend = metaCampaigns.reduce((s, c) => s + c.spend, 0);
   const googleSpend = googleCampaigns.reduce((s, c) => s + c.spend, 0);
   const totalSpend = metaSpend + googleSpend;
@@ -28,7 +35,7 @@ export default function BlendedMarketing() {
   ];
 
   return (
-    <Page title="Blended Marketing" description={isAllClients ? "Combined Meta + Google performance (showing ABC Fashion)" : `${client?.name} — combined marketing performance`}>
+    <Page title="Blended Marketing" description={isAllClients ? "Combined Meta + Google performance" : `${client?.name} — combined marketing performance`}>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <KpiCard label="Total Ad Spend" value={formatCurrencyCompact(totalSpend)} icon={<Banknote />} accent="warning" />
         <KpiCard label="Blended ROAS" value={`${metrics.blendedRoas.toFixed(2)}x`} icon={<Target />} accent="positive" />
@@ -82,23 +89,25 @@ export default function BlendedMarketing() {
                 <th className="px-4 py-2.5 font-medium">Channel</th>
                 <th className="px-3 py-2.5 font-medium">Spend</th>
                 <th className="px-3 py-2.5 font-medium">Results</th>
-                <th className="px-3 py-2.5 font-medium">Avg. ROAS</th>
+                <th className="px-3 py-2.5 font-medium">Cost per result</th>
                 <th className="px-4 py-2.5 font-medium">Share of spend</th>
               </tr>
             </thead>
             <tbody>
               {[
-                { name: "Meta Ads", spend: metaSpend, results: metaCampaigns.reduce((s, c) => s + c.results, 0), roas: metaCampaigns.reduce((s, c) => s + c.roas, 0) / metaCampaigns.length },
-                { name: "Google Ads", spend: googleSpend, results: googleCampaigns.reduce((s, c) => s + c.results, 0), roas: googleCampaigns.reduce((s, c) => s + c.roas, 0) / googleCampaigns.length },
+                { name: "Meta Ads", spend: metaSpend, results: metaCampaigns.reduce((s, c) => s + c.results, 0) },
+                { name: "Google Ads", spend: googleSpend, results: googleCampaigns.reduce((s, c) => s + c.results, 0) },
               ].map((row) => (
                 <tr key={row.name} className="border-b border-border-subtle last:border-0 hover:bg-surface-hover">
                   <td className="px-4 py-2.5 font-medium text-text-primary">{row.name}</td>
                   <td className="px-3 py-2.5 font-semibold tabular-nums text-text-primary">{formatCurrencyCompact(row.spend)}</td>
                   <td className="px-3 py-2.5 tabular-nums text-text-secondary">{formatNumber(row.results)}</td>
-                  <td className="px-3 py-2.5 tabular-nums text-text-secondary">{row.roas.toFixed(2)}x</td>
+                  <td className="px-3 py-2.5 tabular-nums text-text-secondary">
+                    {row.results > 0 ? formatCurrencyCompact(row.spend / row.results) : "—"}
+                  </td>
                   <td className="px-4 py-2.5">
                     <div className="h-1.5 w-32 overflow-hidden rounded-full bg-bg-subtle">
-                      <div className="h-full rounded-full bg-brand" style={{ width: `${(row.spend / totalSpend) * 100}%` }} />
+                      <div className="h-full rounded-full bg-brand" style={{ width: `${totalSpend > 0 ? (row.spend / totalSpend) * 100 : 0}%` }} />
                     </div>
                   </td>
                 </tr>
