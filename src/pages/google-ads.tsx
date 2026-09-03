@@ -9,8 +9,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { CreativesGrid } from "@/components/dashboard/creatives-panel";
 import { useApp } from "@/store/app-context";
-import { getCampaigns, getCampaignActivity, getCreatives, relativeTime } from "@/data/mock";
-import type { Campaign, CampaignActivity } from "@/data/types";
+import { useClientResource } from "@/hooks/use-client-resource";
+import { supabase } from "@/lib/supabase";
+import { relativeTime } from "@/data/mock";
+import type { Campaign, CampaignActivity, Creative } from "@/data/types";
 import { formatCompact, formatCurrency, formatCurrencyCompact, formatNumber, cn } from "@/lib/utils";
 import {
   Banknote,
@@ -42,10 +44,16 @@ const ACTIVITY_ICON: Record<CampaignActivity["type"], React.ElementType> = {
   status: BadgeCheck,
 };
 
+const EMPTY_CAMPAIGNS: Campaign[] = [];
+const EMPTY_CREATIVES: Creative[] = [];
+const EMPTY_NOTES: CampaignActivity[] = [];
+
 export default function GoogleAds() {
   const { client, isAllClients } = useApp();
-  const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
-  const campaigns = React.useMemo(() => getCampaigns(cid, "google"), [cid]);
+  const { data: campaigns } = useClientResource<Campaign[]>(
+    !isAllClients && client ? `/api/clients/${client.id}/campaigns?platform=google` : null,
+    EMPTY_CAMPAIGNS,
+  );
   const [selectedCampaign, setSelectedCampaign] = React.useState<Campaign | null>(null);
 
   const totals = campaigns.reduce(
@@ -62,7 +70,7 @@ export default function GoogleAds() {
   const avgCtr = totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0;
 
   return (
-    <Page title="Google Ads" description={isAllClients ? "Campaign performance (showing ABC Fashion)" : `${client?.name} — Google Ads performance`}>
+    <Page title="Google Ads" description={isAllClients ? "Campaign performance" : `${client?.name} — Google Ads performance`}>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <KpiCard label="Ad Spend" value={formatCurrencyCompact(totals.spend)} icon={<Banknote />} accent="warning" />
         <KpiCard label="Clicks" value={formatNumber(totals.clicks)} icon={<MousePointerClick />} accent="cyan" />
@@ -129,18 +137,44 @@ export default function GoogleAds() {
 }
 
 function CampaignDetailDialog({ campaign, onOpenChange }: { campaign: Campaign | null; onOpenChange: (open: boolean) => void }) {
-  const baseActivity = React.useMemo(() => (campaign ? getCampaignActivity(campaign.id) : []), [campaign?.id]);
+  const { client, isAllClients } = useApp();
+  const { data: creatives } = useClientResource<Creative[]>(
+    !isAllClients && client && campaign ? `/api/clients/${client.id}/campaigns/${campaign.id}/creatives` : null,
+    EMPTY_CREATIVES,
+  );
+  const { data: notes } = useClientResource<CampaignActivity[]>(
+    !isAllClients && client && campaign ? `/api/clients/${client.id}/campaigns/${campaign.id}/notes` : null,
+    EMPTY_NOTES,
+  );
   const [localNotes, setLocalNotes] = React.useState<CampaignActivity[]>([]);
-  const activity = [...baseActivity, ...localNotes.filter((n) => n.campaignId === campaign?.id)];
+  const activity = [...notes, ...localNotes.filter((n) => n.campaignId === campaign?.id)];
   const [draft, setDraft] = React.useState("");
+  const [posting, setPosting] = React.useState(false);
 
-  const sendNote = () => {
-    if (!draft.trim() || !campaign) return;
-    setLocalNotes((prev) => [
-      ...prev,
-      { id: `local-${Date.now()}`, campaignId: campaign.id, type: "note", author: "You", authorRole: "client", message: draft.trim(), timestamp: new Date().toISOString() },
-    ]);
-    setDraft("");
+  const sendNote = async () => {
+    if (!draft.trim() || !campaign || !client) return;
+    setPosting(true);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      setPosting(false);
+      return;
+    }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${client.id}/campaigns/${campaign.id}/notes`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ body: draft.trim() }),
+      });
+      if (res.ok) {
+        const created = await res.json();
+        setLocalNotes((prev) => [...prev, created]);
+        setDraft("");
+      }
+    } finally {
+      setPosting(false);
+    }
   };
 
   return (
@@ -218,7 +252,7 @@ function CampaignDetailDialog({ campaign, onOpenChange }: { campaign: Campaign |
                         rows={1}
                         className="flex-1 resize-none rounded-[var(--radius-md)] border border-border bg-surface px-2.5 py-2 text-[12.5px] text-text-primary outline-none placeholder:text-text-tertiary focus-visible:border-brand focus-visible:ring-2 focus-visible:ring-brand/20"
                       />
-                      <Button size="icon" onClick={sendNote} disabled={!draft.trim()}>
+                      <Button size="icon" onClick={sendNote} disabled={!draft.trim() || posting}>
                         <Send className="size-4" />
                       </Button>
                     </div>
@@ -226,7 +260,7 @@ function CampaignDetailDialog({ campaign, onOpenChange }: { campaign: Campaign |
 
                   <TabsContent value="creatives" className="mt-3">
                     <div className="scrollbar-thin max-h-[280px] overflow-y-auto pr-1">
-                      <CreativesGrid creatives={getCreatives(campaign)} />
+                      <CreativesGrid creatives={creatives} />
                     </div>
                   </TabsContent>
                 </Tabs>

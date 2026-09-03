@@ -1,10 +1,8 @@
 import type {
   AppNotification,
   Campaign,
-  CampaignActivity,
   Client,
   CrmTask,
-  Creative,
   GeoRow,
   Order,
   OrderStatus,
@@ -385,113 +383,6 @@ export function getCampaigns(clientId: string, platform: "meta" | "google"): Cam
       roas: Math.round(roas * 100) / 100,
     };
   });
-}
-
-const CREATIVE_LIBRARY: { name: string; format: Creative["format"]; headline: string; primaryText: string; cta: string }[] = [
-  {
-    name: "Product Hero Shot",
-    format: "Image",
-    headline: "The bestseller everyone's talking about",
-    primaryText: "Premium quality, made to last. Free shipping on all orders this week — shop the collection before it's gone.",
-    cta: "Shop Now",
-  },
-  {
-    name: "UGC Testimonial",
-    format: "Video",
-    headline: "Real customers, real results",
-    primaryText: "\"I wasn't expecting it to be this good.\" See why thousands of customers keep coming back.",
-    cta: "Watch & Shop",
-  },
-  {
-    name: "Before / After Carousel",
-    format: "Carousel",
-    headline: "See the difference for yourself",
-    primaryText: "Swipe through to see real transformations from our community. Your turn starts here.",
-    cta: "Get Offer",
-  },
-  {
-    name: "Founder Story",
-    format: "Video",
-    headline: "Why we started this brand",
-    primaryText: "A short story about the problem we set out to solve — and why customers trust us with theirs.",
-    cta: "Learn More",
-  },
-  {
-    name: "Limited-Time Discount",
-    format: "Image",
-    headline: "20% off — this week only",
-    primaryText: "Our most popular styles are on sale. Stock is limited, so don't wait to grab yours.",
-    cta: "Get Offer",
-  },
-  {
-    name: "Lifestyle Flatlay",
-    format: "Image",
-    headline: "Made for everyday life",
-    primaryText: "Designed to fit seamlessly into your routine. Explore the full range and find your favorite.",
-    cta: "Shop Now",
-  },
-];
-
-export function getCreatives(campaign: Campaign): Creative[] {
-  const rand = mulberry32(seedFromString(campaign.id + ":creatives"));
-  const count = 2 + Math.floor(rand() * 3);
-  const weights = Array.from({ length: count }, () => 0.5 + rand());
-  const totalWeight = weights.reduce((a, b) => a + b, 0);
-
-  return weights.map((weight, idx) => {
-    const share = weight / totalWeight;
-    const lib = CREATIVE_LIBRARY[(idx * 2 + Math.floor(rand() * CREATIVE_LIBRARY.length)) % CREATIVE_LIBRARY.length];
-    const spend = Math.max(1, Math.round(campaign.spend * share));
-    const impressions = Math.max(1, Math.round(campaign.impressions * share));
-    const clicks = Math.max(1, Math.round(campaign.clicks * share * (0.75 + rand() * 0.5)));
-    const ctr = Math.round((clicks / impressions) * 10000) / 100;
-    const cpc = Math.round((spend / clicks) * 100) / 100;
-    const results = Math.max(0, Math.round(campaign.results * share * (0.65 + rand() * 0.7)));
-    const roas = Math.max(0.4, Math.round((campaign.roas * (0.6 + rand() * 0.9)) * 100) / 100);
-    const isWeakest = idx === count - 1 && roas < campaign.roas * 0.7;
-
-    return {
-      id: `${campaign.id}-cr-${idx}`,
-      campaignId: campaign.id,
-      name: lib.name,
-      format: lib.format,
-      headline: lib.headline,
-      primaryText: lib.primaryText,
-      cta: lib.cta,
-      thumbnailUrl: null,
-      status: isWeakest && rand() > 0.4 ? "Paused" : "Active",
-      spend,
-      impressions,
-      clicks,
-      ctr,
-      cpc,
-      results,
-      roas,
-      hookRate: lib.format === "Video" ? Math.round((28 + rand() * 30) * 10) / 10 : null,
-      holdRate: lib.format === "Video" ? Math.round((8 + rand() * 18) * 10) / 10 : null,
-      launchedDate: "2026-07-" + (10 + (idx % 15)),
-    };
-  });
-}
-
-export function getCampaignActivity(campaignId: string): CampaignActivity[] {
-  const rand = mulberry32(seedFromString(campaignId + ":activity"));
-  const script: Omit<CampaignActivity, "id" | "campaignId" | "timestamp">[] = [
-    { type: "created", author: "System", authorRole: "system", message: "Campaign created and launched." },
-    { type: "note", author: "Client", authorRole: "client", message: "Please reduce the daily budget slightly and test a new creative — engagement feels flat this week." },
-    { type: "response", author: "Marketing Team", authorRole: "marketing", message: "Understood — pausing the underperforming ad set and uploading two new creative variants for testing." },
-    { type: "creative", author: "Marketing Team", authorRole: "marketing", message: "New UGC-style creative uploaded and testing has started on a 20% budget split." },
-    { type: "budget", author: "Marketing Team", authorRole: "marketing", message: "Daily budget adjusted from ₹8,000 to ₹6,500 as requested." },
-    { type: "note", author: "Client", authorRole: "client", message: "The new creative looks great. Approved — please continue testing for another 3 days." },
-    { type: "status", author: "Marketing Team", authorRole: "marketing", message: "Marked task as completed. Monitoring performance daily." },
-  ];
-  const start = new Date("2026-08-14T09:00:00Z").getTime();
-  return script.map((s, i) => ({
-    ...s,
-    id: `${campaignId}-act-${i}`,
-    campaignId,
-    timestamp: new Date(start + i * (3 + rand() * 10) * 3600 * 1000).toISOString(),
-  }));
 }
 
 const TASK_TITLES = [
