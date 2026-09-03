@@ -7,10 +7,25 @@ import { HttpError } from "../lib/http-error.js";
 const router = Router();
 
 const SELECT_CLIENTS = `
-  select c.*, tm.name as owner_name
+  select c.*, tm.name as owner_name, coalesce(rto.rto_percent, 0) as rto_percent
   from clients c
   left join team_members tm on tm.id = c.owner_id
+  left join lateral (
+    select
+      case when count(*) > 0
+        then (count(*) filter (where so.status in ('RTO Initiated', 'RTO Delivered'))::numeric / count(*)) * 100
+        else 0
+      end as rto_percent
+    from shopify_orders so
+    where so.client_id = c.id and so.order_date >= current_date - interval '6 days'
+  ) rto on true
 `;
+
+function statusFromRtoPercent(rtoPercent: number): "healthy" | "attention" | "critical" {
+  if (rtoPercent >= 15) return "critical";
+  if (rtoPercent >= 8) return "attention";
+  return "healthy";
+}
 
 const LOGO_COLORS = [
   "bg-violet-500",
@@ -67,7 +82,7 @@ router.get("/", requireAuth, async (req, res, next) => {
         logoColor: r.logo_color,
         logoInitial: r.logo_initial,
         owner: r.owner_name,
-        status: "healthy", // computed status lands with the Shopify integration plan, once real order data exists
+        status: statusFromRtoPercent(Number(r.rto_percent)),
       })),
     );
   } catch (err) {
@@ -112,7 +127,7 @@ router.post("/", requireAuth, async (req, res, next) => {
       logoColor: r.logo_color,
       logoInitial: r.logo_initial,
       owner: r.owner_name,
-      status: "healthy",
+      status: statusFromRtoPercent(Number(r.rto_percent)),
     });
   } catch (err) {
     next(err);
@@ -146,7 +161,7 @@ router.patch("/:id", requireAuth, async (req, res, next) => {
       logoColor: r.logo_color,
       logoInitial: r.logo_initial,
       owner: r.owner_name,
-      status: "healthy",
+      status: statusFromRtoPercent(Number(r.rto_percent)),
     });
   } catch (err) {
     next(err);

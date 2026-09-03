@@ -45,6 +45,40 @@ describe("GET /api/clients", () => {
     expect(res.status).toBe(200);
     expect(res.body.map((c: { id: string }) => c.id)).toEqual(["abc-fashion"]);
   });
+
+  it("computes status from the last 7 days' RTO rate: healthy, attention, and critical", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('55555555-5555-5555-5555-555555555555', 'abc-fashion', 'shopify', 'connected', 'abc-fashion.myshopify.com'),
+       ('55555555-5555-5555-5555-555555555556', 'xyz-cosmetics', 'shopify', 'connected', 'xyz-cosmetics.myshopify.com')`,
+    );
+    // abc-fashion: 2 of 10 orders RTO in the last 7 days -> 20% -> critical
+    for (let i = 0; i < 8; i++) {
+      await testPool.query(
+        `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+         ('abc-fashion', '55555555-5555-5555-5555-555555555555', $1, 'Priya Shah', now() - interval '1 day', 500, 'Delivered', 'Prepaid')`,
+        [`ok-${i}`],
+      );
+    }
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', 'rto-1', 'Amit Rao', now() - interval '1 day', 500, 'RTO Initiated', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', 'rto-2', 'Neha Singh', now() - interval '1 day', 500, 'RTO Delivered', 'COD')`,
+    );
+    // xyz-cosmetics: no RTO orders in the last 7 days -> healthy
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('xyz-cosmetics', '55555555-5555-5555-5555-555555555556', '1', 'Ravi Kumar', now() - interval '1 day', 500, 'Delivered', 'Prepaid')`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const abcFashion = res.body.find((c: { id: string }) => c.id === "abc-fashion");
+    const xyzCosmetics = res.body.find((c: { id: string }) => c.id === "xyz-cosmetics");
+    expect(abcFashion.status).toBe("critical");
+    expect(xyzCosmetics.status).toBe("healthy");
+  });
 });
 
 describe("POST /api/clients", () => {
