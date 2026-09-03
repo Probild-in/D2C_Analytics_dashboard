@@ -128,4 +128,16 @@ describe("POST /api/clients/:id/connections/:platform/authorize", () => {
     expect(res.status).toBe(200);
     expect(res.body.authorizeUrl).toContain("facebook.com");
   });
+
+  it("resolves the google connector and returns an authorizeUrl", async () => {
+    process.env.GOOGLE_ADS_CLIENT_ID = "test-client-id.apps.googleusercontent.com";
+    process.env.GOOGLE_ADS_CLIENT_SECRET = "test-client-secret";
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/google/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({});
+    expect(res.status).toBe(200);
+    expect(res.body.authorizeUrl).toContain("accounts.google.com");
+  });
 });
