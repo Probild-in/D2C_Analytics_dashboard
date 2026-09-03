@@ -112,6 +112,61 @@ function MetaConnectButton({ clientId, connections }: { clientId: string; connec
   );
 }
 
+function GoogleConnectButton({ clientId, connections }: { clientId: string; connections: Connection[] }) {
+  const [connecting, setConnecting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const google = connections.find((c) => c.platform === "google");
+
+  const handleConnect = async () => {
+    setConnecting(true);
+    setError(null);
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) {
+      setConnecting(false);
+      setError("You're not signed in. Please log in again.");
+      return;
+    }
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/google/authorize`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error?.message ?? "Failed to connect Google Ads. Please try again.");
+        setConnecting(false);
+        return;
+      }
+      const { authorizeUrl } = await res.json();
+      window.location.href = authorizeUrl;
+    } catch {
+      setError("Failed to connect Google Ads. Please check your connection and try again.");
+      setConnecting(false);
+    }
+  };
+
+  if (google && google.status === "connected") {
+    return (
+      <span className="flex items-center gap-1 rounded-md bg-bg-subtle px-2 py-1 text-[11px] font-medium text-text-secondary">
+        <SearchIcon className="size-3.5" />
+        Google Ads — {google.externalAccountId}
+      </span>
+    );
+  }
+
+  return (
+    <div>
+      <Button size="sm" variant="secondary" onClick={handleConnect} disabled={connecting}>
+        Connect Google Ads
+      </Button>
+      {error && <p className="mt-1 text-[11px] text-negative">{error}</p>}
+    </div>
+  );
+}
+
 function ConnectionsPanel({ clientId }: { clientId: string }) {
   const { data: connections, loading } = useClientResource<Connection[]>(`/api/clients/${clientId}/connections`, EMPTY_CONNECTIONS);
   const [shopDomain, setShopDomain] = React.useState("");
@@ -168,6 +223,7 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
           Shopify — {shopify.externalAccountId}
         </span>
         <MetaConnectButton clientId={clientId} connections={connections} />
+        <GoogleConnectButton clientId={clientId} connections={connections} />
       </div>
     );
   }
@@ -197,6 +253,7 @@ function ConnectionsPanel({ clientId }: { clientId: string }) {
         {error && <p className="mt-1 text-[11px] text-negative">{error}</p>}
       </div>
       <MetaConnectButton clientId={clientId} connections={connections} />
+      <GoogleConnectButton clientId={clientId} connections={connections} />
     </div>
   );
 }
