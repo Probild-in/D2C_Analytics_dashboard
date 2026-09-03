@@ -2,13 +2,11 @@ import type {
   AppNotification,
   Campaign,
   Client,
-  CrmTask,
   GeoRow,
   Order,
   OrderStatus,
   Product,
   SalesPoint,
-  TeamMember,
 } from "./types";
 
 // Deterministic pseudo-random generator so the UI is stable across renders/reloads.
@@ -385,47 +383,6 @@ export function getCampaigns(clientId: string, platform: "meta" | "google"): Cam
   });
 }
 
-const TASK_TITLES = [
-  "Review Maharashtra RTO spike",
-  "Approve new creative for Summer Sale",
-  "Follow up on delayed Delhivery shipments",
-  "Prepare weekly performance report",
-  "Update product images on Shopify",
-  "Investigate cancellation spike — Electronics",
-  "Negotiate courier rates for Q3",
-  "Set up retargeting audience for cart abandoners",
-  "Reconcile COD remittance for July",
-  "Draft festive campaign brief",
-  "Fix NDR follow-up SOP with ops team",
-  "Client monthly review call — prep deck",
-];
-
-export function getTasks(clientId?: string): CrmTask[] {
-  const rand = mulberry32(seedFromString((clientId ?? "all") + ":tasks"));
-  const assignees = ["Riya Kapoor", "Aditya Rao", "Meera Nair", "Karan Singh", "Priya Menon", "Sameer Khan"];
-  const priorities: CrmTask["priority"][] = ["Low", "Medium", "High", "Urgent"];
-  const statuses: CrmTask["status"][] = ["To Do", "In Progress", "Waiting", "Completed"];
-  const clientPool = clientId ? [clientId] : CLIENTS.map((c) => c.id);
-
-  return TASK_TITLES.map((title, i) => {
-    const cid = clientPool[Math.floor(rand() * clientPool.length)];
-    const d = new Date("2026-08-21T00:00:00Z");
-    d.setDate(d.getDate() + Math.floor(rand() * 14) - 4);
-    return {
-      id: `task-${i}`,
-      clientId: cid,
-      title,
-      description: "Auto-generated task description outlining the required follow-up and expected outcome for the team.",
-      assignee: assignees[Math.floor(rand() * assignees.length)],
-      priority: priorities[Math.floor(rand() * priorities.length)],
-      status: statuses[i % statuses.length],
-      dueDate: d.toISOString().slice(0, 10),
-      comments: Math.floor(rand() * 6),
-      tags: rand() > 0.5 ? ["Ops"] : rand() > 0.3 ? ["Marketing"] : ["Client Facing"],
-    };
-  });
-}
-
 const NOTIF_SCRIPT: { kind: AppNotification["kind"]; title: string; description: string }[] = [
   { kind: "campaign", title: "New campaign feedback", description: "added a note to Summer Sale — Prospecting campaign." },
   { kind: "rto", title: "RTO alert", description: "Maharashtra RTO crossed 30% threshold this week." },
@@ -454,15 +411,6 @@ export function getNotifications(): AppNotification[] {
     };
   });
 }
-
-export const TEAM: TeamMember[] = [
-  { id: "t1", name: "Riya Kapoor", role: "Owner", email: "riya@agency.com", clients: CLIENTS.map((c) => c.id) },
-  { id: "t2", name: "Aditya Rao", role: "Manager", email: "aditya@agency.com", clients: ["abc-fashion", "xyz-cosmetics"] },
-  { id: "t3", name: "Meera Nair", role: "Marketer", email: "meera@agency.com", clients: ["brand-c-electronics"] },
-  { id: "t4", name: "Karan Singh", role: "Manager", email: "karan@agency.com", clients: ["brand-d-foods"] },
-  { id: "t5", name: "Priya Menon", role: "Team Member", email: "priya@agency.com", clients: ["abc-fashion"] },
-  { id: "t6", name: "Sameer Khan", role: "Team Member", email: "sameer@agency.com", clients: ["xyz-cosmetics", "brand-d-foods"] },
-];
 
 export function relativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
