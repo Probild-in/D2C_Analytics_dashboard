@@ -165,6 +165,65 @@ describe("GET /api/clients/:id/sales", () => {
     expect(res.status).toBe(200);
     expect(res.body[0].adSpend).toBe(5000);
   });
+
+  it("clientId=all aggregates sales across every client the caller can access", async () => {
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('xyz-cosmetics', 'XYZ Cosmetics', 'Beauty', 'bg-rose-500', 'X')`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('77777777-7777-7777-7777-777777777771', 'xyz-cosmetics', 'shopify', 'connected', 'xyz-cosmetics.myshopify.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, shopify_customer_id) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1000, 'Delivered', 'Prepaid', '9001'),
+       ('xyz-cosmetics', '77777777-7777-7777-7777-777777777771', '1', 'Ravi Kumar', now(), 500, 'Delivered', 'Prepaid', '9001')`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/all/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].orders).toBe(2);
+    expect(res.body[0].netSales).toBe(1500);
+    // Same numeric shopify_customer_id ('9001') at two different stores must
+    // count as two distinct new customers, not be deduped across clients.
+    expect(res.body[0].newCustomers).toBe(2);
+  });
+
+  it("clientId=all scopes to only the clients a limited team member can access", async () => {
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('22222222-2222-2222-2222-222222222222', 'Scoped User', 'scoped@agency.com', 'team_member', false)`,
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('xyz-cosmetics', 'XYZ Cosmetics', 'Beauty', 'bg-rose-500', 'X')`,
+    );
+    await testPool.query(
+      `insert into team_member_clients (team_member_id, client_id) values
+       ('22222222-2222-2222-2222-222222222222', 'abc-fashion')`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('77777777-7777-7777-7777-777777777772', 'xyz-cosmetics', 'shopify', 'connected', 'xyz-cosmetics.myshopify.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now(), 1000, 'Delivered', 'Prepaid'),
+       ('xyz-cosmetics', '77777777-7777-7777-7777-777777777772', '1', 'Ravi Kumar', now(), 500, 'Delivered', 'Prepaid')`,
+    );
+
+    const token = signTestJwt({ sub: "22222222-2222-2222-2222-222222222222", email: "scoped@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/all/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body[0].orders).toBe(1);
+    expect(res.body[0].netSales).toBe(1000);
+  });
 });
 
 describe("GET /api/clients/:id/orders", () => {

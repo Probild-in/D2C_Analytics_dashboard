@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useApp } from "@/store/app-context";
 import { rangeToDays } from "@/lib/date-range";
-import { getAllClientsSalesSeries, sumSeries } from "@/data/mock";
+import { sumSeries } from "@/data/mock";
 import { useClientResource } from "./use-client-resource";
 import type { SalesPoint } from "@/data/types";
 
@@ -14,13 +14,16 @@ export function usePeriodData() {
   const { clientId, isAllClients, dateRange } = useApp();
   const days = rangeToDays(dateRange);
 
-  const salesPath = !isAllClients && clientId ? `/api/clients/${clientId}/sales?days=${days * 2}` : null;
+  const salesPath = isAllClients
+    ? `/api/clients/all/sales?days=${days * 2}`
+    : clientId
+      ? `/api/clients/${clientId}/sales?days=${days * 2}`
+      : null;
   const { data: realSeries, loading } = useClientResource<SalesPoint[]>(salesPath, EMPTY_SALES);
 
   return React.useMemo(() => {
-    const total = isAllClients ? getAllClientsSalesSeries(days * 2) : realSeries;
-    const current = total.slice(days);
-    const previous = total.slice(0, days);
+    const current = realSeries.slice(days);
+    const previous = realSeries.slice(0, days);
     return {
       days,
       current,
@@ -29,7 +32,7 @@ export function usePeriodData() {
       previousSum: sumSeries(previous),
       loading,
     };
-  }, [isAllClients, days, realSeries, loading]);
+  }, [days, realSeries, loading]);
 }
 
 export function deriveMetrics(sum: ReturnType<typeof sumSeries>) {

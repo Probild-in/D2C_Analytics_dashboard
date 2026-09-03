@@ -1,15 +1,26 @@
 import { Router } from "express";
 import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { assertClientAccess } from "../lib/access.js";
+import { assertClientAccess, getAccessibleClientIds } from "../lib/access.js";
 
 const router = Router({ mergeParams: true });
 
 router.get("/sales", requireAuth, async (req, res, next) => {
   try {
     const clientId = req.params.id;
-    await assertClientAccess(pool, req.auth!.userId, clientId);
     const days = Math.max(1, Math.min(730, Number(req.query.days) || 90));
+
+    // "all" aggregates every client the caller can see (agency-wide dashboard view)
+    // instead of a single client — everything else about the query is identical.
+    let clientIds: string[];
+    if (clientId === "all") {
+      const accessible = await getAccessibleClientIds(pool, req.auth!.userId);
+      clientIds =
+        accessible === "all" ? (await pool.query("select id from clients")).rows.map((r) => r.id) : accessible;
+    } else {
+      await assertClientAccess(pool, req.auth!.userId, clientId);
+      clientIds = [clientId];
+    }
 
     const result = await pool.query(
       `with days as (
@@ -25,14 +36,14 @@ router.get("/sales", requireAuth, async (req, res, next) => {
            count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders,
            count(*) filter (where payment_method = 'COD') as cod_orders,
            count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
-           count(distinct shopify_customer_id) filter (
+           count(distinct client_id || ':' || shopify_customer_id) filter (
              where shopify_customer_id is not null
              and order_date::date = (
                select min(o2.order_date)::date from shopify_orders o2
                where o2.client_id = shopify_orders.client_id and o2.shopify_customer_id = shopify_orders.shopify_customer_id
              )
            ) as new_customers,
-           count(distinct shopify_customer_id) filter (
+           count(distinct client_id || ':' || shopify_customer_id) filter (
              where shopify_customer_id is not null
              and order_date::date <> (
                select min(o2.order_date)::date from shopify_orders o2
@@ -40,15 +51,15 @@ router.get("/sales", requireAuth, async (req, res, next) => {
              )
            ) as returning_customers
          from shopify_orders
-         where client_id = $1 and order_date >= current_date - ($2::int - 1)
+         where client_id = any($1::text[]) and order_date >= current_date - ($2::int - 1)
          group by order_date::date
        ),
        ad_spend_by_day as (
          select metric_date as day, sum(spend) as spend
          from (
-           select metric_date, spend from meta_campaign_metrics where client_id = $1
+           select metric_date, spend from meta_campaign_metrics where client_id = any($1::text[])
            union all
-           select metric_date, spend from google_campaign_metrics where client_id = $1
+           select metric_date, spend from google_campaign_metrics where client_id = any($1::text[])
          ) combined
          where metric_date >= current_date - ($2::int - 1)
          group by metric_date
@@ -69,7 +80,7 @@ router.get("/sales", requireAuth, async (req, res, next) => {
        left join orders_by_day on orders_by_day.day = days.day
        left join ad_spend_by_day on ad_spend_by_day.day = days.day
        order by days.day`,
-      [clientId, days],
+      [clientIds, days],
     );
 
     res.json(

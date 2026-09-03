@@ -36,19 +36,19 @@ import { useApp } from "@/store/app-context";
 import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
 import { percentDelta } from "@/lib/date-range";
 import { formatCurrencyCompact, formatNumber, formatPercent } from "@/lib/utils";
-import { getTasks, CLIENTS } from "@/data/mock";
-import type { SalesPoint } from "@/data/types";
+import { getTasks } from "@/data/mock";
+import type { Client, SalesPoint } from "@/data/types";
 
 const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
 export default function Dashboard() {
-  const { client, isAllClients } = useApp();
+  const { client, clients, isAllClients } = useApp();
   const { current, currentSum, previousSum } = usePeriodData();
   const metrics = deriveMetrics(currentSum);
   const prevMetrics = deriveMetrics(previousSum);
   const [chartMetric, setChartMetric] = React.useState<"sales" | "orders" | "spend">("sales");
 
-  const attentionClients = CLIENTS.filter((c) => c.status !== "healthy");
+  const attentionClients = clients.filter((c) => c.status !== "healthy");
   const tasks = getTasks(isAllClients ? undefined : client?.id).filter((t) => t.status !== "Completed").slice(0, 4);
 
   const chartData = current.map((p) => ({
@@ -332,16 +332,18 @@ function DailySummaryCard({ yesterday }: { yesterday?: SalesPoint }) {
             <p className="text-[10px] text-white/70">ROAS</p>
           </div>
         </div>
-        <div className="flex items-start gap-1.5 rounded-lg bg-black/15 px-2.5 py-2 text-[11.5px] leading-snug">
-          <TriangleAlert className="mt-0.5 size-3.5 shrink-0 text-amber-300" />
-          <span>Maharashtra RTO increased to 38%, up from 27% last week.</span>
-        </div>
+        {rtoPercent > 15 && (
+          <div className="flex items-start gap-1.5 rounded-lg bg-black/15 px-2.5 py-2 text-[11.5px] leading-snug">
+            <TriangleAlert className="mt-0.5 size-3.5 shrink-0 text-amber-300" />
+            <span>RTO is at {formatPercent(rtoPercent)} — higher than usual. Worth a look.</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
 
-function AttentionCard({ clients }: { clients: typeof CLIENTS }) {
+function AttentionCard({ clients }: { clients: Client[] }) {
   return (
     <Card className="flex-1">
       <CardHeader>
