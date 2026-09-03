@@ -21,8 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CLIENTS, TEAM } from "@/data/mock";
-import type { Client } from "@/data/types";
+import type { Client, TeamMember } from "@/data/types";
 import { cn } from "@/lib/utils";
 import { CircleSlash, MoreHorizontal, PenLine, Plus, ShoppingBag, Megaphone, Search as SearchIcon, Truck, CheckCircle2, XCircle, X } from "lucide-react";
 import { useClientResource } from "@/hooks/use-client-resource";
@@ -56,6 +55,7 @@ interface Connection {
 }
 
 const EMPTY_CONNECTIONS: Connection[] = [];
+const EMPTY_TEAM: TeamMember[] = [];
 
 function MetaConnectButton({ clientId, connections }: { clientId: string; connections: Connection[] }) {
   const [connecting, setConnecting] = React.useState(false);
@@ -325,6 +325,7 @@ function ConnectionResultBanner() {
 
 export default function ManageClients() {
   const { clients } = useApp();
+  const { data: team } = useClientResource<TeamMember[]>("/api/team-members", EMPTY_TEAM);
   const [selectedClient, setSelectedClient] = React.useState<Client | null>(null);
   const [editingClient, setEditingClient] = React.useState<Client | null>(null);
   return (
@@ -433,7 +434,7 @@ export default function ManageClients() {
       <Card className="mt-4">
         <CardHeader>
           <CardTitle>Team &amp; permissions</CardTitle>
-          <CardDescription>{TEAM.length} team members with access to your clients</CardDescription>
+          <CardDescription>{team.length} team members with access to your clients</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           <table className="w-full min-w-[680px] border-collapse text-[12.5px]">
@@ -445,7 +446,7 @@ export default function ManageClients() {
               </tr>
             </thead>
             <tbody>
-              {TEAM.map((m) => (
+              {team.map((m) => (
                 <tr key={m.id} className="border-b border-border-subtle last:border-0 hover:bg-surface-hover">
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2.5">
@@ -461,11 +462,11 @@ export default function ManageClients() {
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex flex-wrap gap-1">
-                      {m.clients.length === CLIENTS.length ? (
+                      {m.clients.length === clients.length ? (
                         <Badge variant="brand">All clients</Badge>
                       ) : (
                         m.clients.map((cid) => {
-                          const c = CLIENTS.find((x) => x.id === cid);
+                          const c = clients.find((x) => x.id === cid);
                           return (
                             <Badge key={cid} variant="neutral">
                               {c?.name}
@@ -482,14 +483,22 @@ export default function ManageClients() {
         </CardContent>
       </Card>
 
-      <ClientDetailDialog client={selectedClient} onOpenChange={(open) => !open && setSelectedClient(null)} />
+      <ClientDetailDialog client={selectedClient} team={team} onOpenChange={(open) => !open && setSelectedClient(null)} />
       <EditClientDialog client={editingClient} onOpenChange={(open) => !open && setEditingClient(null)} />
     </Page>
   );
 }
 
-function ClientDetailDialog({ client, onOpenChange }: { client: Client | null; onOpenChange: (open: boolean) => void }) {
-  const members = client ? TEAM.filter((m) => m.clients.length === CLIENTS.length || m.clients.includes(client.id)) : [];
+function ClientDetailDialog({
+  client,
+  team,
+  onOpenChange,
+}: {
+  client: Client | null;
+  team: TeamMember[];
+  onOpenChange: (open: boolean) => void;
+}) {
+  const members = client ? team.filter((m) => m.clients.includes(client.id)) : [];
 
   return (
     <Dialog open={!!client} onOpenChange={onOpenChange}>

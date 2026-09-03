@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Area,
   AreaChart,
@@ -36,12 +37,14 @@ import { useApp } from "@/store/app-context";
 import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
 import { percentDelta } from "@/lib/date-range";
 import { formatCurrencyCompact, formatNumber, formatPercent } from "@/lib/utils";
-import { getTasks } from "@/data/mock";
-import type { Client, SalesPoint } from "@/data/types";
+import { useClientResource } from "@/hooks/use-client-resource";
+import type { Client, CrmTask, SalesPoint } from "@/data/types";
 
 const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
+const EMPTY_TASKS: CrmTask[] = [];
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { client, clients, isAllClients } = useApp();
   const { current, currentSum, previousSum } = usePeriodData();
   const metrics = deriveMetrics(currentSum);
@@ -49,7 +52,9 @@ export default function Dashboard() {
   const [chartMetric, setChartMetric] = React.useState<"sales" | "orders" | "spend">("sales");
 
   const attentionClients = clients.filter((c) => c.status !== "healthy");
-  const tasks = getTasks(isAllClients ? undefined : client?.id).filter((t) => t.status !== "Completed").slice(0, 4);
+  const tasksPath = isAllClients ? "/api/clients/all/tasks" : client ? `/api/clients/${client.id}/tasks` : null;
+  const { data: allTasks } = useClientResource<CrmTask[]>(tasksPath, EMPTY_TASKS);
+  const tasks = allTasks.filter((t) => t.status !== "Completed").slice(0, 4);
 
   const chartData = current.map((p) => ({
     date: dateFmt.format(new Date(p.date)),
@@ -234,7 +239,12 @@ export default function Dashboard() {
                 <PriorityDot priority={t.priority} />
               </div>
             ))}
-            <Button variant="ghost" size="sm" className="mt-1 w-full justify-center text-[12px] text-text-secondary">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-1 w-full justify-center text-[12px] text-text-secondary"
+              onClick={() => navigate("/tasks")}
+            >
               View all tasks <ArrowRight className="size-3.5" />
             </Button>
           </CardContent>
