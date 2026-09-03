@@ -156,3 +156,105 @@ describe("googleConnector token refresh", () => {
     expect(decryptToken(conn.rows[0].access_token)).toBe("fresh-access-token");
   });
 });
+
+describe("googleConnector.sync (full)", () => {
+  beforeEach(async () => {
+    await resetTestDb();
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('abc-fashion', 'ABC Fashion', 'Fashion & Apparel', 'bg-violet-500', 'A')`,
+    );
+    process.env.CREDENTIAL_ENCRYPTION_KEY = "0".repeat(64);
+    const { encryptToken } = await import("../../src/lib/crypto.js");
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, access_token, refresh_token, external_account_id) values
+       ('55555555-5555-5555-5555-555555555555', 'abc-fashion', 'google', 'connected', $1, $2, '1234567890')`,
+      [encryptToken("real-access-token"), encryptToken("1//real-refresh-token")],
+    );
+  });
+
+  it("upserts campaigns, daily metrics, and ads as creatives", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (!url.includes("searchStream")) throw new Error(`Unexpected fetch: ${url}`);
+        const body = JSON.parse((init?.body as string) ?? "{}") as { query: string };
+        if (body.query.includes("FROM campaign") && !body.query.includes("metrics.impressions")) {
+          return new Response(
+            JSON.stringify([{ results: [{ campaign: { id: "111", name: "Search - Brand Terms", status: "ENABLED" } }] }]),
+            { status: 200 },
+          );
+        }
+        if (body.query.includes("metrics.impressions") && body.query.includes("FROM campaign")) {
+          return new Response(
+            JSON.stringify([
+              {
+                results: [
+                  {
+                    campaign: { id: "111", name: "Search - Brand Terms" },
+                    metrics: { impressions: "8000", clicks: "200", costMicros: "400000000", conversions: "15" },
+                  },
+                ],
+              },
+            ]),
+            { status: 200 },
+          );
+        }
+        if (body.query.includes("FROM ad_group_ad")) {
+          return new Response(
+            JSON.stringify([
+              {
+                results: [
+                  {
+                    adGroupAd: {
+                      ad: {
+                        id: "222",
+                        name: "Brand RSA 1",
+                        responsiveSearchAd: {
+                          headlines: [{ text: "Shop the Sale Today" }, { text: "Free Shipping Over ₹999" }],
+                          descriptions: [{ text: "Premium quality, fast delivery, easy returns." }],
+                        },
+                      },
+                      status: "ENABLED",
+                    },
+                    campaign: { id: "111" },
+                    metrics: { impressions: "3000", clicks: "90", costMicros: "150000000", conversions: "6" },
+                  },
+                ],
+              },
+            ]),
+            { status: 200 },
+          );
+        }
+        throw new Error(`Unhandled query: ${body.query}`);
+      }),
+    );
+
+    const result = await googleConnector.sync("55555555-5555-5555-5555-555555555555");
+    expect(result.recordsSynced).toBe(1);
+
+    const campaigns = await testPool.query("select * from campaigns where connection_id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    expect(campaigns.rowCount).toBe(1);
+    expect(campaigns.rows[0]).toMatchObject({ external_campaign_id: "111", name: "Search - Brand Terms", status: "active" });
+
+    const metrics = await testPool.query("select * from google_campaign_metrics where connection_id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    expect(metrics.rowCount).toBe(1);
+    expect(metrics.rows[0]).toMatchObject({ campaign_id: "111", spend: 400, impressions: 8000, clicks: 200, conversions: 15 });
+
+    const creatives = await testPool.query("select * from campaign_creatives where campaign_id = $1", [campaigns.rows[0].id]);
+    expect(creatives.rowCount).toBe(1);
+    expect(creatives.rows[0]).toMatchObject({
+      external_creative_id: "222",
+      name: "Brand RSA 1",
+      format: "RESPONSIVE_SEARCH_AD",
+      headline: "Shop the Sale Today",
+      primary_text: "Premium quality, fast delivery, easy returns.",
+      thumbnail_url: null,
+      status: "active",
+      spend: 150,
+      impressions: 3000,
+      clicks: 90,
+      results: 6,
+    });
+  });
+});

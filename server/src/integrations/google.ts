@@ -49,6 +49,41 @@ async function assertUnderGoogleAccountLimit(clientId: string): Promise<void> {
   }
 }
 
+interface GoogleCampaignRow {
+  campaign: { id: string; name: string; status: string };
+}
+
+interface GoogleMetricsRow {
+  campaign: { id: string; name: string };
+  metrics: { impressions: string; clicks: string; costMicros: string; conversions: string };
+}
+
+interface GoogleAdRow {
+  adGroupAd: {
+    ad: {
+      id: string;
+      name: string;
+      responsiveSearchAd?: { headlines: { text: string }[]; descriptions: { text: string }[] };
+    };
+    status: string;
+  };
+  campaign: { id: string };
+  metrics: { impressions: string; clicks: string; costMicros: string; conversions: string };
+}
+
+// Google's status vocabulary (ENABLED/PAUSED/REMOVED/...) maps onto this dashboard's
+// narrower enum the same deliberately-lossy way Shopify's and Meta's connectors do.
+function mapGoogleStatus(status: string): string {
+  const s = status.toUpperCase();
+  if (s === "ENABLED") return "active";
+  if (s === "PAUSED") return "paused";
+  return "paused";
+}
+
+function microsToUnits(micros: string): number {
+  return Math.round(parseFloat(micros) / 1_000_000);
+}
+
 async function refreshAccessToken(connectionId: string, refreshToken: string): Promise<string> {
   const { clientId, clientSecret } = getOAuthCredentials();
   const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -93,6 +128,36 @@ async function withTokenRefresh<T>(
     throw new Error(`Google Ads API request failed: ${res.status}`);
   }
   return parseResponse(res);
+}
+
+async function runGaqlQuery<T>(
+  connectionId: string,
+  accessToken: string,
+  refreshToken: string,
+  customerId: string,
+  query: string,
+): Promise<T[]> {
+  const body = await withTokenRefresh(
+    connectionId,
+    accessToken,
+    refreshToken,
+    (token) =>
+      fetch(`https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}/googleAds:searchStream`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          "developer-token": getDeveloperToken(),
+          "login-customer-id": customerId,
+        },
+        body: JSON.stringify({ query }),
+      }),
+    (res) => res.json(),
+  );
+  // searchStream returns an array of response "batches", each with its own `results` array
+  // — flatten them into one list of rows, matching how this codebase treats every other
+  // connector's response as a flat list to iterate.
+  return (body as { results?: T[] }[]).flatMap((batch) => batch.results ?? []);
 }
 
 export const googleConnector: Connector = {
@@ -183,27 +248,90 @@ export const googleConnector: Connector = {
     const refreshToken = decryptToken(conn.refresh_token);
     const customerId = conn.external_account_id;
 
-    const campaignsQuery = "SELECT campaign.id, campaign.name, campaign.status FROM campaign";
-    await withTokenRefresh(
+    const campaignRows = await runGaqlQuery<GoogleCampaignRow>(
       connectionId,
       accessToken,
       refreshToken,
-      (token) =>
-        fetch(`https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}/googleAds:searchStream`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-            "developer-token": getDeveloperToken(),
-            "login-customer-id": customerId,
-          },
-          body: JSON.stringify({ query: campaignsQuery }),
-        }),
-      (res) => res.json(),
+      customerId,
+      "SELECT campaign.id, campaign.name, campaign.status FROM campaign",
     );
 
-    // Full campaign/metrics/ad upsert logic added in Task 5.
-    return { recordsSynced: 0 };
+    let recordsSynced = 0;
+    for (const row of campaignRows) {
+      const campaignRow = await pool.query(
+        `insert into campaigns (client_id, connection_id, external_campaign_id, name, status)
+         values ($1, $2, $3, $4, $5)
+         on conflict (connection_id, external_campaign_id)
+         do update set name = excluded.name, status = excluded.status
+         returning id`,
+        [conn.client_id, connectionId, row.campaign.id, row.campaign.name, mapGoogleStatus(row.campaign.status)],
+      );
+      const campaignRowId = campaignRow.rows[0].id;
+      recordsSynced++;
+
+      const metricsRows = await runGaqlQuery<GoogleMetricsRow>(
+        connectionId,
+        accessToken,
+        refreshToken,
+        customerId,
+        `SELECT campaign.id, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions FROM campaign WHERE campaign.id = ${row.campaign.id} AND segments.date DURING TODAY`,
+      );
+      for (const m of metricsRows) {
+        await pool.query(
+          `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions)
+           values ($1, $2, $3, $4, current_date, $5, $6, $7, $8)
+           on conflict (connection_id, campaign_id, metric_date)
+           do update set spend = excluded.spend, impressions = excluded.impressions, clicks = excluded.clicks, conversions = excluded.conversions`,
+          [
+            conn.client_id,
+            connectionId,
+            m.campaign.id,
+            m.campaign.name,
+            microsToUnits(m.metrics.costMicros),
+            Math.round(parseFloat(m.metrics.impressions)),
+            Math.round(parseFloat(m.metrics.clicks)),
+            Math.round(parseFloat(m.metrics.conversions)),
+          ],
+        );
+      }
+
+      const adRows = await runGaqlQuery<GoogleAdRow>(
+        connectionId,
+        accessToken,
+        refreshToken,
+        customerId,
+        `SELECT ad_group_ad.ad.id, ad_group_ad.ad.name, ad_group_ad.ad.responsive_search_ad.headlines, ad_group_ad.ad.responsive_search_ad.descriptions, ad_group_ad.status, campaign.id, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions FROM ad_group_ad WHERE campaign.id = ${row.campaign.id} AND segments.date DURING TODAY`,
+      );
+      for (const adRow of adRows) {
+        const rsa = adRow.adGroupAd.ad.responsiveSearchAd;
+        await pool.query(
+          `insert into campaign_creatives
+             (campaign_id, external_creative_id, name, format, headline, primary_text, cta, thumbnail_url, status, spend, impressions, clicks, results)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+           on conflict (campaign_id, external_creative_id)
+           do update set name = excluded.name, status = excluded.status, spend = excluded.spend,
+             impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results`,
+          [
+            campaignRowId,
+            adRow.adGroupAd.ad.id,
+            adRow.adGroupAd.ad.name,
+            "RESPONSIVE_SEARCH_AD",
+            rsa?.headlines[0]?.text ?? null,
+            rsa?.descriptions[0]?.text ?? null,
+            null, // Google Search ads have no single "call to action" field the way Meta's do
+            null, // no visual asset for a text-only search ad
+            mapGoogleStatus(adRow.adGroupAd.status),
+            microsToUnits(adRow.metrics.costMicros),
+            Math.round(parseFloat(adRow.metrics.impressions)),
+            Math.round(parseFloat(adRow.metrics.clicks)),
+            Math.round(parseFloat(adRow.metrics.conversions)),
+          ],
+        );
+      }
+    }
+
+    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);
+    return { recordsSynced };
   },
 
   async disconnect(connectionId: string) {
