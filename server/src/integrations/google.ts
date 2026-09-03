@@ -1,5 +1,6 @@
 import type { Connector } from "./types.js";
 import pool from "../db.js";
+import { decryptToken, encryptToken } from "../lib/crypto.js";
 
 const GOOGLE_ADS_API_VERSION = "v25";
 const GOOGLE_OAUTH_SCOPE = "https://www.googleapis.com/auth/adwords";
@@ -46,6 +47,52 @@ async function assertUnderGoogleAccountLimit(clientId: string): Promise<void> {
   if (Number(currentCount) >= Number(limit)) {
     throw new Error(`Google account limit reached (${limit} account(s) included on this client's plan)`);
   }
+}
+
+async function refreshAccessToken(connectionId: string, refreshToken: string): Promise<string> {
+  const { clientId, clientSecret } = getOAuthCredentials();
+  const res = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`Google token refresh failed: ${res.status}`);
+  }
+  const body = (await res.json()) as { access_token: string; expires_in?: number };
+  await pool.query(
+    "update platform_connections set access_token = $2, token_expires_at = $3 where id = $1",
+    [connectionId, encryptToken(body.access_token), body.expires_in ? new Date(Date.now() + body.expires_in * 1000) : null],
+  );
+  return body.access_token;
+}
+
+// Wraps a single Google Ads API call with lazy refresh-on-401: tries the request with the
+// current access token; if Google returns 401 (the token expired — these are short-lived,
+// ~1 hour), refreshes once via the stored refresh_token and retries exactly once more. A
+// 401 after the retry means the refresh_token itself is no longer valid (e.g. revoked) and
+// is allowed to propagate as a real failure, same as any other sync error.
+async function withTokenRefresh<T>(
+  connectionId: string,
+  accessToken: string,
+  refreshToken: string,
+  makeRequest: (token: string) => Promise<Response>,
+  parseResponse: (res: Response) => Promise<T>,
+): Promise<T> {
+  let res = await makeRequest(accessToken);
+  if (res.status === 401) {
+    const freshToken = await refreshAccessToken(connectionId, refreshToken);
+    res = await makeRequest(freshToken);
+  }
+  if (!res.ok) {
+    throw new Error(`Google Ads API request failed: ${res.status}`);
+  }
+  return parseResponse(res);
 }
 
 export const googleConnector: Connector = {
@@ -123,8 +170,39 @@ export const googleConnector: Connector = {
     };
   },
 
-  async sync(_connectionId: string) {
-    // Implemented in Task 4.
+  async sync(connectionId: string) {
+    const connResult = await pool.query(
+      "select client_id, access_token, refresh_token, external_account_id from platform_connections where id = $1",
+      [connectionId],
+    );
+    if (connResult.rowCount === 0) {
+      throw new Error(`No connection found for id ${connectionId}`);
+    }
+    const conn = connResult.rows[0];
+    const accessToken = decryptToken(conn.access_token);
+    const refreshToken = decryptToken(conn.refresh_token);
+    const customerId = conn.external_account_id;
+
+    const campaignsQuery = "SELECT campaign.id, campaign.name, campaign.status FROM campaign";
+    await withTokenRefresh(
+      connectionId,
+      accessToken,
+      refreshToken,
+      (token) =>
+        fetch(`https://googleads.googleapis.com/${GOOGLE_ADS_API_VERSION}/customers/${customerId}/googleAds:searchStream`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+            "developer-token": getDeveloperToken(),
+            "login-customer-id": customerId,
+          },
+          body: JSON.stringify({ query: campaignsQuery }),
+        }),
+      (res) => res.json(),
+    );
+
+    // Full campaign/metrics/ad upsert logic added in Task 5.
     return { recordsSynced: 0 };
   },
 

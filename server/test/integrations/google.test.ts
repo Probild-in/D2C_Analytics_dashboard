@@ -109,3 +109,50 @@ describe("googleConnector.handleCallback", () => {
     await expect(googleConnector.handleCallback({ code: "auth-code-123" }, { clientId: "abc-fashion" })).rejects.toThrow(/limit/i);
   });
 });
+
+describe("googleConnector token refresh", () => {
+  beforeEach(async () => {
+    await resetTestDb();
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('abc-fashion', 'ABC Fashion', 'Fashion & Apparel', 'bg-violet-500', 'A')`,
+    );
+    process.env.CREDENTIAL_ENCRYPTION_KEY = "0".repeat(64);
+  });
+
+  it("refreshes an expired access token once and retries the request that triggered it", async () => {
+    const { encryptToken } = await import("../../src/lib/crypto.js");
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, access_token, refresh_token, external_account_id) values
+       ('55555555-5555-5555-5555-555555555555', 'abc-fashion', 'google', 'connected', $1, $2, '1234567890')`,
+      [encryptToken("stale-access-token"), encryptToken("1//real-refresh-token")],
+    );
+
+    let campaignsCallCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("oauth2.googleapis.com/token")) {
+          return new Response(JSON.stringify({ access_token: "fresh-access-token", expires_in: 3599 }), { status: 200 });
+        }
+        if (url.includes("searchStream")) {
+          campaignsCallCount++;
+          const authHeader = (init?.headers as Record<string, string>)?.Authorization;
+          if (authHeader === "Bearer stale-access-token") {
+            return new Response(JSON.stringify({ error: { code: 401, status: "UNAUTHENTICATED" } }), { status: 401 });
+          }
+          return new Response(JSON.stringify([{ results: [] }]), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    const result = await googleConnector.sync("55555555-5555-5555-5555-555555555555");
+    expect(result.recordsSynced).toBe(0);
+    expect(campaignsCallCount).toBe(2); // first call 401s, second (post-refresh) succeeds
+
+    const conn = await testPool.query("select access_token from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    const { decryptToken } = await import("../../src/lib/crypto.js");
+    expect(decryptToken(conn.rows[0].access_token)).toBe("fresh-access-token");
+  });
+});
