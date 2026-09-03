@@ -160,11 +160,12 @@ describe("runScheduledSyncs", () => {
 });
 
 describe("startScheduler", () => {
-  it("schedules both the hourly Shopify sync and the 6-hourly Meta sync", () => {
+  it("schedules the hourly Shopify sync and a 6-hourly sync for both Meta and Google", () => {
     const scheduleSpy = vi.spyOn(cron, "schedule");
     startScheduler();
     expect(scheduleSpy).toHaveBeenCalledWith("0 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
-    expect(scheduleSpy).toHaveBeenCalledWith("0 */6 * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    const sixHourlyCalls = scheduleSpy.mock.calls.filter((call) => call[0] === "0 */6 * * *");
+    expect(sixHourlyCalls).toHaveLength(2);
     scheduleSpy.mockRestore();
   });
 });

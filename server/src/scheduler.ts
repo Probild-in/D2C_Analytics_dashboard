@@ -57,4 +57,14 @@ export function startScheduler() {
     },
     { noOverlap: true },
   );
+
+  // Same 6-hourly cadence as Meta — Google Ads' own reporting also lags, and its API has
+  // per-developer-token rate limits this schedule stays well clear of.
+  cron.schedule(
+    "0 */6 * * *",
+    () => {
+      runScheduledSyncs("google").catch((err) => console.error("Google scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
 }
