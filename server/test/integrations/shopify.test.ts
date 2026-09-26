@@ -313,6 +313,14 @@ describe("shopifyConnector.sync", () => {
     expect(conn.rows[0].last_synced_at).not.toBeNull();
     expect(conn.rows[0].status).toBe("connected");
   });
+
+  it("does not resurrect a connection that was disconnected", async () => {
+    await testPool.query("update platform_connections set status = 'disconnected' where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ orders: [] }), { status: 200 })));
+    await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
+    const conn = await testPool.query("select status from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    expect(conn.rows[0].status).toBe("disconnected");
+  });
 });
 
 describe("shopifyConnector.disconnect", () => {

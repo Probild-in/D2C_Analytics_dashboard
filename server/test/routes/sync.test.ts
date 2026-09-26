@@ -46,6 +46,23 @@ describe("POST /api/clients/:id/connections/:platform/sync", () => {
     expect(res.status).toBe(404);
   });
 
+  it("404s not_connected for a disconnected connection instead of syncing it", async () => {
+    await testPool.query("update platform_connections set status = 'disconnected' where id = $1", [
+      "55555555-5555-5555-5555-555555555555",
+    ]);
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/sync")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("not_connected");
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const conn = await testPool.query("select status from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    expect(conn.rows[0].status).toBe("disconnected");
+  });
+
   it("404s for a client the user cannot access", async () => {
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access) values

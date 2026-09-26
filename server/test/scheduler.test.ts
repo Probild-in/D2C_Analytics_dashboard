@@ -4,6 +4,7 @@ import { testPool, resetTestDb } from "./helpers/test-db.js";
 import { encryptToken } from "../src/lib/crypto.js";
 import { runScheduledSyncs, startScheduler } from "../src/scheduler.js";
 import pool from "../src/db.js";
+import { connectors } from "../src/lib/connector-registry.js";
 
 beforeEach(async () => {
   await resetTestDb();
@@ -79,6 +80,32 @@ describe("runScheduledSyncs", () => {
     const logs = await testPool.query("select * from sync_logs where connection_id = $1", ["77777777-7777-7777-7777-777777777777"]);
     expect(logs.rowCount).toBe(1);
     expect(logs.rows[0].error).not.toBeNull();
+  });
+
+  it("does not overwrite a connection disconnected mid-sync with error when that sync fails", async () => {
+    const id = "bbbbbbbb-2222-2222-2222-222222222222";
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, access_token, external_account_id) values
+       ($1, 'abc-fashion', 'shopify', 'connected', $2, 'abc-fashion.myshopify.com')`,
+      [id, encryptToken("shpat_real_token")],
+    );
+    // Simulate the user clicking Disconnect while the scheduled sync is in flight,
+    // after which the sync fails.
+    const syncSpy = vi.spyOn(connectors.shopify, "sync").mockImplementation(async (connectionId: string) => {
+      await testPool.query("update platform_connections set status = 'disconnected' where id = $1", [connectionId]);
+      throw new Error("boom");
+    });
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    try {
+      await runScheduledSyncs("shopify");
+    } finally {
+      syncSpy.mockRestore();
+      consoleErrorSpy.mockRestore();
+    }
+
+    const conn = await testPool.query("select status from platform_connections where id = $1", [id]);
+    expect(conn.rows[0].status).toBe("disconnected");
   });
 
   it("keeps syncing later connections even when the error-recovery queries for an earlier failure also fail", async () => {

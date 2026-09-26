@@ -23,7 +23,7 @@ export async function runScheduledSyncs(platform: string) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error(`Sync failed for connection ${row.id}:`, err);
       try {
-        await pool.query("update platform_connections set status = 'error' where id = $1", [row.id]);
+        await pool.query("update platform_connections set status = 'error' where id = $1 and status <> 'disconnected'", [row.id]);
         await pool.query(
           "insert into sync_logs (connection_id, started_at, finished_at, error) values ($1, $2, now(), $3)",
           [row.id, startedAt, errorMessage],

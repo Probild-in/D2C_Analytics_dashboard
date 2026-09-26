@@ -189,7 +189,7 @@ export const shopifyConnector: OAuthConnector = {
       }
     }
 
-    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);
+    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1 and status <> 'disconnected'", [connectionId]);
     return { recordsSynced };
   },
 
