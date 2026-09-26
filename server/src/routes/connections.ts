@@ -5,6 +5,7 @@ import { assertClientAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
 import { connectors } from "../lib/connector-registry.js";
 import { signState } from "../lib/state-token.js";
+import { normalizeShopDomain } from "../lib/shop-domain.js";
 
 const router = Router({ mergeParams: true });
 
@@ -44,16 +45,25 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
       throw new HttpError(400, "wrong_auth_type", `${platform} connects with credentials, not OAuth`);
     }
 
-    const shopDomain = (req.body as { shopDomain?: string }).shopDomain;
-    if (platform === "shopify" && !/^[a-z0-9-]+\.myshopify\.com$/.test(shopDomain ?? "")) {
-      throw new HttpError(400, "invalid_shop_domain", "shopDomain must be a valid *.myshopify.com domain");
+    let shopDomain: string | undefined;
+    if (platform === "shopify") {
+      const rawShopDomain = (req.body as { shopDomain?: unknown }).shopDomain;
+      const normalized = normalizeShopDomain(typeof rawShopDomain === "string" ? rawShopDomain : "");
+      if (!normalized) {
+        throw new HttpError(
+          400,
+          "invalid_shop_domain",
+          "Enter your Shopify store name, like mystore or mystore.myshopify.com",
+        );
+      }
+      shopDomain = normalized;
     }
 
     const state = await signState({
       clientId,
       platform,
       teamMemberId: req.auth!.userId,
-      shopDomain: platform === "shopify" ? shopDomain : undefined,
+      shopDomain,
     });
     const authorizeUrl = connector.getAuthUrl(shopDomain ?? clientId, state);
     res.json({ authorizeUrl });
