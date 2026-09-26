@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { CircleSlash, MoreHorizontal, PenLine, Plus, ShoppingBag, Megaphone, Search as SearchIcon, Truck, CheckCircle2, XCircle, X } from "lucide-react";
 import { useClientResource } from "@/hooks/use-client-resource";
 import { supabase } from "@/lib/supabase";
+import { IntegrationsPanel } from "@/components/integrations/integrations-panel";
 import { useApp } from "@/store/app-context";
 
 const statusMeta: Record<string, { label: string; variant: "positive" | "warning" | "negative" }> = {
@@ -48,215 +49,7 @@ const ROLE_VARIANT: Record<string, "brand" | "info" | "neutral" | "outline"> = {
   "Team Member": "outline",
 };
 
-interface Connection {
-  platform: string;
-  status: "connected" | "disconnected" | "error";
-  externalAccountId: string;
-}
-
-const EMPTY_CONNECTIONS: Connection[] = [];
 const EMPTY_TEAM: TeamMember[] = [];
-
-function MetaConnectButton({ clientId, connections }: { clientId: string; connections: Connection[] }) {
-  const [connecting, setConnecting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const meta = connections.find((c) => c.platform === "meta");
-
-  const handleConnect = async () => {
-    setConnecting(true);
-    setError(null);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setConnecting(false);
-      setError("You're not signed in. Please log in again.");
-      return;
-    }
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/meta/authorize`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.error?.message ?? "Failed to connect Meta Ads. Please try again.");
-        setConnecting(false);
-        return;
-      }
-      const { authorizeUrl } = await res.json();
-      window.location.href = authorizeUrl;
-    } catch {
-      setError("Failed to connect Meta Ads. Please check your connection and try again.");
-      setConnecting(false);
-    }
-  };
-
-  if (meta && meta.status === "connected") {
-    return (
-      <span className="flex items-center gap-1 rounded-md bg-bg-subtle px-2 py-1 text-[11px] font-medium text-text-secondary">
-        <Megaphone className="size-3.5" />
-        Meta Ads — {meta.externalAccountId}
-      </span>
-    );
-  }
-
-  return (
-    <div>
-      <Button size="sm" variant="secondary" onClick={handleConnect} disabled={connecting}>
-        Connect Meta Ads
-      </Button>
-      {error && <p className="mt-1 text-[11px] text-negative">{error}</p>}
-    </div>
-  );
-}
-
-function GoogleConnectButton({ clientId, connections }: { clientId: string; connections: Connection[] }) {
-  const [connecting, setConnecting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const google = connections.find((c) => c.platform === "google");
-
-  const handleConnect = async () => {
-    setConnecting(true);
-    setError(null);
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setConnecting(false);
-      setError("You're not signed in. Please log in again.");
-      return;
-    }
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/google/authorize`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.error?.message ?? "Failed to connect Google Ads. Please try again.");
-        setConnecting(false);
-        return;
-      }
-      const { authorizeUrl } = await res.json();
-      window.location.href = authorizeUrl;
-    } catch {
-      setError("Failed to connect Google Ads. Please check your connection and try again.");
-      setConnecting(false);
-    }
-  };
-
-  if (google && google.status === "connected") {
-    return (
-      <span className="flex items-center gap-1 rounded-md bg-bg-subtle px-2 py-1 text-[11px] font-medium text-text-secondary">
-        <SearchIcon className="size-3.5" />
-        Google Ads — {google.externalAccountId}
-      </span>
-    );
-  }
-
-  return (
-    <div>
-      <Button size="sm" variant="secondary" onClick={handleConnect} disabled={connecting}>
-        Connect Google Ads
-      </Button>
-      {error && <p className="mt-1 text-[11px] text-negative">{error}</p>}
-    </div>
-  );
-}
-
-function ConnectionsPanel({ clientId }: { clientId: string }) {
-  const { data: connections, loading } = useClientResource<Connection[]>(`/api/clients/${clientId}/connections`, EMPTY_CONNECTIONS);
-  const [shopDomain, setShopDomain] = React.useState("");
-  const [connecting, setConnecting] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  const shopify = connections.find((c) => c.platform === "shopify");
-
-  const handleConnect = async () => {
-    if (!shopDomain.trim()) return;
-    setConnecting(true);
-    setError(null);
-    // Uses supabase.auth.getSession() — the same official Supabase client method
-    // useClientResource (Task 12) and app-context.tsx already use — not a hand-parsed
-    // localStorage lookup. See Task 12's plan note (commit 08adb3e) for why that approach
-    // is both fragile (undocumented Supabase storage-key format) and unnecessary.
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    if (!session) {
-      setConnecting(false);
-      setError("You're not signed in. Please log in again.");
-      return;
-    }
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/clients/${clientId}/connections/shopify/authorize`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ shopDomain: shopDomain.trim() }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.error?.message ?? "Failed to connect Shopify. Please try again.");
-        setConnecting(false);
-        return;
-      }
-      const { authorizeUrl } = await res.json();
-      window.location.href = authorizeUrl;
-    } catch {
-      setError("Failed to connect Shopify. Please check your connection and try again.");
-      setConnecting(false);
-    }
-  };
-
-  if (loading) {
-    return <p className="text-[11px] text-text-tertiary">Loading…</p>;
-  }
-
-  if (shopify && shopify.status === "connected") {
-    return (
-      <div className="space-y-2">
-        <span className="flex items-center gap-1 rounded-md bg-bg-subtle px-2 py-1 text-[11px] font-medium text-text-secondary">
-          <ShoppingBag className="size-3.5" />
-          Shopify — {shopify.externalAccountId}
-        </span>
-        <MetaConnectButton clientId={clientId} connections={connections} />
-        <GoogleConnectButton clientId={clientId} connections={connections} />
-      </div>
-    );
-  }
-
-  const shopDomainValid = /^[a-z0-9-]+\.myshopify\.com$/.test(shopDomain.trim());
-
-  return (
-    <div className="space-y-2">
-      <div>
-        <div className="flex items-center gap-1.5">
-          <Input
-            value={shopDomain}
-            onChange={(e) => {
-              setShopDomain(e.target.value);
-              setError(null);
-            }}
-            placeholder="yourstore.myshopify.com"
-            className="h-7 max-w-52 text-[11px]"
-          />
-          <Button size="sm" onClick={handleConnect} disabled={connecting || !shopDomain.trim() || !shopDomainValid}>
-            Connect Shopify
-          </Button>
-        </div>
-        {!error && shopDomain.trim() && !shopDomainValid && (
-          <p className="mt-1 text-[11px] text-text-tertiary">Must look like yourstore.myshopify.com</p>
-        )}
-        {error && <p className="mt-1 text-[11px] text-negative">{error}</p>}
-      </div>
-      <MetaConnectButton clientId={clientId} connections={connections} />
-      <GoogleConnectButton clientId={clientId} connections={connections} />
-    </div>
-  );
-}
 
 type ConnectionResult = { type: "success" } | { type: "error"; message: string };
 
@@ -311,7 +104,7 @@ function ConnectionResultBanner() {
       )}
     >
       {isSuccess ? <CheckCircle2 className="mt-0.5 size-4 shrink-0" /> : <XCircle className="mt-0.5 size-4 shrink-0" />}
-      <p className="flex-1">{isSuccess ? "Shopify connected successfully." : result.message}</p>
+      <p className="flex-1">{isSuccess ? "Connected successfully." : result.message}</p>
       <button
         onClick={() => setResult(null)}
         className="shrink-0 rounded p-0.5 opacity-70 hover:opacity-100"
@@ -531,7 +324,7 @@ function ClientDetailDialog({
                 </div>
                 <div className="col-span-2">
                   <p className="mb-1.5 text-[10.5px] text-text-tertiary">Connected integrations</p>
-                  <ConnectionsPanel clientId={client.id} />
+                  <IntegrationsPanel clientId={client.id} />
                 </div>
               </div>
 
