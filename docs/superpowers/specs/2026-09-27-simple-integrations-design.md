@@ -58,7 +58,14 @@ authType: "oauth" | "credentials";
 connectWithCredentials?(
   clientId: string,
   credentials: Record<string, string>,
-): Promise<{ externalAccountId: string; accessToken: string; expiresAt?: Date }>;
+): Promise<{
+  externalAccountId: string;
+  accessToken: string;
+  expiresAt?: Date;
+  // secrets the connector needs later (e.g. Shiprocket email+password for re-login);
+  // the route stores them encrypted in platform_connections.credentials
+  credentials?: Record<string, string>;
+}>;
 ```
 
 `getAuthUrl`/`handleCallback` become optional (present only for `oauth`). The registry
@@ -73,9 +80,11 @@ key remains but is not connectable).
   `GET /integrations/:platform/callback`, `GET /clients/:id/connections`.
 - New: `POST /clients/:id/connections/:platform/connect` for `credentials` platforms.
   Flow: `assertClientAccess` → connector `connectWithCredentials` (live validation against
-  the provider) → account-limit check → upsert `platform_connections` → respond with the
-  connection summary, or a 400 with a user-readable message ("Shiprocket rejected these
-  credentials").
+  the provider) → upsert `platform_connections` → respond with the connection summary.
+  A connector signals bad credentials by throwing `CredentialsRejectedError` (message is
+  shown to the user, HTTP 400); any other failure is logged and returned as a generic 502.
+  Account-limit checks stay inside each connector (the existing pattern: Meta/Google do it
+  in `handleCallback`); couriers have no plan limit today.
 - New: `DELETE /clients/:id/connections/:platform` (disconnect: sets `status =
   'disconnected'`, keeps historical synced data).
 - Credentials are never returned by any endpoint.
@@ -134,8 +143,9 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
 
 - **Plan 1, domain field**: one input. Accepts `mystore`, `mystore.myshopify.com`,
   `https://mystore.myshopify.com/...`, or `admin.shopify.com/store/mystore`; normalizes to
-  `mystore.myshopify.com` client-side and re-validates server-side with the existing
-  regex. Pressing Enter connects. Then the existing redirect → Shopify login/approve →
+  `mystore.myshopify.com` on the server (single source of truth, testable with the
+  existing server test runner) and validates with the existing regex. The frontend sends
+  the raw text. Pressing Enter connects. Then the existing redirect → Shopify login/approve →
   callback flow.
 - **Plan 5, install link**: `GET /integrations/shopify/install?shop=&hmac=&...` verifies
   the HMAC, then starts OAuth with a state token that has no `clientId`. The callback
@@ -185,7 +195,8 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   last synced time, and one action: Connect, Reconnect, or Disconnect.
 - OAuth platforms: Connect → POST `/authorize` → `window.location` to provider.
   Credential platforms: Connect opens a small dialog with the form, submit is disabled
-  until valid, live errors from the server shown inline, closes on success.
+  until valid, live errors from the server shown inline, closes on success. The dialog
+  ships with plan 2, its first consumer; plan 1 builds only the OAuth card path.
 - Handles the `?connection=success|error&message=` return params (already emitted by the
   callback) with a toast/banner.
 - Plan 4/5 add two pages: `connect/pick-accounts` and `connect/claim`.
@@ -217,7 +228,9 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   fallback).
 - Route tests: `/connect` (auth, access, limit, bad credentials, success), disconnect,
   claim/pick-accounts (expiry, single use, limit).
-- Frontend: normalization of Shopify domain input (unit), IntegrationCard state rendering.
+- Frontend: the repo has no frontend test runner and this design does not add one.
+  Frontend changes are verified with `npm run build` (type-check), `npm run lint`, and a
+  manual run-through of each card state; logic worth unit-testing lives on the server.
 - **Manual end-to-end** on real accounts before each integration is "done": real Shopify
   store (both flows), real Meta Business Manager with more than one ad account, a real
   Shiprocket API user, a real Delhivery token. Not automatable; same bar as prior plans.
