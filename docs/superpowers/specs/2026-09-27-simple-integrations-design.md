@@ -100,11 +100,12 @@ key remains but is not connectable).
 - `external_account_id`: Shiprocket = API user email; Delhivery = the account/client name
   if the API returns one, otherwise a short non-secret fingerprint of the token (first 8
   hex chars of its SHA-256).
-- New table `shipments`:
-  - `id`, `client_id`, `connection_id` (FKs, cascade), `awb`, `order_ref` (the merchant's
-    order number/id, used to match `shopify_orders`), `courier_name`, `status` (one of
-    the existing `OrderStatus` values), `destination_state`, `shipped_at`,
-    `delivered_at`, `rto_at`, `last_event_at`, `synced_at`; `unique (connection_id, awb)`.
+- New table `shipments` (migration 007, plan 2):
+  - `id`, `client_id`, `connection_id` (FKs, cascade), `awb`, `order_ref` (the courier's
+    reference for the merchant order; stored for a future match against `shopify_orders`),
+    `courier_name`, `status` (one of the existing `OrderStatus` values), `destination_state`,
+    `ordered_at`, `delivered_at`, `synced_at`; `unique (connection_id, awb)`. (Earlier
+    drafts listed `shipped_at`, `rto_at`, `last_event_at`; dropped as unsourced/YAGNI.)
 - New table `pending_connections` (plan 4/5 only): `id`, `platform`, `team_member_id`,
   `payload` (encrypted JSON: token + candidate accounts / shop), `expires_at` (30 min).
   Lets a flow pause for a user choice (ad-account picker, "which client owns this store")
@@ -121,19 +122,28 @@ the Meta status mapping. The frontend `OrderStatus` enum does not change.
 Hourly node-cron job per courier platform through the existing `runScheduledSyncs`
 (same error isolation and `sync_logs`). Each sync:
 
-1. Determine the window: shipments created or updated in the last 30 days, plus any
-   non-terminal shipments already stored.
-2. Fetch/refresh statuses, upsert into `shipments`.
-3. Update `platform_connections.last_synced_at`.
+1. Determine the window: orders created in the last 30 days (the connector pages through
+   the courier's newest-first order list and stops at the first page that is entirely
+   older than the window, or at a hard page cap). Non-terminal shipments older than the
+   window are not re-polled (accepted gap).
+2. Upsert one `shipments` row per shipment (AWB) with the mapped status.
+3. Update `platform_connections.last_synced_at` (never resurrecting a disconnected row).
 
 ### Operations page
 
-- New `GET /clients/:id/couriers/breakdown`: per-courier counts (shipped, delivered, NDR,
-  RTO) and RTO %, aggregated from `shipments` for the selected date range. Replaces the
-  mocked `getCourierBreakdown` in `operations.tsx`.
-- Where a shipment's `order_ref` matches a Shopify order, the orders endpoint prefers the
-  shipment's status and courier over the Shopify-derived guess (Shopify only knows
-  fulfilled/unfulfilled). Unmatched orders keep today's behavior.
+- New `GET /clients/:id/couriers/summary?days=N` (`:id` may be `all`): `{ connected,
+  statusCounts, couriers[] }` aggregated from `shipments` for the last N days, where each
+  courier has orders, delivered, RTO %, NDR % and average delivery days (null when
+  unknown). Replaces the mocked `getCourierBreakdown` in `operations.tsx`; the delivery
+  funnel and NDR KPI also read `statusCounts` when a courier is connected.
+- `GET /clients/:id/sales` computes `rto_orders` per day from `shipments` when the
+  client(s) have any shipments (attributed to the order date), so every RTO number in the
+  app (KPIs, trend, dashboard) becomes real. Clients with no shipments keep today's
+  Shopify-derived value.
+- Deviation from earlier drafts: the "orders endpoint prefers shipment status where
+  `order_ref` matches a Shopify order" overlay is deferred. The key that links a courier
+  order to a Shopify order (Shopify order id vs number/name) cannot be confirmed without
+  real data, and Operations no longer needs it because it reads shipments directly.
 - When no courier is connected, the courier panel shows an empty state with a "Connect a
   delivery partner" link instead of mock data.
 
@@ -172,12 +182,18 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
 
 - Form: API user email + password (helper text: "Create an API user in Shiprocket →
   Settings → API"). `connectWithCredentials` calls `/v1/external/auth/login`; success
-  returns the token (stored encrypted in `access_token`, expiry ~10 days) and credentials
-  are stored encrypted in `credentials`. On a 401 during sync the connector re-logs-in
-  once and retries.
-- Sync reads the shipments/orders list and per-AWB tracking as needed; `mapStatus` maps
-  Shiprocket status labels (e.g. `IN TRANSIT`, `PICKED UP`, `RTO INITIATED`,
-  `RTO DELIVERED`, NDR variants, `DELIVERED`) to `OrderStatus`.
+  returns the token (stored encrypted in `access_token`) and credentials (whitelisted to
+  email + password) are stored encrypted in `credentials`. Token lifetime is unconfirmed
+  (a Shiprocket SDK documents 24 hours), so each sync logs in fresh instead of tracking
+  expiry; rejected stored credentials put the connection in `error` (card: Reconnect).
+- Sync pages through `GET /v1/external/orders` (each order carries its shipments/AWBs) and
+  does not call per-AWB tracking; `mapStatus` maps Shiprocket status labels (e.g.
+  `IN TRANSIT`, `PICKED UP`, `RTO INITIATED`, `RTO DELIVERED`, NDR variants, `DELIVERED`)
+  to `OrderStatus`, with a logged fallback to "In Transit" for unknown labels.
+- The response shapes (list envelope, field names, date formats, status labels, sort
+  order) are NOT confirmed by any documentation reachable from Context7 or the docs site
+  (JS-rendered); they are isolated in one module and validated at runtime, and must be
+  confirmed against a real Shiprocket API user before plan 2 counts as "done".
 
 ### Delhivery (plan 3)
 
