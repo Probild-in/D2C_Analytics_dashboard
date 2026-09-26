@@ -47,5 +47,8 @@ describe("authType guards", () => {
       .query({ state });
     expect(res.status).toBe(302);
     expect(res.headers.location).toContain("connection=error");
+    // The guard's own message, not the generic catch-all one (URLSearchParams encodes spaces as "+").
+    const message = new URL(res.headers.location.replace("/#/", "/?")).searchParams.get("message");
+    expect(message).toBe("This platform does not use OAuth");
   });
 });
