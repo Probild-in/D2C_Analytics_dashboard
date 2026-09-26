@@ -49,3 +49,14 @@ export const OAUTH_PLATFORMS: PlatformMeta[] = [
     icon: Search,
   },
 ];
+
+// A client can have several rows per platform over time (reconnects, old disconnects).
+// Show the live one; otherwise the broken one; otherwise the most recent.
+export function pickConnection(connections: Connection[], platform: string): Connection | undefined {
+  const forPlatform = connections.filter((c) => c.platform === platform);
+  return (
+    forPlatform.find((c) => c.status === "connected") ??
+    forPlatform.find((c) => c.status === "error") ??
+    forPlatform[forPlatform.length - 1]
+  );
+}

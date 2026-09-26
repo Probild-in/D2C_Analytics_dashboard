@@ -1,7 +1,7 @@
 import * as React from "react";
 import { useClientResource } from "@/hooks/use-client-resource";
-import { IntegrationCard, pickConnection } from "./integration-card";
-import { OAUTH_PLATFORMS, type Connection } from "./platforms";
+import { IntegrationCard } from "./integration-card";
+import { OAUTH_PLATFORMS, pickConnection, type Connection } from "./platforms";
 
 const EMPTY_CONNECTIONS: Connection[] = [];
 
