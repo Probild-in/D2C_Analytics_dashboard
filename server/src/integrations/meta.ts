@@ -1,4 +1,4 @@
-import type { Connector } from "./types.js";
+import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
 
@@ -95,8 +95,9 @@ async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
   }
 }
 
-export const metaConnector: Connector = {
+export const metaConnector: OAuthConnector = {
   platform: "meta",
+  authType: "oauth",
 
   getAuthUrl(_clientId: string, state: string): string {
     const { appId } = getCredentials();

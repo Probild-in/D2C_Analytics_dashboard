@@ -39,6 +39,10 @@ router.get("/:platform/callback", async (req, res) => {
     redirectError("Unknown platform");
     return;
   }
+  if (connector.authType !== "oauth") {
+    redirectError("This platform does not use OAuth");
+    return;
+  }
 
   try {
     const { externalAccountId, accessToken, refreshToken, expiresAt } = await connector.handleCallback(query, {

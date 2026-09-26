@@ -40,8 +40,11 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
     if (!connector) {
       throw new HttpError(404, "unknown_platform", `No connector for platform ${platform}`);
     }
+    if (connector.authType !== "oauth") {
+      throw new HttpError(400, "wrong_auth_type", `${platform} connects with credentials, not OAuth`);
+    }
 
-    const shopDomain = (req.body as { shopDomain?: string }).shopDomain;
+    const shopDomain =(req.body as { shopDomain?: string }).shopDomain;
     if (platform === "shopify" && !/^[a-z0-9-]+\.myshopify\.com$/.test(shopDomain ?? "")) {
       throw new HttpError(400, "invalid_shop_domain", "shopDomain must be a valid *.myshopify.com domain");
     }

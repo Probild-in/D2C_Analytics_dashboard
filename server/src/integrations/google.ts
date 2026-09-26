@@ -1,4 +1,4 @@
-import type { Connector } from "./types.js";
+import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken, encryptToken } from "../lib/crypto.js";
 
@@ -160,8 +160,9 @@ async function runGaqlQuery<T>(
   return (body as { results?: T[] }[]).flatMap((batch) => batch.results ?? []);
 }
 
-export const googleConnector: Connector = {
+export const googleConnector: OAuthConnector = {
   platform: "google",
+  authType: "oauth",
 
   getAuthUrl(_clientId: string, state: string): string {
     const { clientId } = getOAuthCredentials();

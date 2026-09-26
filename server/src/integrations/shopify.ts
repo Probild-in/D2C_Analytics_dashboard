@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { Connector } from "./types.js";
+import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
 
@@ -79,8 +79,9 @@ function verifyCallbackHmac(query: Record<string, string>, secret: string): bool
   return computedBuf.length === providedBuf.length && crypto.timingSafeEqual(computedBuf, providedBuf);
 }
 
-export const shopifyConnector: Connector = {
+export const shopifyConnector: OAuthConnector = {
   platform: "shopify",
+  authType: "oauth",
 
   getAuthUrl(shopDomain: string, state: string): string {
     const { apiKey } = getCredentials();
