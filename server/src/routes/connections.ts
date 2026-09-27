@@ -12,8 +12,10 @@ import { CredentialsRejectedError } from "../integrations/types.js";
 
 const router = Router({ mergeParams: true });
 
-// 10 attempts per user per client per 10 minutes: enough for typos, too few for guessing.
+// 10 attempts per user per client and 30 per user overall, per 10 minutes: enough for typos
+// (and a few clients in a row), too few for guessing credentials.
 const connectLimiter = createRateLimiter({ max: 10, windowMs: 10 * 60 * 1000 });
+const connectUserLimiter = createRateLimiter({ max: 30, windowMs: 10 * 60 * 1000, scope: "user" });
 
 function isStringMap(value: unknown): value is Record<string, string> {
   return (
@@ -87,7 +89,7 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
   }
 });
 
-router.post("/:platform/connect", requireAuth, connectLimiter, async (req, res, next) => {
+router.post("/:platform/connect", requireAuth, connectUserLimiter, connectLimiter, async (req, res, next) => {
   try {
     const clientId = req.params.id;
     const platform = req.params.platform;
