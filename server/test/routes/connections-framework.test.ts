@@ -5,7 +5,7 @@ import { testPool, resetTestDb } from "../helpers/test-db.js";
 import { signTestJwt } from "../helpers/test-jwt.js";
 import { installFakeCourier, FAKE_COURIER_PLATFORM } from "../helpers/fake-courier.js";
 import { signState } from "../../src/lib/state-token.js";
-import { decryptToken } from "../../src/lib/crypto.js";
+import { decryptToken, encryptToken } from "../../src/lib/crypto.js";
 import { CredentialsRejectedError } from "../../src/integrations/types.js";
 
 const RIYA = "11111111-1111-1111-1111-111111111111";
@@ -172,6 +172,31 @@ describe("DELETE /api/clients/:id/connections/:platform", () => {
     expect(res.status).toBe(204);
     const rows = (await testPool.query("select status from platform_connections")).rows;
     expect(rows).toEqual([{ status: "disconnected" }]);
+  });
+
+  it("clears stored secrets when disconnecting but keeps the row", async () => {
+    await testPool.query("update platform_connections set access_token = $1, refresh_token = $2, credentials = $3", [
+      encryptToken("tok"),
+      encryptToken("ref"),
+      encryptToken(JSON.stringify(CREDS)),
+    ]);
+    const res = await del(FAKE_COURIER_PLATFORM);
+    expect(res.status).toBe(204);
+    const row = (
+      await testPool.query("select status, access_token, refresh_token, credentials from platform_connections")
+    ).rows[0];
+    expect(row).toEqual({ status: "disconnected", access_token: null, refresh_token: null, credentials: null });
+  });
+
+  it("disconnects every active connection of the platform for the client", async () => {
+    await testPool.query(
+      `insert into platform_connections (client_id, platform, status, external_account_id) values
+       ('abc-fashion', '${FAKE_COURIER_PLATFORM}', 'connected', 'second@abc.com')`,
+    );
+    const res = await del(FAKE_COURIER_PLATFORM);
+    expect(res.status).toBe(204);
+    const rows = (await testPool.query("select status from platform_connections order by external_account_id")).rows;
+    expect(rows).toEqual([{ status: "disconnected" }, { status: "disconnected" }]);
   });
 
   it("404s not_connected when there is nothing to disconnect", async () => {

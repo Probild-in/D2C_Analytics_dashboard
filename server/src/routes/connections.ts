@@ -113,7 +113,9 @@ router.post("/:platform/connect", requireAuth, connectLimiter, async (req, res, 
       if (err instanceof CredentialsRejectedError) {
         throw new HttpError(400, "credentials_rejected", err.message);
       }
-      console.error(`Credential connect failed for ${platform}:`, err);
+      // Log the message only: an error object from an HTTP client can carry the request body,
+      // which for this endpoint contains the user's password.
+      console.error(`Credential connect failed for ${platform}: ${err instanceof Error ? err.message : String(err)}`);
       throw new HttpError(
         502,
         "provider_unreachable",
@@ -157,6 +159,14 @@ router.delete("/:platform", requireAuth, async (req, res, next) => {
     for (const row of active.rows) {
       await connector.disconnect(row.id);
     }
+    // Disconnect is a user-facing promise: stop holding the client's tokens and stored
+    // credentials. The row and its synced data stay; reconnecting stores fresh secrets.
+    await pool.query(
+      `update platform_connections
+       set access_token = null, refresh_token = null, credentials = null
+       where client_id = $1 and platform = $2 and status = 'disconnected'`,
+      [clientId, platform],
+    );
     res.status(204).end();
   } catch (err) {
     next(err);
