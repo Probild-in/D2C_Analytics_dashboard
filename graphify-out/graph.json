@@ -299,7 +299,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "kpi-card.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "kpicardprops",
       "source_file": "src/components/dashboard/kpi-card.tsx",
@@ -358,17 +358,17 @@
       "source_location": "L54"
     },
     {
-      "id": "server_src_integrations_payment_gateway_paymentgateway",
-      "label": "PaymentGateway",
+      "id": "server_src_lib_connection_store_saveconnectioninput",
+      "label": "SaveConnectionInput",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
-      "norm_label": "paymentgateway",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L1"
+      "norm_label": "saveconnectioninput",
+      "source_file": "server/src/lib/connection-store.ts",
+      "source_location": "L4"
     },
     {
       "id": "server_src_lib_http_error_httperror",
@@ -377,7 +377,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "httperror",
       "source_file": "server/src/lib/http-error.ts",
@@ -390,7 +390,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "request",
       "source_file": "server/src/middleware/auth.ts",
@@ -403,7 +403,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "crmtaskdbrow",
       "source_file": "server/src/routes/tasks.ts",
@@ -416,7 +416,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "taskrow",
       "source_file": "server/src/routes/tasks.ts",
@@ -459,19 +459,6 @@
       "file_type": "code",
       "norm_label": "charttooltipprops",
       "source_file": "src/components/dashboard/chart-tooltip.tsx",
-      "source_location": "L3"
-    },
-    {
-      "id": "server_src_lib_state_token_statepayload",
-      "label": "StatePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "statepayload",
-      "source_file": "server/src/lib/state-token.ts",
       "source_location": "L3"
     },
     {
@@ -611,7 +598,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocketautherror",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -624,7 +611,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocketorder",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -637,7 +624,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocketorderspage",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -650,7 +637,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocketshipment",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -709,13 +696,26 @@
       "source_location": "L56"
     },
     {
+      "id": "server_src_integrations_types_connector",
+      "label": "Connector",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "connector-registry.ts",
+      "file_type": "code",
+      "norm_label": "connector",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L39"
+    },
+    {
       "id": "server_src_integrations_types_credentialsconnector",
       "label": "CredentialsConnector",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
       "norm_label": "credentialsconnector",
       "source_file": "server/src/integrations/types.ts",
@@ -728,37 +728,37 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
       "norm_label": "credentialsrejectederror",
       "source_file": "server/src/integrations/types.ts",
       "source_location": "L3"
     },
     {
-      "id": "server_src_lib_connection_store_saveconnectioninput",
-      "label": "SaveConnectionInput",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "saveconnectioninput",
-      "source_file": "server/src/lib/connection-store.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "server_src_integrations_types_connector",
-      "label": "Connector",
+      "id": "server_src_integrations_delhivery_api_delhiveryautherror",
+      "label": "DelhiveryAuthError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "connector-registry.ts",
+      "community_name": "delhivery-api.ts",
       "file_type": "code",
-      "norm_label": "connector",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L39"
+      "norm_label": "delhiveryautherror",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "server_src_integrations_delhivery_api_delhiverytrackedshipment",
+      "label": "DelhiveryTrackedShipment",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery-api.ts",
+      "file_type": "code",
+      "norm_label": "delhiverytrackedshipment",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L16"
     },
     {
       "id": "server_src_integrations_shopify_shopifyorder",
@@ -774,6 +774,32 @@
       "source_location": "L9"
     },
     {
+      "id": "server_src_integrations_types_baseconnector",
+      "label": "BaseConnector",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": "baseconnector",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "server_src_integrations_types_oauthconnector",
+      "label": "OAuthConnector",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": "oauthconnector",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L12"
+    },
+    {
       "id": "server_src_integrations_shiprocket_status_shipmentstatus",
       "label": "ShipmentStatus",
       "_callable": true,
@@ -787,30 +813,43 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_types_baseconnector",
-      "label": "BaseConnector",
+      "id": "server_src_integrations_delhivery_status_shipmentstatus",
+      "label": "ShipmentStatus",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "OAuthConnector",
+      "community_name": "delhivery-status.ts",
       "file_type": "code",
-      "norm_label": "baseconnector",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L5"
+      "norm_label": "shipmentstatus",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L6"
     },
     {
-      "id": "server_src_integrations_types_oauthconnector",
-      "label": "OAuthConnector",
+      "id": "server_src_lib_state_token_statepayload",
+      "label": "StatePayload",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 86,
-      "community_name": "OAuthConnector",
+      "community": 88,
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "oauthconnector",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L12"
+      "norm_label": "statepayload",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "server_src_integrations_payment_gateway_paymentgateway",
+      "label": "PaymentGateway",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 91,
+      "community_name": "PaymentGateway",
+      "file_type": "code",
+      "norm_label": "paymentgateway",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L1"
     },
     {
       "id": "src_data_mock_generatesalesseries",
@@ -1226,11 +1265,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 15,
-      "community_name": "kpi-card.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "kpicard()",
       "source_file": "src/components/dashboard/kpi-card.tsx",
       "source_location": "L27"
+    },
+    {
+      "id": "src_pages_geography_geography",
+      "label": "Geography()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "geography()",
+      "source_file": "src/pages/geography.tsx",
+      "source_location": "L14"
+    },
+    {
+      "id": "src_pages_login_login",
+      "label": "Login()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "login()",
+      "source_file": "src/pages/login.tsx",
+      "source_location": "L8"
     },
     {
       "id": "src_components_ui_avatar_avatar",
@@ -1821,48 +1884,12 @@
       "source_location": "L153"
     },
     {
-      "id": "server_src_integrations_payment_gateway_paymentgateway_cancelsubscription",
-      "label": ".cancelSubscription()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "connections.ts",
-      "file_type": "code",
-      "norm_label": ".cancelsubscription()",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "server_src_integrations_payment_gateway_paymentgateway_chargeinvoice",
-      "label": ".chargeInvoice()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "connections.ts",
-      "file_type": "code",
-      "norm_label": ".chargeinvoice()",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "server_src_integrations_payment_gateway_paymentgateway_createsubscription",
-      "label": ".createSubscription()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "connections.ts",
-      "file_type": "code",
-      "norm_label": ".createsubscription()",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L2"
-    },
-    {
       "id": "server_src_lib_access_assertclientaccess",
       "label": "assertClientAccess()",
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "assertclientaccess()",
       "source_file": "server/src/lib/access.ts",
@@ -1874,7 +1901,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "getaccessibleclientids()",
       "source_file": "server/src/lib/access.ts",
@@ -1886,11 +1913,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "resolveclientscope()",
       "source_file": "server/src/lib/access.ts",
       "source_location": "L32"
+    },
+    {
+      "id": "server_src_lib_connection_store_saveconnection",
+      "label": "saveConnection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "saveconnection()",
+      "source_file": "server/src/lib/connection-store.ts",
+      "source_location": "L18"
     },
     {
       "id": "server_src_lib_http_error_httperror_constructor",
@@ -1898,7 +1937,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": ".constructor()",
       "source_file": "server/src/lib/http-error.ts",
@@ -1910,7 +1949,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": ".tobody()",
       "source_file": "server/src/lib/http-error.ts",
@@ -1922,7 +1961,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "normalizeshopdomain()",
       "source_file": "server/src/lib/shop-domain.ts",
@@ -1934,7 +1973,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "requireauth()",
       "source_file": "server/src/middleware/auth.ts",
@@ -1946,7 +1985,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "createratelimiter()",
       "source_file": "server/src/middleware/rate-limit.ts",
@@ -1958,7 +1997,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "generateuniqueclientid()",
       "source_file": "server/src/routes/clients.ts",
@@ -1970,7 +2009,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "picklogocolor()",
       "source_file": "server/src/routes/clients.ts",
@@ -1982,7 +2021,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "slugify()",
       "source_file": "server/src/routes/clients.ts",
@@ -1994,7 +2033,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "statusfromrtopercent()",
       "source_file": "server/src/routes/clients.ts",
@@ -2006,7 +2045,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "isstringmap()",
       "source_file": "server/src/routes/connections.ts",
@@ -2018,10 +2057,34 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "maptaskrow()",
       "source_file": "server/src/routes/tasks.ts",
+      "source_location": "L38"
+    },
+    {
+      "id": "server_src_scheduler_runscheduledsyncs",
+      "label": "runScheduledSyncs()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "runscheduledsyncs()",
+      "source_file": "server/src/scheduler.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "server_src_scheduler_startscheduler",
+      "label": "startScheduler()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "startscheduler()",
+      "source_file": "server/src/scheduler.ts",
       "source_location": "L38"
     },
     {
@@ -2030,7 +2093,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "buildapp()",
       "source_file": "server/test/middleware/auth.test.ts",
@@ -2042,7 +2105,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "fakereq()",
       "source_file": "server/test/middleware/rate-limit.test.ts",
@@ -2162,7 +2225,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "react",
+      "community_name": "use-period-data.ts",
       "file_type": "code",
       "norm_label": "useclientresource()",
       "source_file": "src/hooks/use-client-resource.ts",
@@ -2174,7 +2237,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "react",
+      "community_name": "use-period-data.ts",
       "file_type": "code",
       "norm_label": "derivemetrics()",
       "source_file": "src/hooks/use-period-data.ts",
@@ -2186,23 +2249,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 36,
-      "community_name": "react",
+      "community_name": "use-period-data.ts",
       "file_type": "code",
       "norm_label": "useperioddata()",
       "source_file": "src/hooks/use-period-data.ts",
       "source_location": "L13"
-    },
-    {
-      "id": "src_pages_login_login",
-      "label": "Login()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "login()",
-      "source_file": "src/pages/login.tsx",
-      "source_location": "L8"
     },
     {
       "id": "src_pages_blended_marketing_blendedmarketing",
@@ -2277,40 +2328,40 @@
       "source_location": "L4"
     },
     {
-      "id": "server_src_lib_state_token_getsecret",
-      "label": "getSecret()",
+      "id": "server_src_lib_crypto_decrypttoken",
+      "label": "decryptToken()",
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
-      "norm_label": "getsecret()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L10"
+      "norm_label": "decrypttoken()",
+      "source_file": "server/src/lib/crypto.ts",
+      "source_location": "L20"
     },
     {
-      "id": "server_src_lib_state_token_signstate",
-      "label": "signState()",
+      "id": "server_src_lib_crypto_encrypttoken",
+      "label": "encryptToken()",
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
-      "norm_label": "signstate()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L18"
+      "norm_label": "encrypttoken()",
+      "source_file": "server/src/lib/crypto.ts",
+      "source_location": "L12"
     },
     {
-      "id": "server_src_lib_state_token_verifystate",
-      "label": "verifyState()",
+      "id": "server_src_lib_crypto_getkey",
+      "label": "getKey()",
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
-      "norm_label": "verifystate()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L26"
+      "norm_label": "getkey()",
+      "source_file": "server/src/lib/crypto.ts",
+      "source_location": "L3"
     },
     {
       "id": "server_test_helpers_fake_courier_installfakecourier",
@@ -2318,7 +2369,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "installfakecourier()",
       "source_file": "server/test/helpers/fake-courier.ts",
@@ -2330,7 +2381,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "resettestdb()",
       "source_file": "server/test/helpers/test-db.ts",
@@ -2342,11 +2393,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "signtestjwt()",
       "source_file": "server/test/helpers/test-jwt.ts",
       "source_location": "L3"
+    },
+    {
+      "id": "server_test_integrations_shiprocket_test_insertconnection",
+      "label": "insertConnection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "insertconnection()",
+      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "source_location": "L27"
+    },
+    {
+      "id": "server_test_integrations_shiprocket_test_order",
+      "label": "order()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "order()",
+      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "source_location": "L55"
+    },
+    {
+      "id": "server_test_integrations_shiprocket_test_recent",
+      "label": "recent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "recent()",
+      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "server_test_integrations_shiprocket_test_stubshiprocket",
+      "label": "stubShiprocket()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "stubshiprocket()",
+      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "source_location": "L41"
     },
     {
       "id": "server_test_integrations_shopify_test_computetesthmac",
@@ -2354,7 +2453,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "computetesthmac()",
       "source_file": "server/test/integrations/shopify.test.ts",
@@ -2366,11 +2465,47 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "insertshipment()",
       "source_file": "server/test/migration-007.test.ts",
       "source_location": "L18"
+    },
+    {
+      "id": "server_test_routes_connect_delhivery_test_connect",
+      "label": "connect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "connect()",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L44"
+    },
+    {
+      "id": "server_test_routes_connect_delhivery_test_stubdelhivery",
+      "label": "stubDelhivery()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "stubdelhivery()",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L37"
+    },
+    {
+      "id": "server_test_routes_connect_delhivery_test_token",
+      "label": "token()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "token()",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L9"
     },
     {
       "id": "server_test_routes_connect_logging_test_connectwithcredentials",
@@ -2378,7 +2513,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connectwithcredentials()",
       "source_file": "server/test/routes/connect-logging.test.ts",
@@ -2390,7 +2525,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connect()",
       "source_file": "server/test/routes/connect-shiprocket.test.ts",
@@ -2402,7 +2537,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "stubshiprocket()",
       "source_file": "server/test/routes/connect-shiprocket.test.ts",
@@ -2414,7 +2549,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "token()",
       "source_file": "server/test/routes/connect-shiprocket.test.ts",
@@ -2426,7 +2561,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connectwithcredentials()",
       "source_file": "server/test/routes/connections-framework.test.ts",
@@ -2438,7 +2573,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "addshipment()",
       "source_file": "server/test/routes/courier-data.test.ts",
@@ -2450,7 +2585,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connectcourier()",
       "source_file": "server/test/routes/courier-data.test.ts",
@@ -2462,7 +2597,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "get()",
       "source_file": "server/test/routes/courier-data.test.ts",
@@ -2474,7 +2609,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "computetesthmac()",
       "source_file": "server/test/routes/integrations.test.ts",
@@ -2682,7 +2817,7 @@
       "file_type": "code",
       "norm_label": "pickconnection()",
       "source_file": "src/components/integrations/platforms.ts",
-      "source_location": "L85"
+      "source_location": "L95"
     },
     {
       "id": "src_pages_all_clients_allclients",
@@ -2702,7 +2837,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "asdate()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2714,7 +2849,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "asstring()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2726,7 +2861,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "fetchorderspage()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2738,7 +2873,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "isrecord()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2750,7 +2885,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "parseorder()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2762,7 +2897,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "parseshipment()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2774,7 +2909,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocketlogin()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
@@ -2786,7 +2921,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "stubfetch()",
       "source_file": "server/test/integrations/shiprocket-api.test.ts",
@@ -3050,131 +3185,119 @@
       "_callable": true,
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
       "norm_label": ".connectwithcredentials()",
       "source_file": "server/src/integrations/types.ts",
       "source_location": "L26"
     },
     {
-      "id": "server_test_integrations_shiprocket_test_insertconnection",
+      "id": "server_test_integrations_delhivery_test_insertconnection",
       "label": "insertConnection()",
       "_callable": true,
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
       "norm_label": "insertconnection()",
-      "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L26"
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L25"
     },
     {
-      "id": "server_test_integrations_shiprocket_test_order",
-      "label": "order()",
+      "id": "server_test_integrations_delhivery_test_insertshopifyconnection",
+      "label": "insertShopifyConnection()",
       "_callable": true,
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
-      "norm_label": "order()",
-      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "norm_label": "insertshopifyconnection()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "server_test_integrations_delhivery_test_insertshopifyorder",
+      "label": "insertShopifyOrder()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "connector-registry.ts",
+      "file_type": "code",
+      "norm_label": "insertshopifyorder()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "server_test_integrations_delhivery_test_stubdelhivery",
+      "label": "stubDelhivery()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "connector-registry.ts",
+      "file_type": "code",
+      "norm_label": "stubdelhivery()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
       "source_location": "L49"
     },
     {
-      "id": "server_test_integrations_shiprocket_test_recent",
-      "label": "recent()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "shiprocket.ts",
-      "file_type": "code",
-      "norm_label": "recent()",
-      "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "server_test_integrations_shiprocket_test_stubshiprocket",
-      "label": "stubShiprocket()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "shiprocket.ts",
-      "file_type": "code",
-      "norm_label": "stubshiprocket()",
-      "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L35"
-    },
-    {
-      "id": "server_src_lib_connection_store_saveconnection",
-      "label": "saveConnection()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "saveconnection()",
-      "source_file": "server/src/lib/connection-store.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "server_src_lib_crypto_decrypttoken",
-      "label": "decryptToken()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "decrypttoken()",
-      "source_file": "server/src/lib/crypto.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "server_src_lib_crypto_encrypttoken",
-      "label": "encryptToken()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "encrypttoken()",
-      "source_file": "server/src/lib/crypto.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "server_src_lib_crypto_getkey",
-      "label": "getKey()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "getkey()",
-      "source_file": "server/src/lib/crypto.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "server_src_scheduler_runscheduledsyncs",
-      "label": "runScheduledSyncs()",
+      "id": "server_src_integrations_delhivery_api_asstring",
+      "label": "asString()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "connector-registry.ts",
+      "community_name": "delhivery-api.ts",
       "file_type": "code",
-      "norm_label": "runscheduledsyncs()",
-      "source_file": "server/src/scheduler.ts",
-      "source_location": "L5"
+      "norm_label": "asstring()",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L27"
     },
     {
-      "id": "server_src_scheduler_startscheduler",
-      "label": "startScheduler()",
+      "id": "server_src_integrations_delhivery_api_isrecord",
+      "label": "isRecord()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "connector-registry.ts",
+      "community_name": "delhivery-api.ts",
       "file_type": "code",
-      "norm_label": "startscheduler()",
-      "source_file": "server/src/scheduler.ts",
-      "source_location": "L38"
+      "norm_label": "isrecord()",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "server_src_integrations_delhivery_api_trackshipment",
+      "label": "trackShipment()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery-api.ts",
+      "file_type": "code",
+      "norm_label": "trackshipment()",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "server_test_integrations_delhivery_api_test_stubfetch",
+      "label": "stubFetch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery-api.ts",
+      "file_type": "code",
+      "norm_label": "stubfetch()",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "server_src_integrations_shopify_firstfulfillmenttracking",
+      "label": "firstFulfillmentTracking()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": "firstfulfillmenttracking()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L31"
     },
     {
       "id": "server_src_integrations_shopify_getcredentials",
@@ -3186,7 +3309,7 @@
       "file_type": "code",
       "norm_label": "getcredentials()",
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L46"
+      "source_location": "L55"
     },
     {
       "id": "server_src_integrations_shopify_getredirecturi",
@@ -3198,7 +3321,7 @@
       "file_type": "code",
       "norm_label": "getredirecturi()",
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L38"
+      "source_location": "L47"
     },
     {
       "id": "server_src_integrations_shopify_maporderstatus",
@@ -3210,7 +3333,7 @@
       "file_type": "code",
       "norm_label": "maporderstatus()",
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L27"
+      "source_location": "L36"
     },
     {
       "id": "server_src_integrations_shopify_mappaymentmethod",
@@ -3222,7 +3345,7 @@
       "file_type": "code",
       "norm_label": "mappaymentmethod()",
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L33"
+      "source_location": "L42"
     },
     {
       "id": "server_src_integrations_shopify_parsenextlink",
@@ -3234,7 +3357,7 @@
       "file_type": "code",
       "norm_label": "parsenextlink()",
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L58"
+      "source_location": "L67"
     },
     {
       "id": "server_src_integrations_shopify_verifycallbackhmac",
@@ -3246,7 +3369,55 @@
       "file_type": "code",
       "norm_label": "verifycallbackhmac()",
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L69"
+      "source_location": "L78"
+    },
+    {
+      "id": "server_src_integrations_types_baseconnector_disconnect",
+      "label": ".disconnect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": ".disconnect()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "server_src_integrations_types_baseconnector_sync",
+      "label": ".sync()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": ".sync()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "server_src_integrations_types_oauthconnector_getauthurl",
+      "label": ".getAuthUrl()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": ".getauthurl()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "server_src_integrations_types_oauthconnector_handlecallback",
+      "label": ".handleCallback()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "shopify.ts",
+      "file_type": "code",
+      "norm_label": ".handlecallback()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L15"
     },
     {
       "id": "server_src_integrations_shiprocket_status_mapshiprocketstatus",
@@ -3261,64 +3432,52 @@
       "source_location": "L19"
     },
     {
-      "id": "server_src_integrations_types_baseconnector_disconnect",
-      "label": ".disconnect()",
+      "id": "server_src_integrations_delhivery_status_mapdelhiverystatus",
+      "label": "mapDelhiveryStatus()",
       "_callable": true,
       "_origin": "ast",
       "community": 86,
-      "community_name": "OAuthConnector",
+      "community_name": "delhivery-status.ts",
       "file_type": "code",
-      "norm_label": ".disconnect()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L8"
+      "norm_label": "mapdelhiverystatus()",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L19"
     },
     {
-      "id": "server_src_integrations_types_baseconnector_sync",
-      "label": ".sync()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "OAuthConnector",
-      "file_type": "code",
-      "norm_label": ".sync()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "server_src_integrations_types_oauthconnector_getauthurl",
-      "label": ".getAuthUrl()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "OAuthConnector",
-      "file_type": "code",
-      "norm_label": ".getauthurl()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L14"
-    },
-    {
-      "id": "server_src_integrations_types_oauthconnector_handlecallback",
-      "label": ".handleCallback()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "OAuthConnector",
-      "file_type": "code",
-      "norm_label": ".handlecallback()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_pages_geography_geography",
-      "label": "Geography()",
+      "id": "server_src_lib_state_token_getsecret",
+      "label": "getSecret()",
       "_callable": true,
       "_origin": "ast",
       "community": 88,
-      "community_name": "geography.tsx",
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "geography()",
-      "source_file": "src/pages/geography.tsx",
-      "source_location": "L14"
+      "norm_label": "getsecret()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "server_src_lib_state_token_signstate",
+      "label": "signState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 88,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "signstate()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "server_src_lib_state_token_verifystate",
+      "label": "verifyState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 88,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "verifystate()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L26"
     },
     {
       "id": "src_lib_utils_cn",
@@ -3415,6 +3574,42 @@
       "norm_label": "trimzero()",
       "source_file": "src/lib/utils.ts",
       "source_location": "L31"
+    },
+    {
+      "id": "server_src_integrations_payment_gateway_paymentgateway_cancelsubscription",
+      "label": ".cancelSubscription()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 91,
+      "community_name": "PaymentGateway",
+      "file_type": "code",
+      "norm_label": ".cancelsubscription()",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "server_src_integrations_payment_gateway_paymentgateway_chargeinvoice",
+      "label": ".chargeInvoice()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 91,
+      "community_name": "PaymentGateway",
+      "file_type": "code",
+      "norm_label": ".chargeinvoice()",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "server_src_integrations_payment_gateway_paymentgateway_createsubscription",
+      "label": ".createSubscription()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 91,
+      "community_name": "PaymentGateway",
+      "file_type": "code",
+      "norm_label": ".createsubscription()",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L2"
     },
     {
       "id": "src_data_mock",
@@ -4301,7 +4496,7 @@
       "label": "kpi-card.tsx",
       "_origin": "ast",
       "community": 15,
-      "community_name": "kpi-card.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "kpi-card.tsx",
       "source_file": "src/components/dashboard/kpi-card.tsx",
@@ -4312,11 +4507,77 @@
       "label": "accentMap",
       "_origin": "ast",
       "community": 15,
-      "community_name": "kpi-card.tsx",
+      "community_name": "react",
       "file_type": "code",
       "norm_label": "accentmap",
       "source_file": "src/components/dashboard/kpi-card.tsx",
       "source_location": "L19"
+    },
+    {
+      "id": "src_components_ui_input",
+      "label": "input.tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "input.tsx",
+      "source_file": "src/components/ui/input.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_ui_input_input",
+      "label": "Input",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "input",
+      "source_file": "src/components/ui/input.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_pages_geography",
+      "label": "geography.tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "geography.tsx",
+      "source_file": "src/pages/geography.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_pages_geography_empty_geo",
+      "label": "EMPTY_GEO",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "empty_geo",
+      "source_file": "src/pages/geography.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_pages_login",
+      "label": "login.tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "login.tsx",
+      "source_file": "src/pages/login.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": ".oxlintrc.json",
+      "source_location": "L3"
     },
     {
       "id": "src_components_ui_avatar",
@@ -5214,7 +5475,7 @@
       "label": "db.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "db.ts",
       "source_file": "server/src/db.ts",
@@ -5225,18 +5486,40 @@
       "label": "pool",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "pool",
       "source_file": "server/src/db.ts",
       "source_location": "L3"
     },
     {
+      "id": "server_src_index",
+      "label": "index.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "index.ts",
+      "source_file": "server/src/index.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_index_allowedorigins",
+      "label": "allowedOrigins",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "allowedorigins",
+      "source_file": "server/src/index.ts",
+      "source_location": "L19"
+    },
+    {
       "id": "server_src_integrations_payment_gateway",
       "label": "payment-gateway.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "payment-gateway.ts",
       "source_file": "server/src/integrations/payment-gateway.ts",
@@ -5247,7 +5530,7 @@
       "label": "stubPaymentGateway",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "stubpaymentgateway",
       "source_file": "server/src/integrations/payment-gateway.ts",
@@ -5258,18 +5541,40 @@
       "label": "access.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "access.ts",
       "source_file": "server/src/lib/access.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_lib_connection_store",
+      "label": "connection-store.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "connection-store.ts",
+      "source_file": "server/src/lib/connection-store.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_lib_connector_registry_connectors",
+      "label": "connectors",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "connectors",
+      "source_file": "server/src/lib/connector-registry.ts",
+      "source_location": "L8"
+    },
+    {
       "id": "server_src_lib_http_error",
       "label": "http-error.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "http-error.ts",
       "source_file": "server/src/lib/http-error.ts",
@@ -5280,7 +5585,7 @@
       "label": "shop-domain.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "shop-domain.ts",
       "source_file": "server/src/lib/shop-domain.ts",
@@ -5291,7 +5596,7 @@
       "label": "auth.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "auth.ts",
       "source_file": "server/src/middleware/auth.ts",
@@ -5302,7 +5607,7 @@
       "label": "Express",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "express",
       "source_file": "server/src/middleware/auth.ts",
@@ -5313,7 +5618,7 @@
       "label": "rate-limit.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "rate-limit.ts",
       "source_file": "server/src/middleware/rate-limit.ts",
@@ -5324,18 +5629,29 @@
       "label": "billing.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "billing.ts",
       "source_file": "server/src/routes/billing.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_routes_billing_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/billing.ts",
+      "source_location": "L8"
+    },
+    {
       "id": "server_src_routes_campaigns",
       "label": "campaigns.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "campaigns.ts",
       "source_file": "server/src/routes/campaigns.ts",
@@ -5346,18 +5662,29 @@
       "label": "CAMPAIGN_STATUS_DISPLAY",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "campaign_status_display",
       "source_file": "server/src/routes/campaigns.ts",
       "source_location": "L9"
     },
     {
+      "id": "server_src_routes_campaigns_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/campaigns.ts",
+      "source_location": "L7"
+    },
+    {
       "id": "server_src_routes_clients",
       "label": "clients.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "clients.ts",
       "source_file": "server/src/routes/clients.ts",
@@ -5368,18 +5695,29 @@
       "label": "LOGO_COLORS",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "logo_colors",
       "source_file": "server/src/routes/clients.ts",
       "source_location": "L30"
     },
     {
+      "id": "server_src_routes_clients_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/clients.ts",
+      "source_location": "L7"
+    },
+    {
       "id": "server_src_routes_connections",
       "label": "connections.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "connections.ts",
       "source_file": "server/src/routes/connections.ts",
@@ -5390,7 +5728,7 @@
       "label": "connectLimiter",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "connectlimiter",
       "source_file": "server/src/routes/connections.ts",
@@ -5401,29 +5739,51 @@
       "label": "connectUserLimiter",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "connectuserlimiter",
       "source_file": "server/src/routes/connections.ts",
       "source_location": "L18"
     },
     {
+      "id": "server_src_routes_connections_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/connections.ts",
+      "source_location": "L13"
+    },
+    {
       "id": "server_src_routes_courier_data",
       "label": "courier-data.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "courier-data.ts",
       "source_file": "server/src/routes/courier-data.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_routes_courier_data_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/courier-data.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "server_src_routes_couriers",
       "label": "couriers.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "couriers.ts",
       "source_file": "server/src/routes/couriers.ts",
@@ -5434,10 +5794,43 @@
       "label": "KNOWN_COURIERS",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "known_couriers",
       "source_file": "server/src/routes/couriers.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "server_src_routes_couriers_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/couriers.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "server_src_routes_integrations",
+      "label": "integrations.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "integrations.ts",
+      "source_file": "server/src/routes/integrations.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_routes_integrations_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/integrations.ts",
       "source_location": "L6"
     },
     {
@@ -5445,40 +5838,73 @@
       "label": "shopify-data.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "shopify-data.ts",
       "source_file": "server/src/routes/shopify-data.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_routes_shopify_data_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/shopify-data.ts",
+      "source_location": "L6"
+    },
+    {
       "id": "server_src_routes_sync",
       "label": "sync.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "sync.ts",
       "source_file": "server/src/routes/sync.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_routes_sync_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/sync.ts",
+      "source_location": "L8"
+    },
+    {
       "id": "server_src_routes_tasks",
       "label": "tasks.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "tasks.ts",
       "source_file": "server/src/routes/tasks.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_routes_tasks_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/tasks.ts",
+      "source_location": "L7"
+    },
+    {
       "id": "server_src_routes_tasks_valid_priorities",
       "label": "VALID_PRIORITIES",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "valid_priorities",
       "source_file": "server/src/routes/tasks.ts",
@@ -5489,7 +5915,7 @@
       "label": "VALID_STATUSES",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "valid_statuses",
       "source_file": "server/src/routes/tasks.ts",
@@ -5500,7 +5926,7 @@
       "label": "team-members.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "team-members.ts",
       "source_file": "server/src/routes/team-members.ts",
@@ -5511,18 +5937,51 @@
       "label": "ROLE_DISPLAY",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "role_display",
       "source_file": "server/src/routes/team-members.ts",
       "source_location": "L7"
     },
     {
+      "id": "server_src_routes_team_members_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/team-members.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "server_src_scheduler",
+      "label": "scheduler.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "scheduler.ts",
+      "source_file": "server/src/scheduler.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_health_test",
+      "label": "health.test.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "health.test.ts",
+      "source_file": "server/test/health.test.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_test_lib_shop_domain_test",
       "label": "shop-domain.test.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "shop-domain.test.ts",
       "source_file": "server/test/lib/shop-domain.test.ts",
@@ -5533,7 +5992,7 @@
       "label": "auth.test.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "auth.test.ts",
       "source_file": "server/test/middleware/auth.test.ts",
@@ -5544,7 +6003,7 @@
       "label": "rate-limit.test.ts",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "rate-limit.test.ts",
       "source_file": "server/test/middleware/rate-limit.test.ts",
@@ -5555,11 +6014,22 @@
       "label": "res",
       "_origin": "ast",
       "community": 29,
-      "community_name": "connections.ts",
+      "community_name": "index.ts",
       "file_type": "code",
       "norm_label": "res",
       "source_file": "server/test/middleware/rate-limit.test.ts",
       "source_location": "L10"
+    },
+    {
+      "id": "server_test_scheduler_test",
+      "label": "scheduler.test.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "scheduler.test.ts",
+      "source_file": "server/test/scheduler.test.ts",
+      "source_location": "L1"
     },
     {
       "id": "all_clients",
@@ -5969,33 +6439,11 @@
       "source_location": "L4"
     },
     {
-      "id": "src_components_ui_input",
-      "label": "input.tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "input.tsx",
-      "source_file": "src/components/ui/input.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_ui_input_input",
-      "label": "Input",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "input",
-      "source_file": "src/components/ui/input.tsx",
-      "source_location": "L4"
-    },
-    {
       "id": "src_hooks_use_client_resource",
       "label": "use-client-resource.ts",
       "_origin": "ast",
       "community": 36,
-      "community_name": "react",
+      "community_name": "use-period-data.ts",
       "file_type": "code",
       "norm_label": "use-client-resource.ts",
       "source_file": "src/hooks/use-client-resource.ts",
@@ -6006,7 +6454,7 @@
       "label": "use-period-data.ts",
       "_origin": "ast",
       "community": 36,
-      "community_name": "react",
+      "community_name": "use-period-data.ts",
       "file_type": "code",
       "norm_label": "use-period-data.ts",
       "source_file": "src/hooks/use-period-data.ts",
@@ -6017,33 +6465,11 @@
       "label": "EMPTY_SALES",
       "_origin": "ast",
       "community": 36,
-      "community_name": "react",
+      "community_name": "use-period-data.ts",
       "file_type": "code",
       "norm_label": "empty_sales",
       "source_file": "src/hooks/use-period-data.ts",
       "source_location": "L11"
-    },
-    {
-      "id": "src_pages_login",
-      "label": "login.tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "login.tsx",
-      "source_file": "src/pages/login.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "react",
-      "file_type": "concept",
-      "norm_label": "react",
-      "source_file": ".oxlintrc.json",
-      "source_location": "L3"
     },
     {
       "id": "src_pages_blended_marketing",
@@ -6442,165 +6868,33 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_index",
-      "label": "index.ts",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "index.ts",
-      "source_file": "server/src/index.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_index_allowedorigins",
-      "label": "allowedOrigins",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "allowedorigins",
-      "source_file": "server/src/index.ts",
-      "source_location": "L19"
-    },
-    {
       "id": "server_src_index_app",
       "label": "app",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "app",
       "source_file": "server/src/index.ts",
       "source_location": "L18"
     },
     {
-      "id": "server_src_lib_state_token",
-      "label": "state-token.ts",
+      "id": "server_src_lib_crypto",
+      "label": "crypto.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
-      "norm_label": "state-token.ts",
-      "source_file": "server/src/lib/state-token.ts",
+      "norm_label": "crypto.ts",
+      "source_file": "server/src/lib/crypto.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "server_src_routes_billing_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/billing.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "server_src_routes_campaigns_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/campaigns.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "server_src_routes_clients_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/clients.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "server_src_routes_connections_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/connections.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "server_src_routes_courier_data_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/courier-data.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "server_src_routes_couriers_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/couriers.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "server_src_routes_shopify_data_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/shopify-data.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "server_src_routes_sync_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/sync.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "server_src_routes_tasks_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/tasks.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "server_src_routes_team_members_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/team-members.ts",
-      "source_location": "L5"
     },
     {
       "id": "server_test_db_test",
       "label": "db.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "db.test.ts",
       "source_file": "server/test/db.test.ts",
@@ -6611,29 +6905,18 @@
       "label": "expectedTables",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "expectedtables",
       "source_file": "server/test/db.test.ts",
       "source_location": "L4"
     },
     {
-      "id": "server_test_health_test",
-      "label": "health.test.ts",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "health.test.ts",
-      "source_file": "server/test/health.test.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_test_helpers_fake_courier",
       "label": "fake-courier.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "fake-courier.ts",
       "source_file": "server/test/helpers/fake-courier.ts",
@@ -6644,7 +6927,7 @@
       "label": "FAKE_COURIER_PLATFORM",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "fake_courier_platform",
       "source_file": "server/test/helpers/fake-courier.ts",
@@ -6655,7 +6938,7 @@
       "label": "test-db.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "test-db.ts",
       "source_file": "server/test/helpers/test-db.ts",
@@ -6666,7 +6949,7 @@
       "label": "__dirname",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "__dirname",
       "source_file": "server/test/helpers/test-db.ts",
@@ -6677,7 +6960,7 @@
       "label": "migrationFiles",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "migrationfiles",
       "source_file": "server/test/helpers/test-db.ts",
@@ -6688,7 +6971,7 @@
       "label": "migrationsDir",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "migrationsdir",
       "source_file": "server/test/helpers/test-db.ts",
@@ -6699,7 +6982,7 @@
       "label": "testPool",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "testpool",
       "source_file": "server/test/helpers/test-db.ts",
@@ -6710,7 +6993,7 @@
       "label": "test-jwt.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "test-jwt.ts",
       "source_file": "server/test/helpers/test-jwt.ts",
@@ -6721,7 +7004,7 @@
       "label": "google.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "google.test.ts",
       "source_file": "server/test/integrations/google.test.ts",
@@ -6732,18 +7015,40 @@
       "label": "meta.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "meta.test.ts",
       "source_file": "server/test/integrations/meta.test.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_test_integrations_shiprocket_test",
+      "label": "shiprocket.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "shiprocket.test.ts",
+      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_integrations_shiprocket_test_creds",
+      "label": "CREDS",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "creds",
+      "source_file": "server/test/integrations/shiprocket.test.ts",
+      "source_location": "L9"
+    },
+    {
       "id": "server_test_integrations_shopify_test",
       "label": "shopify.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "shopify.test.ts",
       "source_file": "server/test/integrations/shopify.test.ts",
@@ -6754,21 +7059,21 @@
       "label": "access.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "access.test.ts",
       "source_file": "server/test/lib/access.test.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_test_lib_state_token_test",
-      "label": "state-token.test.ts",
+      "id": "server_test_lib_crypto_test",
+      "label": "crypto.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
-      "norm_label": "state-token.test.ts",
-      "source_file": "server/test/lib/state-token.test.ts",
+      "norm_label": "crypto.test.ts",
+      "source_file": "server/test/lib/crypto.test.ts",
       "source_location": "L1"
     },
     {
@@ -6776,7 +7081,7 @@
       "label": "migration-006.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "migration-006.test.ts",
       "source_file": "server/test/migration-006.test.ts",
@@ -6787,10 +7092,32 @@
       "label": "migration-007.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "migration-007.test.ts",
       "source_file": "server/test/migration-007.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_migration_008_test",
+      "label": "migration-008.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "migration-008.test.ts",
+      "source_file": "server/test/migration-008.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_migration_009_test",
+      "label": "migration-009.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "migration-009.test.ts",
+      "source_file": "server/test/migration-009.test.ts",
       "source_location": "L1"
     },
     {
@@ -6798,7 +7125,7 @@
       "label": "billing.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "billing.test.ts",
       "source_file": "server/test/routes/billing.test.ts",
@@ -6809,7 +7136,7 @@
       "label": "campaigns.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "campaigns.test.ts",
       "source_file": "server/test/routes/campaigns.test.ts",
@@ -6820,10 +7147,21 @@
       "label": "clients.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "clients.test.ts",
       "source_file": "server/test/routes/clients.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_routes_connect_delhivery_test",
+      "label": "connect-delhivery.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "connect-delhivery.test.ts",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
       "source_location": "L1"
     },
     {
@@ -6831,7 +7169,7 @@
       "label": "connect-logging.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connect-logging.test.ts",
       "source_file": "server/test/routes/connect-logging.test.ts",
@@ -6842,7 +7180,7 @@
       "label": "connect-rate-limit.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connect-rate-limit.test.ts",
       "source_file": "server/test/routes/connect-rate-limit.test.ts",
@@ -6853,7 +7191,7 @@
       "label": "connect-shiprocket.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connect-shiprocket.test.ts",
       "source_file": "server/test/routes/connect-shiprocket.test.ts",
@@ -6864,7 +7202,7 @@
       "label": "connect-user-rate-limit.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connect-user-rate-limit.test.ts",
       "source_file": "server/test/routes/connect-user-rate-limit.test.ts",
@@ -6875,7 +7213,7 @@
       "label": "connections-framework.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connections-framework.test.ts",
       "source_file": "server/test/routes/connections-framework.test.ts",
@@ -6886,7 +7224,7 @@
       "label": "CREDS",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "creds",
       "source_file": "server/test/routes/connections-framework.test.ts",
@@ -6897,7 +7235,7 @@
       "label": "connections.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "connections.test.ts",
       "source_file": "server/test/routes/connections.test.ts",
@@ -6908,7 +7246,7 @@
       "label": "courier-data.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "courier-data.test.ts",
       "source_file": "server/test/routes/courier-data.test.ts",
@@ -6919,7 +7257,7 @@
       "label": "couriers.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "couriers.test.ts",
       "source_file": "server/test/routes/couriers.test.ts",
@@ -6930,7 +7268,7 @@
       "label": "integrations.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "integrations.test.ts",
       "source_file": "server/test/routes/integrations.test.ts",
@@ -6941,7 +7279,7 @@
       "label": "shopify-data.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "shopify-data.test.ts",
       "source_file": "server/test/routes/shopify-data.test.ts",
@@ -6952,7 +7290,7 @@
       "label": "sync.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "sync.test.ts",
       "source_file": "server/test/routes/sync.test.ts",
@@ -6963,7 +7301,7 @@
       "label": "tasks.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "tasks.test.ts",
       "source_file": "server/test/routes/tasks.test.ts",
@@ -6974,7 +7312,7 @@
       "label": "team-members.test.ts",
       "_origin": "ast",
       "community": 58,
-      "community_name": "index.ts",
+      "community_name": "test-db.ts",
       "file_type": "code",
       "norm_label": "team-members.test.ts",
       "source_file": "server/test/routes/team-members.test.ts",
@@ -7732,17 +8070,6 @@
       "source_location": "L31"
     },
     {
-      "id": "server_package_devdependencies_types_cors",
-      "label": "@types/cors",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "@types/cors",
-      "source_file": "server/package.json",
-      "source_location": "L23"
-    },
-    {
       "id": "server_package_devdependencies_types_express",
       "label": "@types/express",
       "_origin": "ast",
@@ -7752,6 +8079,17 @@
       "norm_label": "@types/express",
       "source_file": "server/package.json",
       "source_location": "L24"
+    },
+    {
+      "id": "server_package_devdependencies_types_jsonwebtoken",
+      "label": "@types/jsonwebtoken",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "devDependencies",
+      "file_type": "code",
+      "norm_label": "@types/jsonwebtoken",
+      "source_file": "server/package.json",
+      "source_location": "L25"
     },
     {
       "id": "server_package_devdependencies_types_node",
@@ -7820,17 +8158,6 @@
       "source_location": "L31"
     },
     {
-      "id": "types_cors",
-      "label": "@types/cors",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "devDependencies",
-      "file_type": "concept",
-      "norm_label": "@types/cors",
-      "source_file": "server/package.json",
-      "source_location": "L23"
-    },
-    {
       "id": "types_express",
       "label": "@types/express",
       "_origin": "ast",
@@ -7840,6 +8167,17 @@
       "norm_label": "@types/express",
       "source_file": "server/package.json",
       "source_location": "L24"
+    },
+    {
+      "id": "types_jsonwebtoken",
+      "label": "@types/jsonwebtoken",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "devDependencies",
+      "file_type": "concept",
+      "norm_label": "@types/jsonwebtoken",
+      "source_file": "server/package.json",
+      "source_location": "L25"
     },
     {
       "id": "types_node_cron",
@@ -7896,7 +8234,7 @@
       "node_kind": "heading",
       "norm_label": "architecture",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L49"
+      "source_location": "L52"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_connector_framework",
@@ -7908,7 +8246,7 @@
       "node_kind": "heading",
       "norm_label": "connector framework",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L51"
+      "source_location": "L54"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_courier_status_mapping",
@@ -7920,7 +8258,7 @@
       "node_kind": "heading",
       "norm_label": "courier status mapping",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L114"
+      "source_location": "L117"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_courier_sync",
@@ -7932,7 +8270,7 @@
       "node_kind": "heading",
       "norm_label": "courier sync",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L120"
+      "source_location": "L123"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_data_model_migration_006",
@@ -7944,7 +8282,7 @@
       "node_kind": "heading",
       "norm_label": "data model (migration 006)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L92"
+      "source_location": "L95"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_delhivery_plan_3",
@@ -7956,7 +8294,7 @@
       "node_kind": "heading",
       "norm_label": "delhivery (plan 3)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L198"
+      "source_location": "L213"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_error_handling",
@@ -7968,7 +8306,7 @@
       "node_kind": "heading",
       "norm_label": "error handling",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L220"
+      "source_location": "L265"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_findings_from_current_provider_docs_context7_2026_09_27",
@@ -7992,7 +8330,7 @@
       "node_kind": "heading",
       "norm_label": "frontend",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L204"
+      "source_location": "L249"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_goal",
@@ -8016,7 +8354,7 @@
       "node_kind": "heading",
       "norm_label": "meta (plan 4)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L167"
+      "source_location": "L170"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_non_goals",
@@ -8040,7 +8378,7 @@
       "node_kind": "heading",
       "norm_label": "operations page",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L132"
+      "source_location": "L135"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_per_platform_connect_flows",
@@ -8052,7 +8390,7 @@
       "node_kind": "heading",
       "norm_label": "per-platform connect flows",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L150"
+      "source_location": "L153"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_prerequisites_operator_setup",
@@ -8064,7 +8402,7 @@
       "node_kind": "heading",
       "norm_label": "prerequisites / operator setup",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L269"
+      "source_location": "L315"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_rollout_one_spec_five_plans",
@@ -8076,7 +8414,7 @@
       "node_kind": "heading",
       "norm_label": "rollout: one spec, five plans",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L254"
+      "source_location": "L299"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_routes",
@@ -8088,7 +8426,7 @@
       "node_kind": "heading",
       "norm_label": "routes",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L77"
+      "source_location": "L80"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_security",
@@ -8100,7 +8438,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L230"
+      "source_location": "L275"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shiprocket_plan_2",
@@ -8112,7 +8450,7 @@
       "node_kind": "heading",
       "norm_label": "shiprocket (plan 2)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L181"
+      "source_location": "L184"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shopify_plan_1_then_plan_5",
@@ -8124,7 +8462,19 @@
       "node_kind": "heading",
       "norm_label": "shopify (plan 1, then plan 5)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L152"
+      "source_location": "L155"
+    },
+    {
+      "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shopify_tracking_number_capture_plan_3_prerequisite_for_delhivery",
+      "label": "Shopify tracking-number capture (plan 3, prerequisite for Delhivery)",
+      "_origin": "ast",
+      "community": 63,
+      "community_name": "Simple One-Click Integrations: Shopify, Meta, Couriers",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "shopify tracking-number capture (plan 3, prerequisite for delhivery)",
+      "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
+      "source_location": "L201"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_simple_one_click_integrations_shopify_meta_couriers",
@@ -8148,7 +8498,7 @@
       "node_kind": "heading",
       "norm_label": "testing",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L240"
+      "source_location": "L285"
     },
     {
       "id": "docs_superpowers_plans_2026_09_02_shopify_integration",
@@ -9476,22 +9826,44 @@
       "source_location": "L13"
     },
     {
+      "id": "server_src_integrations_shiprocket",
+      "label": "shiprocket.ts",
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "shiprocket.ts",
+      "source_file": "server/src/integrations/shiprocket.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_src_integrations_shiprocket_api",
       "label": "shiprocket-api.ts",
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocket-api.ts",
       "source_file": "server/src/integrations/shiprocket-api.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_integrations_shiprocket_shiprocketconnector",
+      "label": "shiprocketConnector",
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "shiprocketconnector",
+      "source_file": "server/src/integrations/shiprocket.ts",
+      "source_location": "L16"
+    },
+    {
       "id": "server_test_integrations_shiprocket_api_test",
       "label": "shiprocket-api.test.ts",
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "shiprocket-api.test.ts",
       "source_file": "server/test/integrations/shiprocket-api.test.ts",
@@ -9502,7 +9874,7 @@
       "label": "ORDERS_FIXTURE",
       "_origin": "ast",
       "community": 72,
-      "community_name": "shiprocket-api.ts",
+      "community_name": "shiprocket.ts",
       "file_type": "code",
       "norm_label": "orders_fixture",
       "source_file": "server/test/integrations/shiprocket-api.test.ts",
@@ -9742,6 +10114,17 @@
       "source_location": "L1"
     },
     {
+      "id": "server_src_integrations_google_googleconnector",
+      "label": "googleConnector",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "googleconnector",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L163"
+    },
+    {
       "id": "src_components_ui_dropdown_menu",
       "label": "dropdown-menu.tsx",
       "_origin": "ast",
@@ -9808,131 +10191,43 @@
       "source_location": "L7"
     },
     {
-      "id": "server_src_integrations_shiprocket",
-      "label": "shiprocket.ts",
+      "id": "server_src_integrations_delhivery",
+      "label": "delhivery.ts",
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
-      "norm_label": "shiprocket.ts",
-      "source_file": "server/src/integrations/shiprocket.ts",
+      "norm_label": "delhivery.ts",
+      "source_file": "server/src/integrations/delhivery.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_shiprocket_shiprocketconnector",
-      "label": "shiprocketConnector",
+      "id": "server_src_integrations_delhivery_delhiveryconnector",
+      "label": "delhiveryConnector",
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
+      "community_name": "connector-registry.ts",
       "file_type": "code",
-      "norm_label": "shiprocketconnector",
-      "source_file": "server/src/integrations/shiprocket.ts",
+      "norm_label": "delhiveryconnector",
+      "source_file": "server/src/integrations/delhivery.ts",
       "source_location": "L16"
     },
     {
-      "id": "server_src_integrations_types",
-      "label": "integrations/types.ts",
+      "id": "server_src_integrations_delhivery_terminal_statuses",
+      "label": "TERMINAL_STATUSES",
       "_origin": "ast",
       "community": 80,
-      "community_name": "shiprocket.ts",
-      "file_type": "code",
-      "norm_label": "integrations/types.ts",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_test_integrations_shiprocket_test",
-      "label": "shiprocket.test.ts",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "shiprocket.ts",
-      "file_type": "code",
-      "norm_label": "shiprocket.test.ts",
-      "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_test_integrations_shiprocket_test_creds",
-      "label": "CREDS",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "shiprocket.ts",
-      "file_type": "code",
-      "norm_label": "creds",
-      "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "server_src_lib_connection_store",
-      "label": "connection-store.ts",
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "connection-store.ts",
-      "source_file": "server/src/lib/connection-store.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_lib_crypto",
-      "label": "crypto.ts",
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "crypto.ts",
-      "source_file": "server/src/lib/crypto.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_routes_integrations",
-      "label": "integrations.ts",
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "integrations.ts",
-      "source_file": "server/src/routes/integrations.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_routes_integrations_router",
-      "label": "router",
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "router",
-      "source_file": "server/src/routes/integrations.ts",
-      "source_location": "L6"
-    },
-    {
-      "id": "server_test_lib_crypto_test",
-      "label": "crypto.test.ts",
-      "_origin": "ast",
-      "community": 81,
-      "community_name": "crypto.ts",
-      "file_type": "code",
-      "norm_label": "crypto.test.ts",
-      "source_file": "server/test/lib/crypto.test.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_integrations_google_googleconnector",
-      "label": "googleConnector",
-      "_origin": "ast",
-      "community": 82,
       "community_name": "connector-registry.ts",
       "file_type": "code",
-      "norm_label": "googleconnector",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L163"
+      "norm_label": "terminal_statuses",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L12"
     },
     {
       "id": "server_src_integrations_meta_metaconnector",
       "label": "metaConnector",
       "_origin": "ast",
-      "community": 82,
+      "community": 80,
       "community_name": "connector-registry.ts",
       "file_type": "code",
       "norm_label": "metaconnector",
@@ -9940,10 +10235,32 @@
       "source_location": "L98"
     },
     {
+      "id": "server_src_integrations_shopify_shopifyconnector",
+      "label": "shopifyConnector",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "connector-registry.ts",
+      "file_type": "code",
+      "norm_label": "shopifyconnector",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L91"
+    },
+    {
+      "id": "server_src_integrations_types",
+      "label": "integrations/types.ts",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "connector-registry.ts",
+      "file_type": "code",
+      "norm_label": "integrations/types.ts",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_src_lib_connector_registry",
       "label": "connector-registry.ts",
       "_origin": "ast",
-      "community": 82,
+      "community": 80,
       "community_name": "connector-registry.ts",
       "file_type": "code",
       "norm_label": "connector-registry.ts",
@@ -9951,37 +10268,168 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_lib_connector_registry_connectors",
-      "label": "connectors",
+      "id": "server_test_integrations_delhivery_test",
+      "label": "delhivery.test.ts",
       "_origin": "ast",
-      "community": 82,
+      "community": 80,
       "community_name": "connector-registry.ts",
       "file_type": "code",
-      "norm_label": "connectors",
-      "source_file": "server/src/lib/connector-registry.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "server_src_scheduler",
-      "label": "scheduler.ts",
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "scheduler.ts",
-      "source_file": "server/src/scheduler.ts",
+      "norm_label": "delhivery.test.ts",
+      "source_file": "server/test/integrations/delhivery.test.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_test_scheduler_test",
-      "label": "scheduler.test.ts",
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration",
+      "label": "2026-09-28-delhivery-integration.md",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "2026-09-28-delhivery-integration.md",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_delhivery_integration_plan_3_of_5_implementation_plan",
+      "label": "Delhivery Integration (Plan 3 of 5) Implementation Plan",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "delhivery integration (plan 3 of 5) implementation plan",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "label": "Global Constraints",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "global constraints",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_1_migration_009_shopify_tracking_number_columns",
+      "label": "Task 1: Migration 009 \u2014 Shopify tracking-number columns",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1: migration 009 \u2014 shopify tracking-number columns",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L29"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_2_capture_shopify_s_tracking_number_and_company_during_sync",
+      "label": "Task 2: Capture Shopify's tracking number and company during sync",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2: capture shopify's tracking number and company during sync",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L117"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_3_delhivery_status_mapper_and_api_client_explicitly_unsourced",
+      "label": "Task 3: Delhivery status mapper and API client (explicitly unsourced)",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3: delhivery status mapper and api client (explicitly unsourced)",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L316"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_4_delhivery_connector_registry_couriers_list_scheduler",
+      "label": "Task 4: Delhivery connector, registry, couriers list, scheduler",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4: delhivery connector, registry, couriers list, scheduler",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L589"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_5_route_level_test_through_the_real_delhivery_connector",
+      "label": "Task 5: Route-level test through the real Delhivery connector",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5: route-level test through the real delhivery connector",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L993"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_6_frontend_add_delhivery_to_the_integrations_panel",
+      "label": "Task 6: Frontend \u2014 add Delhivery to the Integrations panel",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6: frontend \u2014 add delhivery to the integrations panel",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1104"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_7_final_verification_real_account_checklist_graph_refresh",
+      "label": "Task 7: Final verification, real-account checklist, graph refresh",
+      "_origin": "ast",
+      "community": 81,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 7: final verification, real-account checklist, graph refresh",
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1161"
+    },
+    {
+      "id": "server_src_integrations_delhivery_api",
+      "label": "delhivery-api.ts",
       "_origin": "ast",
       "community": 82,
-      "community_name": "connector-registry.ts",
+      "community_name": "delhivery-api.ts",
       "file_type": "code",
-      "norm_label": "scheduler.test.ts",
-      "source_file": "server/test/scheduler.test.ts",
+      "norm_label": "delhivery-api.ts",
+      "source_file": "server/src/integrations/delhivery-api.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "server_test_integrations_delhivery_api_test",
+      "label": "delhivery-api.test.ts",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery-api.ts",
+      "file_type": "code",
+      "norm_label": "delhivery-api.test.ts",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_integrations_delhivery_api_test_track_fixture",
+      "label": "TRACK_FIXTURE",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery-api.ts",
+      "file_type": "code",
+      "norm_label": "track_fixture",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L16"
     },
     {
       "id": "server_src_integrations_shopify",
@@ -9993,17 +10441,6 @@
       "norm_label": "shopify.ts",
       "source_file": "server/src/integrations/shopify.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "server_src_integrations_shopify_shopifyconnector",
-      "label": "shopifyConnector",
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "shopifyconnector",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L82"
     },
     {
       "id": "server_src_integrations_shiprocket_status",
@@ -10127,6 +10564,50 @@
       "source_location": "L10"
     },
     {
+      "id": "server_src_integrations_delhivery_status",
+      "label": "delhivery-status.ts",
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "delhivery-status.ts",
+      "file_type": "code",
+      "norm_label": "delhivery-status.ts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_dispatched_parts",
+      "label": "DISPATCHED_PARTS",
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "delhivery-status.ts",
+      "file_type": "code",
+      "norm_label": "dispatched_parts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_in_transit_parts",
+      "label": "IN_TRANSIT_PARTS",
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "delhivery-status.ts",
+      "file_type": "code",
+      "norm_label": "in_transit_parts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "server_test_integrations_delhivery_status_test",
+      "label": "delhivery-status.test.ts",
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "delhivery-status.ts",
+      "file_type": "code",
+      "norm_label": "delhivery-status.test.ts",
+      "source_file": "server/test/integrations/delhivery-status.test.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_package",
       "label": "server/package.json",
       "_origin": "ast",
@@ -10182,26 +10663,26 @@
       "source_location": "L5"
     },
     {
-      "id": "src_pages_geography",
-      "label": "geography.tsx",
+      "id": "server_src_lib_state_token",
+      "label": "state-token.ts",
       "_origin": "ast",
       "community": 88,
-      "community_name": "geography.tsx",
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "geography.tsx",
-      "source_file": "src/pages/geography.tsx",
+      "norm_label": "state-token.ts",
+      "source_file": "server/src/lib/state-token.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_pages_geography_empty_geo",
-      "label": "EMPTY_GEO",
+      "id": "server_test_lib_state_token_test",
+      "label": "state-token.test.ts",
       "_origin": "ast",
       "community": 88,
-      "community_name": "geography.tsx",
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "empty_geo",
-      "source_file": "src/pages/geography.tsx",
-      "source_location": "L12"
+      "norm_label": "state-token.test.ts",
+      "source_file": "server/test/lib/state-token.test.ts",
+      "source_location": "L1"
     },
     {
       "id": "server_package_devdependencies_node_pg_migrate",
@@ -10270,28 +10751,6 @@
       "source_location": "L32"
     },
     {
-      "id": "server_package_devdependencies_types_jsonwebtoken",
-      "label": "@types/jsonwebtoken",
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "@types/jsonwebtoken",
-      "file_type": "code",
-      "norm_label": "@types/jsonwebtoken",
-      "source_file": "server/package.json",
-      "source_location": "L25"
-    },
-    {
-      "id": "types_jsonwebtoken",
-      "label": "@types/jsonwebtoken",
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "@types/jsonwebtoken",
-      "file_type": "concept",
-      "norm_label": "@types/jsonwebtoken",
-      "source_file": "server/package.json",
-      "source_location": "L25"
-    },
-    {
       "id": "server_package_devdependencies_types_supertest",
       "label": "@types/supertest",
       "_origin": "ast",
@@ -10334,6 +10793,28 @@
       "norm_label": "typescript",
       "source_file": "server/package.json",
       "source_location": "L33"
+    },
+    {
+      "id": "server_package_devdependencies_types_cors",
+      "label": "@types/cors",
+      "_origin": "ast",
+      "community": 94,
+      "community_name": "@types/cors",
+      "file_type": "code",
+      "norm_label": "@types/cors",
+      "source_file": "server/package.json",
+      "source_location": "L23"
+    },
+    {
+      "id": "types_cors",
+      "label": "@types/cors",
+      "_origin": "ast",
+      "community": 94,
+      "community_name": "@types/cors",
+      "file_type": "concept",
+      "norm_label": "@types/cors",
+      "source_file": "server/package.json",
+      "source_location": "L23"
     },
     {
       "id": "public_creatives_demo_22",
@@ -10953,6 +11434,30 @@
   ],
   "links": [
     {
+      "source": "server_src_integrations_delhivery_api_trackshipment",
+      "target": "server_src_integrations_delhivery_api_isrecord",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_api_trackshipment",
+      "target": "server_src_integrations_delhivery_api_asstring",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_integrations_google_refreshaccesstoken",
       "target": "server_src_lib_crypto_encrypttoken",
       "relation": "calls",
@@ -11265,6 +11770,18 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_integrations_delhivery_test_insertconnection",
+      "target": "server_src_lib_crypto_encrypttoken",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_integrations_shiprocket_test_insertconnection",
       "target": "server_src_lib_crypto_encrypttoken",
       "relation": "calls",
@@ -11273,7 +11790,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L30",
+      "source_location": "L36",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test_connect",
+      "target": "server_test_routes_connect_delhivery_test_token",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test_token",
+      "target": "server_test_helpers_test_jwt_signtestjwt",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -12537,6 +13078,90 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_types_credentialsconnector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_types_credentialsrejectederror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_db_pool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_lib_crypto_decrypttoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_api_delhiveryautherror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_api_trackshipment",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_status_mapdelhiverystatus",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_integrations_google",
       "target": "server_src_integrations_types_oauthconnector",
       "relation": "imports",
@@ -12858,6 +13483,18 @@
       "context": "import",
       "source_file": "server/src/lib/connector-registry.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_connector_registry",
+      "target": "server_src_integrations_delhivery_delhiveryconnector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/connector-registry.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -13425,6 +14062,102 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_integrations_delhivery_api_test",
+      "target": "server_src_integrations_delhivery_api_delhiveryautherror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_api_test",
+      "target": "server_src_integrations_delhivery_api_trackshipment",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_status_test",
+      "target": "server_src_integrations_delhivery_status_mapdelhiverystatus",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery-status.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_src_lib_crypto_encrypttoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_src_integrations_delhivery_delhiveryconnector",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_src_integrations_types_credentialsrejectederror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_integrations_google_test",
       "target": "server_src_integrations_google_googleconnector",
       "relation": "imports",
@@ -13857,6 +14590,54 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_migration_008_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-008.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_008_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-008.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_009_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-009.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_009_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-009.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_routes_billing_test",
       "target": "server_src_index_app",
       "relation": "imports",
@@ -13998,6 +14779,66 @@
       "context": "import",
       "source_file": "server/test/routes/clients.test.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_src_index_app",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_helpers_test_jwt_signtestjwt",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_src_lib_crypto_decrypttoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -15309,6 +16150,66 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_types",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_lib_crypto",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_api",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_status",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_integrations_google",
       "target": "server_src_integrations_types",
       "relation": "imports_from",
@@ -15570,6 +16471,18 @@
       "context": "import",
       "source_file": "server/src/lib/connector-registry.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_connector_registry",
+      "target": "server_src_integrations_delhivery",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/connector-registry.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -16209,6 +17122,78 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_integrations_delhivery_api_test",
+      "target": "server_src_integrations_delhivery_api",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_status_test",
+      "target": "server_src_integrations_delhivery_status",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery-status.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_src_lib_crypto",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_src_integrations_delhivery",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_src_integrations_types",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_integrations_google_test",
       "target": "server_src_integrations_google",
       "relation": "imports_from",
@@ -16509,6 +17494,30 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_migration_008_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-008.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_009_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-009.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_routes_billing_test",
       "target": "server_src_index",
       "relation": "imports_from",
@@ -16614,6 +17623,54 @@
       "context": "import",
       "source_file": "server/test/routes/clients.test.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_src_index",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_helpers_test_jwt",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_src_lib_crypto",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -18767,6 +19824,105 @@
       "weight": 1.0
     },
     {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_delhivery_integration_plan_3_of_5_implementation_plan",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_delhivery_integration_plan_3_of_5_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_6_frontend_add_delhivery_to_the_integrations_panel",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1104",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_7_final_verification_real_account_checklist_graph_refresh",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L1161",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_2_capture_shopify_s_tracking_number_and_company_during_sync",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L117",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_1_migration_009_shopify_tracking_number_columns",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_3_delhivery_status_mapper_and_api_client_explicitly_unsourced",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L316",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_4_delhivery_connector_registry_couriers_list_scheduler",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L589",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_delhivery_integration_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_delhivery_integration_task_5_route_level_test_through_the_real_delhivery_connector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-delhivery-integration.md",
+      "source_location": "L993",
+      "weight": 1.0
+    },
+    {
       "source": "docs_superpowers_specs_2026_08_31_backend_integrations_design",
       "target": "docs_superpowers_specs_2026_08_31_backend_integrations_design_backend_v1_auth_billing_and_multi_platform_integrations",
       "relation": "contains",
@@ -19115,7 +20271,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L114",
+      "source_location": "L117",
       "weight": 1.0
     },
     {
@@ -19126,7 +20282,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L120",
+      "source_location": "L123",
       "weight": 1.0
     },
     {
@@ -19137,7 +20293,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L132",
+      "source_location": "L135",
       "weight": 1.0
     },
     {
@@ -19148,7 +20304,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L51",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -19159,7 +20315,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L77",
+      "source_location": "L80",
       "weight": 1.0
     },
     {
@@ -19170,7 +20326,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L92",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -19181,7 +20337,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L152",
+      "source_location": "L155",
       "weight": 1.0
     },
     {
@@ -19192,7 +20348,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L167",
+      "source_location": "L170",
       "weight": 1.0
     },
     {
@@ -19203,7 +20359,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L181",
+      "source_location": "L184",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_specs_2026_09_27_simple_integrations_design_per_platform_connect_flows",
+      "target": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shopify_tracking_number_capture_plan_3_prerequisite_for_delhivery",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -19214,7 +20381,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L198",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -19225,7 +20392,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L150",
+      "source_location": "L153",
       "weight": 1.0
     },
     {
@@ -19247,7 +20414,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L204",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -19258,7 +20425,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L220",
+      "source_location": "L265",
       "weight": 1.0
     },
     {
@@ -19269,7 +20436,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L230",
+      "source_location": "L275",
       "weight": 1.0
     },
     {
@@ -19280,7 +20447,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L240",
+      "source_location": "L285",
       "weight": 1.0
     },
     {
@@ -19291,7 +20458,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L254",
+      "source_location": "L299",
       "weight": 1.0
     },
     {
@@ -19302,7 +20469,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L269",
+      "source_location": "L315",
       "weight": 1.0
     },
     {
@@ -19324,7 +20491,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L49",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -20219,6 +21386,127 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_terminal_statuses",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery",
+      "target": "server_src_integrations_delhivery_delhiveryconnector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_api",
+      "target": "server_src_integrations_delhivery_api_delhiveryautherror",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_api",
+      "target": "server_src_integrations_delhivery_api_delhiverytrackedshipment",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_api",
+      "target": "server_src_integrations_delhivery_api_isrecord",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_api",
+      "target": "server_src_integrations_delhivery_api_asstring",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_api",
+      "target": "server_src_integrations_delhivery_api_trackshipment",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_status",
+      "target": "server_src_integrations_delhivery_status_dispatched_parts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_status",
+      "target": "server_src_integrations_delhivery_status_in_transit_parts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_status",
+      "target": "server_src_integrations_delhivery_status_mapdelhiverystatus",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_delhivery_status",
+      "target": "server_src_integrations_delhivery_status_shipmentstatus",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_integrations_google",
       "target": "server_src_integrations_google_withtokenrefresh",
       "relation": "contains",
@@ -20671,13 +21959,24 @@
     },
     {
       "source": "server_src_integrations_shopify",
+      "target": "server_src_integrations_shopify_firstfulfillmenttracking",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_shopify",
       "target": "server_src_integrations_shopify_maporderstatus",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L27",
+      "source_location": "L36",
       "weight": 1.0
     },
     {
@@ -20688,7 +21987,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L33",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -20699,7 +21998,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L38",
+      "source_location": "L47",
       "weight": 1.0
     },
     {
@@ -20710,7 +22009,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L46",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -20721,7 +22020,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L58",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -20732,18 +22031,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L69",
-      "weight": 1.0
-    },
-    {
-      "source": "server_src_integrations_shopify",
-      "target": "server_src_integrations_shopify_shopifyconnector",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L82",
+      "source_location": "L78",
       "weight": 1.0
     },
     {
@@ -20755,6 +22043,17 @@
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/shopify.ts",
       "source_location": "L9",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_shopify",
+      "target": "server_src_integrations_shopify_shopifyconnector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -20875,7 +22174,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/lib/connector-registry.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -21440,6 +22739,72 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_integrations_delhivery_api_test",
+      "target": "server_test_integrations_delhivery_api_test_track_fixture",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_api_test",
+      "target": "server_test_integrations_delhivery_api_test_stubfetch",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_integrations_delhivery_test_insertconnection",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_integrations_delhivery_test_insertshopifyconnection",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_integrations_delhivery_test_insertshopifyorder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_integrations_delhivery_test",
+      "target": "server_test_integrations_delhivery_test_stubdelhivery",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L49",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_integrations_shiprocket_api_test",
       "target": "server_test_integrations_shiprocket_api_test_orders_fixture",
       "relation": "contains",
@@ -21469,7 +22834,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L10",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -21480,7 +22845,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L26",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -21491,7 +22856,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L35",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -21502,7 +22867,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L49",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -21513,7 +22878,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/test/integrations/shiprocket.test.ts",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -21569,6 +22934,39 @@
       "confidence_score": 1.0,
       "source_file": "server/test/migration-007.test.ts",
       "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_routes_connect_delhivery_test_stubdelhivery",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_routes_connect_delhivery_test_connect",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L44",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_connect_delhivery_test",
+      "target": "server_test_routes_connect_delhivery_test_token",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/routes/connect-delhivery.test.ts",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -22261,7 +23659,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/integrations/platforms.ts",
-      "source_location": "L85",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -25930,5 +27328,5 @@
       "source_file": "README.md"
     }
   ],
-  "built_at_commit": "ceb28bca597fa7a8f6667f12d8bc712198e16114"
+  "built_at_commit": "0e93799e24c76770f67b9168dd4023197b8303cc"
 }

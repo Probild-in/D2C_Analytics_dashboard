@@ -186,14 +186,14 @@
     "semantic_hash": "ddd81c421005dd110c1a7ec00690827c"
   },
   "src/data/mock.ts": {
-    "mtime": 1790493037.7658677,
-    "seen": 1790493567.4690502,
+    "mtime": 1790535078.5320714,
+    "seen": 1790540359.409193,
     "ast_hash": "7e0ce63275692179422ce8ffdcc690c2",
     "semantic_hash": ""
   },
   "src/data/types.ts": {
-    "mtime": 1790493030.0257258,
-    "seen": 1790493567.469051,
+    "mtime": 1790535078.535503,
+    "seen": 1790540359.409194,
     "ast_hash": "c78dc1c7f39c5caf792890635928e976",
     "semantic_hash": ""
   },
@@ -264,8 +264,8 @@
     "semantic_hash": ""
   },
   "src/pages/operations.tsx": {
-    "mtime": 1790493094.7756517,
-    "seen": 1790493567.4692428,
+    "mtime": 1790535078.5380044,
+    "seen": 1790540359.409408,
     "ast_hash": "71b1e80d19544fc641cb80b418181eed",
     "semantic_hash": ""
   },
@@ -426,8 +426,8 @@
     "semantic_hash": ""
   },
   "server/src/index.ts": {
-    "mtime": 1790491636.0629094,
-    "seen": 1790493567.467857,
+    "mtime": 1790535078.512939,
+    "seen": 1790540359.4079528,
     "ast_hash": "3e31a484ba6f0d4dfafbe1b351cc095e",
     "semantic_hash": ""
   },
@@ -450,9 +450,9 @@
     "semantic_hash": ""
   },
   "server/src/integrations/shopify.ts": {
-    "mtime": 1790450312.4651556,
-    "seen": 1790493567.46788,
-    "ast_hash": "0fed7e2b9f12106efa213abbf1784fb5",
+    "mtime": 1790538833.8714223,
+    "seen": 1790540359.408016,
+    "ast_hash": "48a48f1cbc8405981b009ec8444dc91e",
     "semantic_hash": ""
   },
   "server/src/integrations/types.ts": {
@@ -462,8 +462,8 @@
     "semantic_hash": ""
   },
   "server/src/lib/access.ts": {
-    "mtime": 1790491587.1363358,
-    "seen": 1790493567.4678998,
+    "mtime": 1790535078.5156577,
+    "seen": 1790540359.408035,
     "ast_hash": "d5cad1a787ec26a2be6b35649566624b",
     "semantic_hash": ""
   },
@@ -474,9 +474,9 @@
     "semantic_hash": ""
   },
   "server/src/lib/connector-registry.ts": {
-    "mtime": 1790491016.3876655,
-    "seen": 1790493567.4679208,
-    "ast_hash": "1bdb666196b665033414093a35fd9080",
+    "mtime": 1790539538.8337066,
+    "seen": 1790540359.408054,
+    "ast_hash": "1f9b985926c15a29239e570b44feed6e",
     "semantic_hash": ""
   },
   "server/src/lib/crypto.ts": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   "server/src/middleware/rate-limit.ts": {
-    "mtime": 1790489816.8355727,
-    "seen": 1790493567.468014,
+    "mtime": 1790535078.5184534,
+    "seen": 1790540359.408149,
     "ast_hash": "0cdc1237644bedfb83599ad8b422636a",
     "semantic_hash": ""
   },
@@ -534,15 +534,15 @@
     "semantic_hash": ""
   },
   "server/src/routes/connections.ts": {
-    "mtime": 1790489829.041809,
-    "seen": 1790493567.4680681,
+    "mtime": 1790535078.5207078,
+    "seen": 1790540359.4082031,
     "ast_hash": "23e85134df7dc39b986c1cc5f26966fe",
     "semantic_hash": ""
   },
   "server/src/routes/couriers.ts": {
-    "mtime": 1790491017.45821,
-    "seen": 1790493567.468069,
-    "ast_hash": "5d21e4634870671e22e505a8c79fff37",
+    "mtime": 1790539543.0281422,
+    "seen": 1790540359.408204,
+    "ast_hash": "d1350c24b022ec0cd00f0cd3fa5ac15d",
     "semantic_hash": ""
   },
   "server/src/routes/integrations.ts": {
@@ -552,9 +552,9 @@
     "semantic_hash": ""
   },
   "server/src/routes/shopify-data.ts": {
-    "mtime": 1790492112.6849687,
-    "seen": 1790493567.4680882,
-    "ast_hash": "bfae55ab66bc06707a6c9f8b84638209",
+    "mtime": 1790535078.523311,
+    "seen": 1790540359.408223,
+    "ast_hash": "fdcb8772a2364b287648f83ad20a92b4",
     "semantic_hash": ""
   },
   "server/src/routes/sync.ts": {
@@ -576,9 +576,9 @@
     "semantic_hash": ""
   },
   "server/src/scheduler.ts": {
-    "mtime": 1790491018.4936488,
-    "seen": 1790493567.468122,
-    "ast_hash": "51b043b07beaa06cffcde22838cdaded",
+    "mtime": 1790539549.057404,
+    "seen": 1790540359.408276,
+    "ast_hash": "81f71ea9bc9e64c14186eef007185b0c",
     "semantic_hash": ""
   },
   "server/test/db.test.ts": {
@@ -624,9 +624,9 @@
     "semantic_hash": ""
   },
   "server/test/integrations/shopify.test.ts": {
-    "mtime": 1790450298.4444392,
-    "seen": 1790493567.468251,
-    "ast_hash": "5acd4360c4241d25f98272b16a334798",
+    "mtime": 1790537899.8163586,
+    "seen": 1790540359.408403,
+    "ast_hash": "f8ee73f73d081de52255ea2241143a53",
     "semantic_hash": ""
   },
   "server/test/lib/access.test.ts": {
@@ -660,8 +660,8 @@
     "semantic_hash": ""
   },
   "server/test/middleware/rate-limit.test.ts": {
-    "mtime": 1790489782.5749805,
-    "seen": 1790493567.4683409,
+    "mtime": 1790535078.5248537,
+    "seen": 1790540359.408493,
     "ast_hash": "493ce28bf478bbe51eaeb6c6e2f738b5",
     "semantic_hash": ""
   },
@@ -696,8 +696,8 @@
     "semantic_hash": ""
   },
   "server/test/routes/connections-framework.test.ts": {
-    "mtime": 1790475444.5496576,
-    "seen": 1790493567.468433,
+    "mtime": 1790535078.5281549,
+    "seen": 1790540359.408577,
     "ast_hash": "1ca4cefbd4b38bbaca9fbd0f502f9aa2",
     "semantic_hash": ""
   },
@@ -708,9 +708,9 @@
     "semantic_hash": ""
   },
   "server/test/routes/couriers.test.ts": {
-    "mtime": 1790490938.756576,
-    "seen": 1790493567.4684522,
-    "ast_hash": "ffe16976288e02b3661174ac68f041f4",
+    "mtime": 1790539487.4210072,
+    "seen": 1790540359.408594,
+    "ast_hash": "55a0cee924a10473dcc05d49cbebacb3",
     "semantic_hash": ""
   },
   "server/test/routes/integrations.test.ts": {
@@ -720,9 +720,9 @@
     "semantic_hash": ""
   },
   "server/test/routes/shopify-data.test.ts": {
-    "mtime": 1790492069.0521486,
-    "seen": 1790493567.468471,
-    "ast_hash": "22b62d969870ab43e2688a7194ced2a7",
+    "mtime": 1790535078.5294087,
+    "seen": 1790540359.408611,
+    "ast_hash": "f1be3d4366c62403e9f0adc0e595d3a8",
     "semantic_hash": ""
   },
   "server/test/routes/sync.test.ts": {
@@ -744,9 +744,9 @@
     "semantic_hash": ""
   },
   "server/test/scheduler.test.ts": {
-    "mtime": 1790490939.7718866,
-    "seen": 1790493567.468509,
-    "ast_hash": "c1b45f9f02c961b204a1b856fb68a52e",
+    "mtime": 1790539493.9181108,
+    "seen": 1790540359.40866,
+    "ast_hash": "40830f6876162e88a53c2182cca3c937",
     "semantic_hash": ""
   },
   "server/test/setup.ts": {
@@ -768,21 +768,21 @@
     "semantic_hash": ""
   },
   "src/components/integrations/integration-card.tsx": {
-    "mtime": 1790492508.0873601,
-    "seen": 1790493567.468661,
+    "mtime": 1790535078.5307107,
+    "seen": 1790540359.4088,
     "ast_hash": "6f1c74047409bae4d89cb3cdbd270e3d",
     "semantic_hash": ""
   },
   "src/components/integrations/integrations-panel.tsx": {
-    "mtime": 1790492509.1185255,
-    "seen": 1790493567.468661,
+    "mtime": 1790535078.5312452,
+    "seen": 1790540359.4088,
     "ast_hash": "69ea8ef031b679f1fe880360dd6f6eab",
     "semantic_hash": ""
   },
   "src/components/integrations/platforms.ts": {
-    "mtime": 1790492506.0129046,
-    "seen": 1790493567.468662,
-    "ast_hash": "0032f5a83f58a25f49a52c27ad0f860c",
+    "mtime": 1790540120.4236972,
+    "seen": 1790540359.408801,
+    "ast_hash": "ec6717888594942330f198c224bb813d",
     "semantic_hash": ""
   },
   "src/components/layout/require-auth.tsx": {
@@ -792,14 +792,14 @@
     "semantic_hash": ""
   },
   "src/hooks/use-client-resource.ts": {
-    "mtime": 1790492520.8092186,
-    "seen": 1790493567.469051,
+    "mtime": 1790535078.5370784,
+    "seen": 1790540359.409194,
     "ast_hash": "9f4fd3bfc4bdb570e9b85aa8b59e4b10",
     "semantic_hash": ""
   },
   "src/lib/api.ts": {
-    "mtime": 1790492504.976316,
-    "seen": 1790493567.469067,
+    "mtime": 1790535078.5376027,
+    "seen": 1790540359.4092119,
     "ast_hash": "fee593848c1fc2c57d3aacb2feb78a66",
     "semantic_hash": ""
   },
@@ -858,86 +858,86 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-09-27-simple-integrations-design.md": {
-    "mtime": 1790451388.5428367,
-    "seen": 1790493567.469493,
-    "ast_hash": "432fd946ff25b71ae2989ba1e7bf7a72",
+    "mtime": 1790537302.985631,
+    "seen": 1790540359.409687,
+    "ast_hash": "efec7463c3534319e47a5fd2a388dcb7",
     "semantic_hash": ""
   },
   "server/src/integrations/shiprocket-api.ts": {
-    "mtime": 1790490558.1457028,
-    "seen": 1790493567.4678788,
+    "mtime": 1790535078.5135558,
+    "seen": 1790540359.408014,
     "ast_hash": "cba74efdd37bfbe7bc93acd7bb5b7034",
     "semantic_hash": ""
   },
   "server/src/integrations/shiprocket-status.ts": {
-    "mtime": 1790490520.7207074,
-    "seen": 1790493567.4678788,
+    "mtime": 1790535078.514248,
+    "seen": 1790540359.408015,
     "ast_hash": "0add530660b161040681de5acf4136a3",
     "semantic_hash": ""
   },
   "server/src/integrations/shiprocket.ts": {
-    "mtime": 1790490973.180651,
-    "seen": 1790493567.46788,
-    "ast_hash": "9a927b799a36d6b508339b730357887c",
+    "mtime": 1790535078.5148594,
+    "seen": 1790540359.408015,
+    "ast_hash": "d8655db3fc5ed71641342487d197e413",
     "semantic_hash": ""
   },
   "server/src/routes/courier-data.ts": {
-    "mtime": 1790491628.1921546,
-    "seen": 1790493567.468069,
-    "ast_hash": "f9a8233a07099263e10e53cd60b1a5b0",
+    "mtime": 1790535078.5225532,
+    "seen": 1790540359.408204,
+    "ast_hash": "afe35696aeff0c8131c033d69b21a22d",
     "semantic_hash": ""
   },
   "server/test/integrations/shiprocket-api.test.ts": {
-    "mtime": 1790490539.8082306,
-    "seen": 1790493567.468249,
+    "mtime": 1790535078.5239017,
+    "seen": 1790540359.408401,
     "ast_hash": "44dd971916421b0fec6a2a94013aa0d3",
     "semantic_hash": ""
   },
   "server/test/integrations/shiprocket-status.test.ts": {
-    "mtime": 1790490507.81451,
-    "seen": 1790493567.46825,
+    "mtime": 1790535078.5241761,
+    "seen": 1790540359.408402,
     "ast_hash": "4e7093dc71a26af1f51e05dbcf7c6a14",
     "semantic_hash": ""
   },
   "server/test/integrations/shiprocket.test.ts": {
-    "mtime": 1790490928.2635934,
-    "seen": 1790493567.46825,
-    "ast_hash": "503da329195e9c666bb37959c9c0c03a",
+    "mtime": 1790535078.5245047,
+    "seen": 1790540359.408402,
+    "ast_hash": "73c062859300c01cdb2baae5aa81f2e2",
     "semantic_hash": ""
   },
   "server/test/migration-007.test.ts": {
-    "mtime": 1790490264.9309914,
-    "seen": 1790493567.4683578,
+    "mtime": 1790535078.5250752,
+    "seen": 1790540359.4085078,
     "ast_hash": "64721a212861097d2702cf9b248badf2",
     "semantic_hash": ""
   },
   "server/test/routes/connect-logging.test.ts": {
-    "mtime": 1790475443.5093298,
-    "seen": 1790493567.4684129,
+    "mtime": 1790535078.5258293,
+    "seen": 1790540359.408559,
     "ast_hash": "b78a991ba7ee45c87b912182c48fe4fe",
     "semantic_hash": ""
   },
   "server/test/routes/connect-shiprocket.test.ts": {
-    "mtime": 1790491319.8024642,
-    "seen": 1790493567.468432,
+    "mtime": 1790535078.5265217,
+    "seen": 1790540359.408576,
     "ast_hash": "aa52c41ba1bf80a2eff379b85867cd34",
     "semantic_hash": ""
   },
   "server/test/routes/connect-user-rate-limit.test.ts": {
-    "mtime": 1790489798.1013691,
-    "seen": 1790493567.468433,
+    "mtime": 1790535078.5271928,
+    "seen": 1790540359.408576,
     "ast_hash": "13ad84a278a719027d5beb58e7c8110f",
     "semantic_hash": ""
   },
   "server/test/routes/courier-data.test.ts": {
-    "mtime": 1790491554.045841,
-    "seen": 1790493567.4684522,
-    "ast_hash": "3d88c64ce1a90b14efee89215da45209",
+    "mtime": 1790535078.5286958,
+    "seen": 1790540359.408594,
+    "ast_hash": "3663dda43ff7d4e6d30df77b68c3f56a",
     "semantic_hash": ""
   },
   "src/components/integrations/credentials-dialog.tsx": {
-    "mtime": 1790492507.0554516,
-    "seen": 1790493567.4686599,
+    "mtime": 1790535078.5302444,
+    "seen": 1790540359.408799,
     "ast_hash": "eaf974983f08d166c292d920789f9477",
     "semantic_hash": ""
   },
@@ -945,6 +945,66 @@
     "mtime": 1790451859.830699,
     "seen": 1790493567.469459,
     "ast_hash": "4e5418fee359d5844e0a651dc143f506",
+    "semantic_hash": ""
+  },
+  "server/src/integrations/delhivery-api.ts": {
+    "mtime": 1790539082.3886583,
+    "seen": 1790540359.4079528,
+    "ast_hash": "d22ea111b1436991ade1412f99478383",
+    "semantic_hash": ""
+  },
+  "server/src/integrations/delhivery-status.ts": {
+    "mtime": 1790539328.7505808,
+    "seen": 1790540359.407954,
+    "ast_hash": "56b8994e4401a18ed12767072f1fa2c9",
+    "semantic_hash": ""
+  },
+  "server/src/integrations/delhivery.ts": {
+    "mtime": 1790539587.4154646,
+    "seen": 1790540359.407955,
+    "ast_hash": "83aab95d36ba5e244388d9b6acd67cd4",
+    "semantic_hash": ""
+  },
+  "server/test/integrations/delhivery-api.test.ts": {
+    "mtime": 1790539062.8060162,
+    "seen": 1790540359.408364,
+    "ast_hash": "07cf974c404b10f810bedc3d3d106087",
+    "semantic_hash": ""
+  },
+  "server/test/integrations/delhivery-status.test.ts": {
+    "mtime": 1790539006.5500093,
+    "seen": 1790540359.408364,
+    "ast_hash": "e94ec6d99bf820013c82b175d812f4f7",
+    "semantic_hash": ""
+  },
+  "server/test/integrations/delhivery.test.ts": {
+    "mtime": 1790539480.2858517,
+    "seen": 1790540359.408365,
+    "ast_hash": "1dd8a174c703b0bc9460fa4122b10850",
+    "semantic_hash": ""
+  },
+  "server/test/migration-008.test.ts": {
+    "mtime": 1790535078.5253665,
+    "seen": 1790540359.408509,
+    "ast_hash": "81614e2fe608ea28a70b9a28cfa6f04c",
+    "semantic_hash": ""
+  },
+  "server/test/migration-009.test.ts": {
+    "mtime": 1790537694.250902,
+    "seen": 1790540359.408509,
+    "ast_hash": "6f900d942179c337cf041c9f2cfc4c4d",
+    "semantic_hash": ""
+  },
+  "server/test/routes/connect-delhivery.test.ts": {
+    "mtime": 1790539958.718525,
+    "seen": 1790540359.4085581,
+    "ast_hash": "7cceb8b005b03f9567edfa36a60188ca",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-28-delhivery-integration.md": {
+    "mtime": 1790537541.5736368,
+    "seen": 1790540359.409653,
+    "ast_hash": "d9e1c396b908251885a3c15d59658fde",
     "semantic_hash": ""
   }
 }
