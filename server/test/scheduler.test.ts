@@ -202,4 +202,11 @@ describe("startScheduler", () => {
     expect(scheduleSpy).toHaveBeenCalledWith("15 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
     scheduleSpy.mockRestore();
   });
+
+  it("schedules an hourly Delhivery sync at minute 30", () => {
+    const scheduleSpy = vi.spyOn(cron, "schedule");
+    startScheduler();
+    expect(scheduleSpy).toHaveBeenCalledWith("30 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    scheduleSpy.mockRestore();
+  });
 });
