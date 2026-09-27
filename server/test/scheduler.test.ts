@@ -195,4 +195,11 @@ describe("startScheduler", () => {
     expect(sixHourlyCalls).toHaveLength(2);
     scheduleSpy.mockRestore();
   });
+
+  it("schedules an hourly Shiprocket sync at minute 15", () => {
+    const scheduleSpy = vi.spyOn(cron, "schedule");
+    startScheduler();
+    expect(scheduleSpy).toHaveBeenCalledWith("15 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    scheduleSpy.mockRestore();
+  });
 });
