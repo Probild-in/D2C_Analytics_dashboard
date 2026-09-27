@@ -102,6 +102,57 @@ describe("delhiveryConnector.sync", () => {
     expect(conn.last_synced_at).not.toBeNull();
   });
 
+  it("uses the Shopify order's real order_date as ordered_at, not sync time", async () => {
+    await insertConnection();
+    await insertShopifyConnection();
+    // 10 days ago: old enough to prove ordered_at isn't "now", but still inside the
+    // connector's own SYNC_WINDOW_DAYS lookback so it remains a sync candidate.
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, tracking_number, tracking_company)
+       values ('abc-fashion', '${SHOPIFY_CONN}', '1001', 'Priya Shah', now() - interval '10 days', 1000, 'Dispatched', 'Prepaid', 'AWB1', 'Delhivery Surface')`,
+    );
+    stubDelhivery({
+      AWB1: { ShipmentData: [{ Shipment: { AWB: "AWB1", Status: { Status: "In Transit" }, Destination: "Karnataka" } }] },
+    });
+
+    await delhiveryConnector.sync(CONN);
+
+    const row = (await testPool.query("select ordered_at from shipments where awb = 'AWB1'")).rows[0];
+    const orderedAt = new Date(row.ordered_at).getTime();
+    const expected = Date.now() - 10 * 24 * 60 * 60 * 1000;
+    expect(Math.abs(orderedAt - expected)).toBeLessThan(2 * 60 * 60 * 1000); // within 2 hours of the order's real date
+    expect(Math.abs(orderedAt - Date.now())).toBeGreaterThan(24 * 60 * 60 * 1000); // must not be "now"
+  });
+
+  it("does not touch a shipment row owned by a different courier connection for the same AWB", async () => {
+    await insertConnection();
+    await insertShopifyConnection();
+    await insertShopifyOrder("1001", "AWB1", "Delhivery Surface");
+    const OTHER_CONN = "99999999-9999-9999-9999-999999999999";
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('${OTHER_CONN}', 'abc-fashion', 'courier_shiprocket', 'connected', 'api-user@brand.com')`,
+    );
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, courier_name, status, ordered_at) values
+       ('abc-fashion', '${OTHER_CONN}', 'AWB1', 'Delhivery Surface', 'In Transit', now())`,
+    );
+    const fetchMock = stubDelhivery({
+      AWB1: { ShipmentData: [{ Shipment: { AWB: "AWB1", Status: { Status: "Delivered" } } }] },
+    });
+
+    await delhiveryConnector.sync(CONN);
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    const row = (
+      await testPool.query("select connection_id, courier_name, status from shipments where awb = 'AWB1'")
+    ).rows[0];
+    expect(row.connection_id).toBe(OTHER_CONN);
+    expect(row.courier_name).toBe("Delhivery Surface");
+    expect(row.status).toBe("In Transit");
+  });
+
   it("is idempotent and updates status on the next run", async () => {
     await insertConnection();
     await insertShopifyConnection();

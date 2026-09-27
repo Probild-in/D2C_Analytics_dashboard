@@ -9,7 +9,7 @@ import { mapDelhiveryStatus } from "./delhivery-status.js";
 // connector tracks one AWB per HTTP call; without a cap a client with a large backlog of
 // Delhivery-flagged Shopify orders could make the hourly sync run very long.
 const MAX_TRACKED_PER_SYNC = 200;
-const TERMINAL_STATUSES = new Set(["Delivered", "RTO Delivered", "Cancelled"]);
+const SYNC_WINDOW_DAYS = 30;
 
 const RECONNECT_MESSAGE = "Delhivery rejected the stored API token. Reconnect with a current token.";
 
@@ -47,25 +47,29 @@ export const delhiveryConnector: CredentialsConnector = {
     const { token } = JSON.parse(decryptToken(conn.credentials)) as { token: string };
 
     // Discover candidate AWBs: Shopify orders for this client whose tracking company looks
-    // like Delhivery, that either have no shipments row yet or whose existing row isn't
-    // terminal — never AWBs synced by a different courier connection.
-    const candidates = await pool.query<{ tracking_number: string; shopify_order_id: string }>(
-      `select o.tracking_number, o.shopify_order_id
+    // like Delhivery, that either have no shipments row yet or have one THIS connection
+    // previously wrote that isn't terminal yet. A shipment row another courier connection
+    // (e.g. Shiprocket) already owns for the same AWB is left alone. Also bounded to orders
+    // placed within the last SYNC_WINDOW_DAYS, so a newly-connected client's full order
+    // history doesn't get backfilled into the "recent" analytics window all at once.
+    const candidates = await pool.query<{ tracking_number: string; shopify_order_id: string; order_date: Date }>(
+      `select o.tracking_number, o.shopify_order_id, o.order_date
        from shopify_orders o
        left join shipments s on s.client_id = o.client_id and s.awb = o.tracking_number
        where o.client_id = $1
          and o.tracking_company ilike '%delhivery%'
          and o.tracking_number is not null
-         and (s.awb is null or s.status not in ('Delivered', 'RTO Delivered', 'Cancelled'))
+         and o.order_date >= now() - ($3::int * interval '1 day')
+         and (s.awb is null or (s.connection_id = $2 and s.status not in ('Delivered', 'RTO Delivered', 'Cancelled')))
        order by o.order_date desc
-       limit $2`,
-      [conn.client_id, MAX_TRACKED_PER_SYNC],
+       limit $4`,
+      [conn.client_id, connectionId, SYNC_WINDOW_DAYS, MAX_TRACKED_PER_SYNC],
     );
 
     const unmapped = new Set<string>();
     let recordsSynced = 0;
 
-    for (const { tracking_number: awb, shopify_order_id: orderRef } of candidates.rows) {
+    for (const { tracking_number: awb, shopify_order_id: orderRef, order_date: orderedAt } of candidates.rows) {
       let tracked;
       try {
         tracked = await trackShipment(token, awb);
@@ -80,11 +84,11 @@ export const delhiveryConnector: CredentialsConnector = {
 
       await pool.query(
         `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, destination_state, ordered_at)
-         values ($1, $2, $3, $4, 'Delhivery', $5, $6, now())
+         values ($1, $2, $3, $4, 'Delhivery', $5, $6, $7)
          on conflict (client_id, awb)
          do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
            status = excluded.status, destination_state = excluded.destination_state, synced_at = now()`,
-        [conn.client_id, connectionId, tracked.awb, orderRef, mapped ?? "In Transit", tracked.destinationState],
+        [conn.client_id, connectionId, tracked.awb, orderRef, mapped ?? "In Transit", tracked.destinationState, orderedAt],
       );
       recordsSynced++;
     }
