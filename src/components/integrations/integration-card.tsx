@@ -2,7 +2,9 @@ import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { apiFetch } from "@/lib/api";
+import { CredentialsDialog } from "./credentials-dialog";
 import type { Connection, PlatformMeta } from "./platforms";
 
 const STATUS_BADGE = {
@@ -11,6 +13,9 @@ const STATUS_BADGE = {
   disconnected: { label: "Not connected", variant: "neutral" },
 } as const;
 
+// The panel remounts a card (via `key`) whenever its connection status changes, so `busy`
+// intentionally stays true after a successful disconnect until the refetched status arrives:
+// there is no window in which a second click could send a second request.
 export function IntegrationCard({
   platform,
   connection,
@@ -25,15 +30,22 @@ export function IntegrationCard({
   const [value, setValue] = React.useState("");
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [credentialsOpen, setCredentialsOpen] = React.useState(false);
+  const [confirmingDisconnect, setConfirmingDisconnect] = React.useState(false);
 
   const Icon = platform.icon;
   const status = connection?.status ?? "disconnected";
   const badge = STATUS_BADGE[status];
   const isConnected = status === "connected";
+  const usesCredentials = platform.authType === "credentials";
   const needsInput = Boolean(platform.input) && !isConnected;
   const canConnect = !busy && (!needsInput || value.trim().length > 0);
 
   const connect = async () => {
+    if (usesCredentials) {
+      setCredentialsOpen(true);
+      return;
+    }
     if (!canConnect) return;
     setBusy(true);
     setError(null);
@@ -53,6 +65,7 @@ export function IntegrationCard({
   };
 
   const disconnect = async () => {
+    setConfirmingDisconnect(false);
     setBusy(true);
     setError(null);
     try {
@@ -60,7 +73,6 @@ export function IntegrationCard({
       onChanged();
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to disconnect ${platform.label}. Please try again.`);
-    } finally {
       setBusy(false);
     }
   };
@@ -104,17 +116,24 @@ export function IntegrationCard({
             }}
             placeholder={platform.input.placeholder}
             aria-label={`${platform.label} ${platform.input.placeholder}`}
+            aria-describedby={`${platform.key}-input-help`}
             className="h-8 text-[12px]"
           />
-          <p className="mt-1 text-[11px] text-text-tertiary">{platform.input.helper}</p>
+          <p id={`${platform.key}-input-help`} className="mt-1 text-[11px] text-text-tertiary">
+            {platform.input.helper}
+          </p>
         </div>
       )}
 
-      {error && <p className="text-[11px] text-negative">{error}</p>}
+      {error && (
+        <p role="alert" className="text-[11px] text-negative">
+          {error}
+        </p>
+      )}
 
       <div className="flex justify-end">
         {isConnected ? (
-          <Button size="sm" variant="ghost" onClick={disconnect} disabled={busy}>
+          <Button size="sm" variant="ghost" onClick={() => setConfirmingDisconnect(true)} disabled={busy}>
             Disconnect
           </Button>
         ) : (
@@ -123,6 +142,36 @@ export function IntegrationCard({
           </Button>
         )}
       </div>
+
+      {usesCredentials && (
+        <CredentialsDialog
+          open={credentialsOpen}
+          onOpenChange={setCredentialsOpen}
+          platform={platform}
+          clientId={clientId}
+          onConnected={onChanged}
+        />
+      )}
+
+      <Dialog open={confirmingDisconnect} onOpenChange={setConfirmingDisconnect}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Disconnect {platform.label}?</DialogTitle>
+            <DialogDescription>
+              Syncing stops and the stored access is deleted. Data already synced is kept.
+              {usesCredentials ? " To reconnect you'll need to enter the credentials again." : " You can reconnect at any time."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmingDisconnect(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={disconnect}>
+              Disconnect
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

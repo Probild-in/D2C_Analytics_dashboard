@@ -67,4 +67,14 @@ export function startScheduler() {
     },
     { noOverlap: true },
   );
+
+  // Courier statuses change through the day and Shiprocket's list endpoint is cheap, so sync
+  // hourly like Shopify, offset to minute 15 so the two don't hit the database together.
+  cron.schedule(
+    "15 * * * *",
+    () => {
+      runScheduledSyncs("courier_shiprocket").catch((err) => console.error("Shiprocket scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
 }

@@ -6,9 +6,10 @@ import { supabase } from "@/lib/supabase";
 // the same fetch/loading-state boilerplate. `path` is the full request path (e.g.
 // "/api/clients/abc-fashion/orders?limit=40"); pass null to skip fetching (e.g. while the
 // client id isn't known yet).
-export function useClientResource<T>(path: string | null, fallback: T): { data: T; loading: boolean } {
+export function useClientResource<T>(path: string | null, fallback: T): { data: T; loading: boolean; error: boolean } {
   const [data, setData] = React.useState<T>(fallback);
   const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(false);
 
   React.useEffect(() => {
     if (!path) {
@@ -18,6 +19,7 @@ export function useClientResource<T>(path: string | null, fallback: T): { data: 
     }
     let cancelled = false;
     setLoading(true);
+    setError(false);
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (cancelled) return;
@@ -35,11 +37,17 @@ export function useClientResource<T>(path: string | null, fallback: T): { data: 
           return r.json();
         })
         .then((json) => {
-          if (!cancelled) setData(json);
+          if (!cancelled) {
+            setData(json);
+            setError(false);
+          }
         })
         .catch((err) => {
           console.error(err);
-          if (!cancelled) setData(fallback);
+          if (!cancelled) {
+            setData(fallback);
+            setError(true);
+          }
         })
         .finally(() => {
           if (!cancelled) setLoading(false);
@@ -52,5 +60,5 @@ export function useClientResource<T>(path: string | null, fallback: T): { data: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [path]);
 
-  return { data, loading };
+  return { data, loading, error };
 }

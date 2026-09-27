@@ -12,8 +12,10 @@ import { CredentialsRejectedError } from "../integrations/types.js";
 
 const router = Router({ mergeParams: true });
 
-// 10 attempts per user per client per 10 minutes: enough for typos, too few for guessing.
+// 10 attempts per user per client and 30 per user overall, per 10 minutes: enough for typos
+// (and a few clients in a row), too few for guessing credentials.
 const connectLimiter = createRateLimiter({ max: 10, windowMs: 10 * 60 * 1000 });
+const connectUserLimiter = createRateLimiter({ max: 30, windowMs: 10 * 60 * 1000, scope: "user" });
 
 function isStringMap(value: unknown): value is Record<string, string> {
   return (
@@ -87,7 +89,7 @@ router.post("/:platform/authorize", requireAuth, async (req, res, next) => {
   }
 });
 
-router.post("/:platform/connect", requireAuth, connectLimiter, async (req, res, next) => {
+router.post("/:platform/connect", requireAuth, connectUserLimiter, connectLimiter, async (req, res, next) => {
   try {
     const clientId = req.params.id;
     const platform = req.params.platform;
@@ -113,7 +115,9 @@ router.post("/:platform/connect", requireAuth, connectLimiter, async (req, res, 
       if (err instanceof CredentialsRejectedError) {
         throw new HttpError(400, "credentials_rejected", err.message);
       }
-      console.error(`Credential connect failed for ${platform}:`, err);
+      // Log the message only: an error object from an HTTP client can carry the request body,
+      // which for this endpoint contains the user's password.
+      console.error(`Credential connect failed for ${platform}: ${err instanceof Error ? err.message : String(err)}`);
       throw new HttpError(
         502,
         "provider_unreachable",
@@ -157,6 +161,14 @@ router.delete("/:platform", requireAuth, async (req, res, next) => {
     for (const row of active.rows) {
       await connector.disconnect(row.id);
     }
+    // Disconnect is a user-facing promise: stop holding the client's tokens and stored
+    // credentials. The row and its synced data stay; reconnecting stores fresh secrets.
+    await pool.query(
+      `update platform_connections
+       set access_token = null, refresh_token = null, credentials = null
+       where client_id = $1 and platform = $2 and status = 'disconnected'`,
+      [clientId, platform],
+    );
     res.status(204).end();
   } catch (err) {
     next(err);
