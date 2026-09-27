@@ -43,6 +43,9 @@ the same.
 - Creating shipments or booking pickups from the dashboard. Read-only tracking data only.
 - Couriers other than Shiprocket and Delhivery (Shadowfax stays "coming soon"). The
   interface makes adding one a single-file change.
+- Matching a Shopify order's tracking number to a Delhivery shipment beyond the
+  `tracking_company ilike '%delhivery%'` heuristic (no fuzzy/alias matching).
+- Multi-fulfillment orders: only the first fulfillment's tracking number is captured.
 - Buying additional connection add-ons; existing limit enforcement is unchanged.
 - Changing how Google Ads connects.
 
@@ -195,11 +198,53 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   (JS-rendered); they are isolated in one module and validated at runtime, and must be
   confirmed against a real Shiprocket API user before plan 2 counts as "done".
 
+### Shopify tracking-number capture (plan 3, prerequisite for Delhivery)
+
+- **Confirmed by Context7** (Shopify Admin REST API, `orders.json` resource): each order's
+  `fulfillments[]` array carries `tracking_company`, `tracking_number`,
+  `tracking_numbers[]`, `tracking_url`, `status`, `shipment_status`. The existing Shopify
+  sync (`server/src/integrations/shopify.ts`) already fetches full order bodies with no
+  `fields=` filter, so this data is already in every response — it is only not parsed yet.
+- Migration 009 adds `shopify_orders.tracking_number text` and
+  `shopify_orders.tracking_company text` (nullable), populated from the FIRST fulfillment
+  in `fulfillments[]` (accepted gap: a multi-fulfillment order only captures one courier's
+  tracking number).
+
 ### Delhivery (plan 3)
 
-- Form: API token (helper text with where to find it in the Delhivery portal).
-  Validation and tracking endpoints, and the status-code table for `mapStatus`, come from
-  Delhivery's portal during plan 3.
+- **Not sourced from Context7.** Every query against Delhivery's docs (track API, fetch
+  waybill, serviceability, NDR, status codes) returned only the developer portal's
+  marketing overview page — no endpoint path, field name, or status vocabulary is
+  confirmed anywhere. This section is written from general, publicly-known conventions
+  about Delhivery's track-by-waybill API (token header auth, `Status`/`StatusType` fields
+  on a tracked shipment) and is **unconfirmed training knowledge, not documented fact** —
+  a materially higher-risk starting point than Shiprocket's plan 2, where Context7 at
+  least confirmed the login and orders-list endpoints. Isolated to
+  `server/src/integrations/delhivery-api.ts` and `delhivery-status.ts`, defensively
+  parsed exactly like the Shiprocket modules, and this plan is explicitly NOT considered
+  safe to rely on for real numbers until verified against a real Delhivery account or
+  real documentation — more so than plan 2's own checklist required.
+- **No bulk order-discovery endpoint is known to exist.** Unlike Shiprocket's
+  `GET /orders`, nothing confirms a "list my shipments" call for Delhivery. Connecting
+  Delhivery by itself would sync nothing. Its shipments are instead discovered from the
+  Shopify tracking-number capture above: for a client with a connected `courier_delhivery`
+  connection, sync reads `shopify_orders` rows where
+  `tracking_company ilike '%delhivery%' and tracking_number is not null` (best-effort
+  string match — a merchant might type "Delhivery Surface", "DL", or something else this
+  misses; accepted gap) and tracks each `tracking_number` as an AWB, capped per sync run.
+- Form: a single API token field (helper text pointing at the Delhivery portal, with a
+  caveat that connecting only validates the token's *shape*, not that it works — see
+  below).
+- `connectWithCredentials` does **not** call Delhivery live (no endpoint is confirmed to
+  validate against): it accepts any non-blank token, stores it encrypted, and the first
+  sync reveals whether it actually works — an auth failure there puts the connection in
+  `error` (card: Reconnect), the same outcome a live check would have produced, just one
+  sync cycle later. This is a deliberate, documented deviation from every other
+  credentials connector in this app (Shiprocket does validate live), because pretending
+  to validate against a guessed endpoint would be worse than being honest that it can't
+  be checked yet.
+- `mapStatus` (in `delhivery-status.ts`) maps assumed status labels onto `OrderStatus`
+  with the same "unknown → In Transit, logged once per sync" fallback as Shiprocket.
 
 ## Frontend
 
@@ -259,7 +304,8 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
 2. **Shiprocket + shipments + Operations.** `shipments` table, connector, hourly sync,
    courier breakdown endpoint, Operations wired (removes `getCourierBreakdown` mock),
    orders overlay.
-3. **Delhivery** connector on the same shipments plumbing.
+3. **Delhivery** connector on the same shipments plumbing, plus the Shopify
+   tracking-number capture it depends on for shipment discovery (migration 009).
 4. **Meta Login for Business + ad-account picker** (`pending_connections`).
 5. **Shopify install-link flow** (reuses `pending_connections`).
 
