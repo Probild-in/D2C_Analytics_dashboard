@@ -160,3 +160,20 @@ export interface TeamMember {
   email: string;
   clients: string[];
 }
+
+export interface CourierStat {
+  name: string;
+  orders: number;
+  delivered: number;
+  rtoPercent: number;
+  ndrPercent: number;
+  // null when no delivered shipment has both an order and a delivery date
+  avgDeliveryDays: number | null;
+}
+
+export interface CourierSummary {
+  // true when the client (or, for "all", any accessible client) has a connected courier
+  connected: boolean;
+  statusCounts: Record<string, number>;
+  couriers: CourierStat[];
+}
