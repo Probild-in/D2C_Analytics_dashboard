@@ -19,6 +19,7 @@ const IN_TRANSIT_PARTS = ["IN TRANSIT", "PICKED UP", "DISPATCHED"];
 export function mapDelhiveryStatus(raw: string | null | undefined): ShipmentStatus | null {
   const s = (raw ?? "").trim().toUpperCase();
   if (!s) return null;
+  // "Lost In Transit"-style labels would otherwise false-match the IN_TRANSIT_PARTS "IN TRANSIT" substring check below; the brief's own test table expects null for these, so this guard runs first.
   if (s.includes("LOST")) return null;
   if (s.includes("RTO")) return s.includes("DELIVERED") ? "RTO Delivered" : "RTO Initiated";
   if (s.includes("CANCEL")) return "Cancelled";
