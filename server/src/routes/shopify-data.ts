@@ -70,7 +70,7 @@ router.get("/sales", requireAuth, async (req, res, next) => {
          group by client_id, ordered_at::date
        ),
        client_has_shipments as (
-         select distinct client_id from shipments where client_id = any($1::text[])
+         select distinct client_id from shipments where client_id = any($1::text[]) and ordered_at is not null
        ),
        scoped_clients as (
          select unnest($1::text[]) as client_id

@@ -85,10 +85,11 @@ export const shiprocketConnector: CredentialsConnector = {
             `insert into shipments
                (client_id, connection_id, awb, order_ref, courier_name, status, destination_state, ordered_at, delivered_at)
              values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-             on conflict (connection_id, awb)
-             do update set order_ref = excluded.order_ref, courier_name = excluded.courier_name,
-               status = excluded.status, destination_state = excluded.destination_state,
-               ordered_at = excluded.ordered_at, delivered_at = excluded.delivered_at, synced_at = now()`,
+             on conflict (client_id, awb)
+             do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
+               courier_name = excluded.courier_name, status = excluded.status,
+               destination_state = excluded.destination_state, ordered_at = excluded.ordered_at,
+               delivered_at = excluded.delivered_at, synced_at = now()`,
             [
               conn.client_id,
               connectionId,

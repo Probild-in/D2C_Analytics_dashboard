@@ -5,6 +5,7 @@ import { shiprocketConnector } from "../../src/integrations/shiprocket.js";
 import { CredentialsRejectedError } from "../../src/integrations/types.js";
 
 const CONN = "66666666-6666-6666-6666-666666666666";
+const CONN_B = "77777777-7777-7777-7777-777777777777";
 const CREDS = { email: "ops@abc.com", password: "pw-secret" };
 const DAY = 24 * 60 * 60 * 1000;
 const recent = (daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString();
@@ -23,11 +24,16 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function insertConnection(status = "connected", creds: object | null = CREDS) {
+async function insertConnection(
+  status = "connected",
+  creds: object | null = CREDS,
+  connId = CONN,
+  externalAccountId = "ops@abc.com",
+) {
   await testPool.query(
     `insert into platform_connections (id, client_id, platform, status, access_token, credentials, external_account_id)
-     values ($1, 'abc-fashion', 'courier_shiprocket', $2, $3, $4, 'ops@abc.com')`,
-    [CONN, status, encryptToken("old-token"), creds ? encryptToken(JSON.stringify(creds)) : null],
+     values ($1, 'abc-fashion', 'courier_shiprocket', $2, $3, $4, $5)`,
+    [connId, status, encryptToken("old-token"), creds ? encryptToken(JSON.stringify(creds)) : null, externalAccountId],
   );
 }
 
@@ -124,6 +130,25 @@ describe("shiprocketConnector.sync", () => {
     const conn = (await testPool.query("select status, last_synced_at from platform_connections")).rows[0];
     expect(conn.status).toBe("connected");
     expect(conn.last_synced_at).not.toBeNull();
+  });
+
+  it("moves a shipment to the new connection_id instead of duplicating it when the same AWB is synced under a different (reconnected) connection", async () => {
+    await insertConnection("connected", CREDS, CONN, "old-ops@abc.com");
+    stubShiprocket([{ data: [order("1001", "IN TRANSIT", [{ awb: "AWB1", courier: "Delhivery" }])] }]);
+    await shiprocketConnector.sync(CONN);
+
+    // Simulate a disconnect + reconnect with a NEW Shiprocket API-user email: a new
+    // connection_id for the same client, re-syncing the same AWB.
+    await insertConnection("connected", CREDS, CONN_B, "new-ops@abc.com");
+    stubShiprocket([{ data: [order("1001", "DELIVERED", [{ awb: "AWB1", courier: "Delhivery" }])] }]);
+    await shiprocketConnector.sync(CONN_B);
+
+    const rows = (await testPool.query("select connection_id, status from shipments where client_id = 'abc-fashion'")).rows;
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toEqual({ connection_id: CONN_B, status: "Delivered" });
+
+    const count = await testPool.query("select count(*) from shipments where client_id = 'abc-fashion'");
+    expect(Number(count.rows[0].count)).toBe(1);
   });
 
   it("is idempotent and updates a shipment's status on the next run", async () => {

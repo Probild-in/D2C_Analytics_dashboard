@@ -81,6 +81,13 @@ describe("GET /api/clients/:id/couriers/summary", () => {
     expect(res.body.connected).toBe(false);
   });
 
+  it("counts a courier connection stuck in error (e.g. a rotated password) as connected", async () => {
+    await connectCourier(CONN, "abc-fashion", "error");
+    await addShipment(CONN, "abc-fashion", "D1", "Delhivery", "Delivered", 3);
+    const res = await get("/api/clients/abc-fashion/couriers/summary");
+    expect(res.body.connected).toBe(true);
+  });
+
   it("clientId=all aggregates every accessible client and scoped users only see theirs", async () => {
     await connectCourier(CONN, "abc-fashion");
     await connectCourier(CONN_B, "xyz-beauty");

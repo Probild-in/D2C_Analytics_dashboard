@@ -16,7 +16,7 @@ router.get("/summary", requireAuth, async (req, res, next) => {
       pool.query(
         `select exists (
            select 1 from platform_connections
-           where client_id = any($1::text[]) and left(platform, 8) = 'courier_' and status = 'connected'
+           where client_id = any($1::text[]) and left(platform, 8) = 'courier_' and status in ('connected', 'error')
          ) as connected`,
         [clientIds],
       ),
