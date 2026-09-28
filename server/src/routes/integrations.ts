@@ -21,7 +21,12 @@ router.get("/shopify/install", async (req, res) => {
 
   const connector = connectors.shopify;
   if (connector.authType !== "oauth") {
-    throw new Error("shopify connector must support OAuth");
+    const params = new URLSearchParams({
+      connection: "error",
+      message: "Shopify connections are temporarily unavailable. Please try again later.",
+    });
+    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+    return;
   }
   const state = await signState({ platform: "shopify", shopDomain: shop });
   res.redirect(connector.getAuthUrl(shop, state));
