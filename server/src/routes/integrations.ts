@@ -74,17 +74,30 @@ router.get("/:platform/callback", async (req, res) => {
     const result = await connector.handleCallback(query, { clientId: statePayload.clientId });
 
     if (result.type === "connected") {
-      await saveConnection({
-        clientId: statePayload.clientId,
-        platform,
-        externalAccountId: result.externalAccountId,
+      if (statePayload.clientId && statePayload.teamMemberId) {
+        await saveConnection({
+          clientId: statePayload.clientId,
+          platform,
+          externalAccountId: result.externalAccountId,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          expiresAt: result.expiresAt,
+          connectedBy: statePayload.teamMemberId,
+        });
+        const params = new URLSearchParams({ connection: "success" });
+        res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+        return;
+      }
+
+      // No client known yet — only the install-link route (Task 2) can produce a state
+      // like this. Store the result and let a logged-in user claim it for a client.
+      const claimPendingId = await createPending(platform, null, null, {
         accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
         expiresAt: result.expiresAt,
-        connectedBy: statePayload.teamMemberId,
+        shop: result.externalAccountId,
       });
-      const params = new URLSearchParams({ connection: "success" });
-      res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+      const claimParams = new URLSearchParams({ pending: claimPendingId });
+      res.redirect(`${frontendUrl}/#/connect/claim?${claimParams.toString()}`);
       return;
     }
 

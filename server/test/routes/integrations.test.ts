@@ -170,6 +170,24 @@ describe("GET /api/integrations/:platform/callback", () => {
       { client_id: "abc-fashion", team_member_id: "11111111-1111-1111-1111-111111111111" },
     ]);
   });
+
+  it("stores a claim-pending connection when the callback's state has no clientId (the install-link case)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ access_token: "shpat_install_token" }), { status: 200 })),
+    );
+    const state = await signState({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com" });
+    const query = { shop: "abc-fashion.myshopify.com", code: "auth-code", state };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    const res = await request(app).get("/api/integrations/shopify/callback").query({ ...query, hmac });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/connect/claim");
+    expect(res.headers.location).toContain("pending=");
+    expect((await testPool.query("select 1 from platform_connections")).rowCount).toBe(0);
+    const pendingRow = await testPool.query("select client_id, team_member_id from pending_connections");
+    expect(pendingRow.rows).toEqual([{ client_id: null, team_member_id: null }]);
+  });
 });
 
 describe("GET /api/integrations/shopify/install", () => {
