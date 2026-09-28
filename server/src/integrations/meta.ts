@@ -66,6 +66,14 @@ function getRedirectUri(): string {
   return `${publicApiUrl}/api/integrations/meta/callback`;
 }
 
+function getLoginConfigId(): string {
+  const configId = process.env.META_LOGIN_CONFIG_ID;
+  if (!configId) {
+    throw new Error("META_LOGIN_CONFIG_ID environment variable must be set");
+  }
+  return configId;
+}
+
 function getCredentials(): { appId: string; appSecret: string } {
   const appId = process.env.META_APP_ID;
   const appSecret = process.env.META_APP_SECRET;
@@ -103,6 +111,8 @@ export const metaConnector: OAuthConnector = {
     const { appId } = getCredentials();
     const url = new URL(`https://www.facebook.com/${META_API_VERSION}/dialog/oauth`);
     url.searchParams.set("client_id", appId);
+    url.searchParams.set("config_id", getLoginConfigId());
+    url.searchParams.set("response_type", "code");
     url.searchParams.set("redirect_uri", getRedirectUri());
     url.searchParams.set("scope", META_SCOPES);
     url.searchParams.set("state", state);
@@ -140,10 +150,25 @@ export const metaConnector: OAuthConnector = {
       throw new Error("No Meta ad account is accessible with this login — the user must have at least one ad account");
     }
 
+    const expiresAt = tokenBody.expires_in ? new Date(Date.now() + tokenBody.expires_in * 1000) : undefined;
+
+    if (adAccountsBody.data.length === 1) {
+      return {
+        type: "connected",
+        externalAccountId: adAccountsBody.data[0].id,
+        accessToken: tokenBody.access_token,
+        expiresAt,
+      };
+    }
+
+    // More than one ad account was granted — the user picks which one on the frontend's
+    // pick-accounts page (server/src/routes/pending-connections.js, Task 5). The account
+    // limit is already checked above, before we get here, same as the single-account path.
     return {
-      externalAccountId: adAccountsBody.data[0].id,
+      type: "pending",
       accessToken: tokenBody.access_token,
-      expiresAt: tokenBody.expires_in ? new Date(Date.now() + tokenBody.expires_in * 1000) : undefined,
+      expiresAt,
+      candidates: adAccountsBody.data.map((account) => ({ id: account.id, label: account.name })),
     };
   },
 

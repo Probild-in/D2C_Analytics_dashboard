@@ -5,6 +5,7 @@ import { testPool, resetTestDb } from "../helpers/test-db.js";
 beforeEach(() => {
   process.env.META_APP_ID = "test-app-id";
   process.env.META_APP_SECRET = "test-app-secret";
+  process.env.META_LOGIN_CONFIG_ID = "test-config-id";
   process.env.PUBLIC_API_URL = "https://d2c.probild.in";
 });
 
@@ -13,12 +14,14 @@ afterEach(() => {
 });
 
 describe("metaConnector.getAuthUrl", () => {
-  it("builds a Facebook Login dialog URL with ads_read scope", () => {
+  it("builds a Facebook Login for Business dialog URL", () => {
     const url = metaConnector.getAuthUrl("abc-fashion", "signed-state-token");
     const parsed = new URL(url);
     expect(parsed.origin).toBe("https://www.facebook.com");
     expect(parsed.pathname).toBe("/v21.0/dialog/oauth");
     expect(parsed.searchParams.get("client_id")).toBe("test-app-id");
+    expect(parsed.searchParams.get("config_id")).toBe("test-config-id");
+    expect(parsed.searchParams.get("response_type")).toBe("code");
     expect(parsed.searchParams.get("scope")).toBe("ads_read");
     expect(parsed.searchParams.get("state")).toBe("signed-state-token");
     expect(parsed.searchParams.get("redirect_uri")).toContain("/api/integrations/meta/callback");
@@ -56,9 +59,55 @@ describe("metaConnector.handleCallback", () => {
       }),
     );
     const result = await metaConnector.handleCallback({ code: "auth-code-123" }, { clientId: "abc-fashion" });
+    expect(result.type).toBe("connected");
+    if (result.type !== "connected") throw new Error("expected connected");
     expect(result.externalAccountId).toBe("act_123456789");
     expect(result.accessToken).toBe("fb-real-token");
     expect(result.expiresAt).toBeInstanceOf(Date);
+  });
+
+  it("returns type 'pending' with every candidate account when more than one is granted", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/oauth/access_token")) {
+          return new Response(JSON.stringify({ access_token: "meta-token", expires_in: 5184000 }), { status: 200 });
+        }
+        return new Response(
+          JSON.stringify({
+            data: [
+              { id: "act_111", name: "ABC Fashion — Main" },
+              { id: "act_222", name: "ABC Fashion — Retargeting" },
+            ],
+          }),
+          { status: 200 },
+        );
+      }),
+    );
+    const result = await metaConnector.handleCallback({ code: "auth-code" }, { clientId: "abc-fashion" });
+    expect(result.type).toBe("pending");
+    if (result.type !== "pending") throw new Error("expected pending");
+    expect(result.accessToken).toBe("meta-token");
+    expect(result.candidates).toEqual([
+      { id: "act_111", label: "ABC Fashion — Main" },
+      { id: "act_222", label: "ABC Fashion — Retargeting" },
+    ]);
+  });
+
+  it("still checks the account limit before a multi-account callback, same as the single-account path", async () => {
+    await testPool.query("update subscriptions set extra_meta_accounts = -1 where client_id = 'abc-fashion'");
+    await testPool.query(
+      `insert into platform_connections (client_id, platform, status, external_account_id) values
+       ('abc-fashion', 'meta', 'connected', 'act_existing')`,
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/oauth/access_token")) return new Response(JSON.stringify({ access_token: "meta-token" }), { status: 200 });
+        return new Response(JSON.stringify({ data: [{ id: "act_111", name: "A" }, { id: "act_222", name: "B" }] }), { status: 200 });
+      }),
+    );
+    await expect(metaConnector.handleCallback({ code: "auth-code" }, { clientId: "abc-fashion" })).rejects.toThrow(/limit/i);
   });
 
   it("throws if the token exchange fails", async () => {
