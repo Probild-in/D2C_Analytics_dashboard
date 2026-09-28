@@ -18,9 +18,9 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1790622309.1968548,
-    "seen": 1790622595.804747,
-    "ast_hash": "3507b57bcb51fbb34e42f83e5da8c75a",
+    "mtime": 1790628390.0778952,
+    "seen": 1790628602.89313,
+    "ast_hash": "165b9c619a688506c8675326ff21940d",
     "semantic_hash": ""
   },
   "src/components/dashboard/chart-tooltip.tsx": {
@@ -438,9 +438,9 @@
     "semantic_hash": ""
   },
   "server/src/integrations/meta.ts": {
-    "mtime": 1790621924.5977187,
-    "seen": 1790622595.8035588,
-    "ast_hash": "b6d9db428c8b2b41576182d65b0fb01c",
+    "mtime": 1790623041.7709258,
+    "seen": 1790628602.892017,
+    "ast_hash": "9c0c08b379f03854e632b62ba775dcdf",
     "semantic_hash": ""
   },
   "server/src/integrations/payment-gateway.ts": {
@@ -456,9 +456,9 @@
     "semantic_hash": ""
   },
   "server/src/integrations/types.ts": {
-    "mtime": 1790620835.2135625,
-    "seen": 1790620927.364234,
-    "ast_hash": "a6136784669819a3b2378b6a452afae2",
+    "mtime": 1790627693.452304,
+    "seen": 1790628602.8920991,
+    "ast_hash": "8f138615e2af9acf03ed582624710743",
     "semantic_hash": ""
   },
   "server/src/lib/access.ts": {
@@ -498,9 +498,9 @@
     "semantic_hash": ""
   },
   "server/src/lib/state-token.ts": {
-    "mtime": 1789464401.396119,
-    "seen": 1790449974.341197,
-    "ast_hash": "3548ecd7c8e0dd5904cf561f4efd29ed",
+    "mtime": 1790626266.729056,
+    "seen": 1790628602.8921988,
+    "ast_hash": "6f080ab7eddcc899a9cbc69df8f64bcf",
     "semantic_hash": ""
   },
   "server/src/middleware/auth.ts": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "server/src/routes/integrations.ts": {
-    "mtime": 1790621529.968371,
-    "seen": 1790622595.8039181,
-    "ast_hash": "745f2263ec3a3a8419fd970707ee67d7",
+    "mtime": 1790627698.4844894,
+    "seen": 1790628602.892344,
+    "ast_hash": "51ac4d329e8f9976dfcaa4a0fe415de1",
     "semantic_hash": ""
   },
   "server/src/routes/shopify-data.ts": {
@@ -648,9 +648,9 @@
     "semantic_hash": ""
   },
   "server/test/lib/state-token.test.ts": {
-    "mtime": 1789464401.4031997,
-    "seen": 1790449974.341207,
-    "ast_hash": "8e2e7b0abf134920236a5d96f968751e",
+    "mtime": 1790626229.1918473,
+    "seen": 1790628602.892711,
+    "ast_hash": "4198fb7f387e0bb4097cd0de59bd9c74",
     "semantic_hash": ""
   },
   "server/test/middleware/auth.test.ts": {
@@ -714,9 +714,9 @@
     "semantic_hash": ""
   },
   "server/test/routes/integrations.test.ts": {
-    "mtime": 1790621529.968561,
-    "seen": 1790622595.804605,
-    "ast_hash": "a345f8af4252f1101439522dccad6d46",
+    "mtime": 1790627514.872775,
+    "seen": 1790628602.8930078,
+    "ast_hash": "2ee02a1139dbd0a089f609133006fb85",
     "semantic_hash": ""
   },
   "server/test/routes/shopify-data.test.ts": {
@@ -858,9 +858,9 @@
     "semantic_hash": ""
   },
   "docs/superpowers/specs/2026-09-27-simple-integrations-design.md": {
-    "mtime": 1790620005.1464746,
-    "seen": 1790620927.366574,
-    "ast_hash": "eff011ba873c638934f1d37c71dea34f",
+    "mtime": 1790625782.8225377,
+    "seen": 1790628602.894249,
+    "ast_hash": "23043decd9546b8e02157944252bcfa2",
     "semantic_hash": ""
   },
   "server/src/integrations/shiprocket-api.ts": {
@@ -1020,15 +1020,15 @@
     "semantic_hash": ""
   },
   "server/src/lib/pending-connections.ts": {
-    "mtime": 1790621383.7047832,
-    "seen": 1790622595.803749,
-    "ast_hash": "12b331c9bb454107456eff9cacb89e31",
+    "mtime": 1790623171.2041526,
+    "seen": 1790628602.892182,
+    "ast_hash": "c610f0100fc37937eda77e7a67028fc8",
     "semantic_hash": ""
   },
   "server/src/routes/pending-connections.ts": {
-    "mtime": 1790621935.7665472,
-    "seen": 1790622595.8039181,
-    "ast_hash": "e930463fb9bc42e21d91f0e93ad50460",
+    "mtime": 1790627966.589532,
+    "seen": 1790628602.8923452,
+    "ast_hash": "9e108482c3c222a208c5751777d6d575",
     "semantic_hash": ""
   },
   "server/test/lib/pending-connections.test.ts": {
@@ -1038,15 +1038,33 @@
     "semantic_hash": ""
   },
   "server/test/routes/pending-connections.test.ts": {
-    "mtime": 1790621911.4919896,
-    "seen": 1790622595.804606,
-    "ast_hash": "a8c98bb80a17f79a67fcdc602e94ddbe",
+    "mtime": 1790627950.6922095,
+    "seen": 1790628602.8930078,
+    "ast_hash": "dacd3f4dd41af4750ec4d18fb5b52d18",
     "semantic_hash": ""
   },
   "src/pages/connect-pick-accounts.tsx": {
     "mtime": 1790622293.3511617,
     "seen": 1790622595.805474,
     "ast_hash": "961598333dd362f128e1213c7510b37d",
+    "semantic_hash": ""
+  },
+  "server/test/routes/shopify-install-link.test.ts": {
+    "mtime": 1790628180.2111952,
+    "seen": 1790628602.893026,
+    "ast_hash": "bdafa30cda51de63b4f9a975d84b65bb",
+    "semantic_hash": ""
+  },
+  "src/pages/connect-claim.tsx": {
+    "mtime": 1790628380.968435,
+    "seen": 1790628602.8938398,
+    "ast_hash": "e079c1f73ae95391659d6e8f011a9891",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/plans/2026-09-29-shopify-install-link.md": {
+    "mtime": 1790626164.1485956,
+    "seen": 1790628602.8942158,
+    "ast_hash": "b5521b9d424eae0ab0b59cc47ad585fd",
     "semantic_hash": ""
   }
 }

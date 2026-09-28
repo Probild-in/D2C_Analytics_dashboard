@@ -293,17 +293,17 @@
       "source_location": "L60"
     },
     {
-      "id": "src_components_dashboard_kpi_card_kpicardprops",
-      "label": "KpiCardProps",
+      "id": "src_pages_connect_claim_pendinginfo",
+      "label": "PendingInfo",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 15,
       "community_name": "react",
       "file_type": "code",
-      "norm_label": "kpicardprops",
-      "source_file": "src/components/dashboard/kpi-card.tsx",
-      "source_location": "L6"
+      "norm_label": "pendinginfo",
+      "source_file": "src/pages/connect-claim.tsx",
+      "source_location": "L8"
     },
     {
       "id": "server_src_integrations_payment_gateway_paymentgateway",
@@ -423,19 +423,6 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_lib_state_token_statepayload",
-      "label": "StatePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "statepayload",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "server_src_middleware_auth_request",
       "label": "Request",
       "_callable": true,
@@ -514,19 +501,6 @@
       "source_location": "L3"
     },
     {
-      "id": "server_src_integrations_types_credentialsrejectederror",
-      "label": "CredentialsRejectedError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "test-db.ts",
-      "file_type": "code",
-      "norm_label": "credentialsrejectederror",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L3"
-    },
-    {
       "id": "server_src_lib_pending_connections_pendingpayload",
       "label": "PendingPayload",
       "_callable": true,
@@ -537,7 +511,7 @@
       "file_type": "code",
       "norm_label": "pendingpayload",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L6"
+      "source_location": "L7"
     },
     {
       "id": "server_src_lib_pending_connections_pendingrow",
@@ -550,7 +524,7 @@
       "file_type": "code",
       "norm_label": "pendingrow",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L14"
+      "source_location": "L15"
     },
     {
       "id": "src_components_layout_nav_config_navgroup",
@@ -577,6 +551,45 @@
       "norm_label": "navitem",
       "source_file": "src/components/layout/nav-config.ts",
       "source_location": "L16"
+    },
+    {
+      "id": "server_src_integrations_google_googleadrow",
+      "label": "GoogleAdRow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "googleadrow",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L61"
+    },
+    {
+      "id": "server_src_integrations_google_googlecampaignrow",
+      "label": "GoogleCampaignRow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "googlecampaignrow",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L52"
+    },
+    {
+      "id": "server_src_integrations_google_googlemetricsrow",
+      "label": "GoogleMetricsRow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "googlemetricsrow",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L56"
     },
     {
       "id": "src_components_integrations_platforms_connection",
@@ -722,43 +735,43 @@
       "source_location": "L3"
     },
     {
-      "id": "server_src_integrations_google_googleadrow",
-      "label": "GoogleAdRow",
+      "id": "server_src_integrations_delhivery_api_delhiveryautherror",
+      "label": "DelhiveryAuthError",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "googleadrow",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L61"
+      "norm_label": "delhiveryautherror",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L14"
     },
     {
-      "id": "server_src_integrations_google_googlecampaignrow",
-      "label": "GoogleCampaignRow",
+      "id": "server_src_integrations_delhivery_api_delhiverytrackedshipment",
+      "label": "DelhiveryTrackedShipment",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "googlecampaignrow",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L52"
+      "norm_label": "delhiverytrackedshipment",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L16"
     },
     {
-      "id": "server_src_integrations_google_googlemetricsrow",
-      "label": "GoogleMetricsRow",
+      "id": "server_src_integrations_delhivery_status_shipmentstatus",
+      "label": "ShipmentStatus",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "googlemetricsrow",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L56"
+      "norm_label": "shipmentstatus",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L6"
     },
     {
       "id": "server_src_integrations_meta_metaad",
@@ -767,7 +780,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "metaad",
       "source_file": "server/src/integrations/meta.ts",
@@ -780,7 +793,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "metacampaign",
       "source_file": "server/src/integrations/meta.ts",
@@ -793,7 +806,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "metainsightrow",
       "source_file": "server/src/integrations/meta.ts",
@@ -806,7 +819,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "shopifyorder",
       "source_file": "server/src/integrations/shopify.ts",
@@ -819,7 +832,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "baseconnector",
       "source_file": "server/src/integrations/types.ts",
@@ -832,7 +845,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "connector",
       "source_file": "server/src/integrations/types.ts",
@@ -845,11 +858,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "credentialsconnector",
       "source_file": "server/src/integrations/types.ts",
       "source_location": "L37"
+    },
+    {
+      "id": "server_src_integrations_types_credentialsrejectederror",
+      "label": "CredentialsRejectedError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "credentialsrejectederror",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L3"
     },
     {
       "id": "server_src_integrations_types_oauthcallbackresult",
@@ -858,7 +884,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "oauthcallbackresult",
       "source_file": "server/src/integrations/types.ts",
@@ -871,49 +897,36 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "oauthconnector",
       "source_file": "server/src/integrations/types.ts",
       "source_location": "L30"
     },
     {
-      "id": "server_src_integrations_delhivery_api_delhiveryautherror",
-      "label": "DelhiveryAuthError",
+      "id": "server_src_lib_state_token_statepayload",
+      "label": "StatePayload",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
+      "community": 83,
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "delhiveryautherror",
-      "source_file": "server/src/integrations/delhivery-api.ts",
-      "source_location": "L14"
+      "norm_label": "statepayload",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L3"
     },
     {
-      "id": "server_src_integrations_delhivery_api_delhiverytrackedshipment",
-      "label": "DelhiveryTrackedShipment",
+      "id": "src_components_dashboard_kpi_card_kpicardprops",
+      "label": "KpiCardProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
+      "community": 84,
+      "community_name": "kpi-card.tsx",
       "file_type": "code",
-      "norm_label": "delhiverytrackedshipment",
-      "source_file": "server/src/integrations/delhivery-api.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_delhivery_status_shipmentstatus",
-      "label": "ShipmentStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
-      "file_type": "code",
-      "norm_label": "shipmentstatus",
-      "source_file": "server/src/integrations/delhivery-status.ts",
+      "norm_label": "kpicardprops",
+      "source_file": "src/components/dashboard/kpi-card.tsx",
       "source_location": "L6"
     },
     {
@@ -1229,78 +1242,6 @@
       "source_location": "L10"
     },
     {
-      "id": "src_pages_dashboard_attentioncard",
-      "label": "AttentionCard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "attentioncard()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L356"
-    },
-    {
-      "id": "src_pages_dashboard_dailysummarycard",
-      "label": "DailySummaryCard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "dailysummarycard()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L312"
-    },
-    {
-      "id": "src_pages_dashboard_dashboard",
-      "label": "Dashboard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "dashboard()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L46"
-    },
-    {
-      "id": "src_pages_dashboard_ministat",
-      "label": "MiniStat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "ministat()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L287"
-    },
-    {
-      "id": "src_pages_dashboard_prioritydot",
-      "label": "PriorityDot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "prioritydot()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L302"
-    },
-    {
-      "id": "src_pages_dashboard_splitbar",
-      "label": "SplitBar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "splitbar()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L257"
-    },
-    {
       "id": "src_components_dashboard_creatives_panel_creativedetaildialog",
       "label": "CreativeDetailDialog()",
       "_callable": true,
@@ -1397,18 +1338,6 @@
       "source_location": "L155"
     },
     {
-      "id": "src_components_dashboard_kpi_card_kpicard",
-      "label": "KpiCard()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "kpicard()",
-      "source_file": "src/components/dashboard/kpi-card.tsx",
-      "source_location": "L27"
-    },
-    {
       "id": "src_components_ui_tabs_tabscontent",
       "label": "TabsContent()",
       "_callable": true,
@@ -1443,6 +1372,18 @@
       "norm_label": "tabstrigger()",
       "source_file": "src/components/ui/tabs.tsx",
       "source_location": "L19"
+    },
+    {
+      "id": "src_pages_connect_claim_connectclaim",
+      "label": "ConnectClaim()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "connectclaim()",
+      "source_file": "src/pages/connect-claim.tsx",
+      "source_location": "L14"
     },
     {
       "id": "src_pages_geography_geography",
@@ -2081,42 +2022,6 @@
       "source_location": "L8"
     },
     {
-      "id": "server_src_lib_state_token_getsecret",
-      "label": "getSecret()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "getsecret()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "server_src_lib_state_token_signstate",
-      "label": "signState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "signstate()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "server_src_lib_state_token_verifystate",
-      "label": "verifyState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "verifystate()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L26"
-    },
-    {
       "id": "server_src_middleware_auth_requireauth",
       "label": "requireAuth()",
       "_callable": true,
@@ -2270,7 +2175,7 @@
       "file_type": "code",
       "norm_label": "app()",
       "source_file": "src/App.tsx",
-      "source_location": "L30"
+      "source_location": "L31"
     },
     {
       "id": "src_app_routefallback",
@@ -2282,7 +2187,7 @@
       "file_type": "code",
       "norm_label": "routefallback()",
       "source_file": "src/App.tsx",
-      "source_location": "L22"
+      "source_location": "L23"
     },
     {
       "id": "src_components_ui_badge_badge",
@@ -2522,7 +2427,7 @@
       "file_type": "code",
       "norm_label": "createpending()",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L23"
+      "source_location": "L24"
     },
     {
       "id": "server_src_lib_pending_connections_deletepending",
@@ -2534,7 +2439,19 @@
       "file_type": "code",
       "norm_label": "deletepending()",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L59"
+      "source_location": "L60"
+    },
+    {
+      "id": "server_src_lib_pending_connections_lockpendingforupdate",
+      "label": "lockPendingForUpdate()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "lockpendingforupdate()",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L69"
     },
     {
       "id": "server_src_lib_pending_connections_readpending",
@@ -2546,7 +2463,7 @@
       "file_type": "code",
       "norm_label": "readpending()",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "id": "server_test_helpers_fake_courier_installfakecourier",
@@ -2679,18 +2596,6 @@
       "norm_label": "stubshiprocket()",
       "source_file": "server/test/integrations/shiprocket.test.ts",
       "source_location": "L41"
-    },
-    {
-      "id": "server_test_integrations_shopify_test_computetesthmac",
-      "label": "computeTestHmac()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "test-db.ts",
-      "file_type": "code",
-      "norm_label": "computetesthmac()",
-      "source_file": "server/test/integrations/shopify.test.ts",
-      "source_location": "L7"
     },
     {
       "id": "server_test_migration_007_test_insertshipment",
@@ -2837,18 +2742,6 @@
       "source_location": "L11"
     },
     {
-      "id": "server_test_routes_integrations_test_computetesthmac",
-      "label": "computeTestHmac()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "test-db.ts",
-      "file_type": "code",
-      "norm_label": "computetesthmac()",
-      "source_file": "server/test/routes/integrations.test.ts",
-      "source_location": "L8"
-    },
-    {
       "id": "server_test_routes_pending_connections_test_token",
       "label": "token()",
       "_callable": true,
@@ -2858,6 +2751,30 @@
       "file_type": "code",
       "norm_label": "token()",
       "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "server_test_routes_shopify_install_link_test_computetesthmac",
+      "label": "computeTestHmac()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "computetesthmac()",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "server_test_routes_shopify_install_link_test_token",
+      "label": "token()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "token()",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
       "source_location": "L10"
     },
     {
@@ -2955,6 +2872,114 @@
       "norm_label": "topbar()",
       "source_file": "src/components/layout/topbar.tsx",
       "source_location": "L17"
+    },
+    {
+      "id": "server_src_integrations_google_assertundergoogleaccountlimit",
+      "label": "assertUnderGoogleAccountLimit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "assertundergoogleaccountlimit()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "server_src_integrations_google_getdevelopertoken",
+      "label": "getDeveloperToken()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getdevelopertoken()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "server_src_integrations_google_getoauthcredentials",
+      "label": "getOAuthCredentials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getoauthcredentials()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "server_src_integrations_google_getredirecturi",
+      "label": "getRedirectUri()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getredirecturi()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "server_src_integrations_google_mapgooglestatus",
+      "label": "mapGoogleStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "mapgooglestatus()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L76"
+    },
+    {
+      "id": "server_src_integrations_google_microstounits",
+      "label": "microsToUnits()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "microstounits()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L83"
+    },
+    {
+      "id": "server_src_integrations_google_refreshaccesstoken",
+      "label": "refreshAccessToken()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "refreshaccesstoken()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L87"
+    },
+    {
+      "id": "server_src_integrations_google_rungaqlquery",
+      "label": "runGaqlQuery()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "rungaqlquery()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L133"
+    },
+    {
+      "id": "server_src_integrations_google_withtokenrefresh",
+      "label": "withTokenRefresh()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "withtokenrefresh()",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L115"
     },
     {
       "id": "src_components_integrations_credentials_dialog_credentialsdialog",
@@ -3161,112 +3186,52 @@
       "source_location": "L4"
     },
     {
-      "id": "server_src_integrations_google_assertundergoogleaccountlimit",
-      "label": "assertUnderGoogleAccountLimit()",
+      "id": "server_src_integrations_delhivery_api_asstring",
+      "label": "asString()",
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "assertundergoogleaccountlimit()",
-      "source_file": "server/src/integrations/google.ts",
+      "norm_label": "asstring()",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L27"
+    },
+    {
+      "id": "server_src_integrations_delhivery_api_isrecord",
+      "label": "isRecord()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "isrecord()",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "server_src_integrations_delhivery_api_trackshipment",
+      "label": "trackShipment()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "trackshipment()",
+      "source_file": "server/src/integrations/delhivery-api.ts",
       "source_location": "L33"
     },
     {
-      "id": "server_src_integrations_google_getdevelopertoken",
-      "label": "getDeveloperToken()",
+      "id": "server_src_integrations_delhivery_status_mapdelhiverystatus",
+      "label": "mapDelhiveryStatus()",
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "getdevelopertoken()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "server_src_integrations_google_getoauthcredentials",
-      "label": "getOAuthCredentials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "getoauthcredentials()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_google_getredirecturi",
-      "label": "getRedirectUri()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "getredirecturi()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "server_src_integrations_google_mapgooglestatus",
-      "label": "mapGoogleStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "mapgooglestatus()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L76"
-    },
-    {
-      "id": "server_src_integrations_google_microstounits",
-      "label": "microsToUnits()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "microstounits()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L83"
-    },
-    {
-      "id": "server_src_integrations_google_refreshaccesstoken",
-      "label": "refreshAccessToken()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "refreshaccesstoken()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L87"
-    },
-    {
-      "id": "server_src_integrations_google_rungaqlquery",
-      "label": "runGaqlQuery()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "rungaqlquery()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L133"
-    },
-    {
-      "id": "server_src_integrations_google_withtokenrefresh",
-      "label": "withTokenRefresh()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 79,
-      "community_name": "google.ts",
-      "file_type": "code",
-      "norm_label": "withtokenrefresh()",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L115"
+      "norm_label": "mapdelhiverystatus()",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L19"
     },
     {
       "id": "server_src_integrations_meta_assertundermetaaccountlimit",
@@ -3274,7 +3239,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "assertundermetaaccountlimit()",
       "source_file": "server/src/integrations/meta.ts",
@@ -3286,7 +3251,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "extractpurchases()",
       "source_file": "server/src/integrations/meta.ts",
@@ -3298,7 +3263,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "getcredentials()",
       "source_file": "server/src/integrations/meta.ts",
@@ -3310,7 +3275,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "getloginconfigid()",
       "source_file": "server/src/integrations/meta.ts",
@@ -3322,7 +3287,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "getredirecturi()",
       "source_file": "server/src/integrations/meta.ts",
@@ -3334,7 +3299,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "mapcampaignstatus()",
       "source_file": "server/src/integrations/meta.ts",
@@ -3346,7 +3311,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "firstfulfillmenttracking()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3358,7 +3323,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "getcredentials()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3370,7 +3335,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "getredirecturi()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3382,7 +3347,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "maporderstatus()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3394,7 +3359,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "mappaymentmethod()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3406,7 +3371,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "parsenextlink()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3418,7 +3383,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "verifycallbackhmac()",
       "source_file": "server/src/integrations/shopify.ts",
@@ -3430,7 +3395,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": ".disconnect()",
       "source_file": "server/src/integrations/types.ts",
@@ -3442,7 +3407,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": ".sync()",
       "source_file": "server/src/integrations/types.ts",
@@ -3454,7 +3419,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": ".connectwithcredentials()",
       "source_file": "server/src/integrations/types.ts",
@@ -3466,7 +3431,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": ".getauthurl()",
       "source_file": "server/src/integrations/types.ts",
@@ -3478,11 +3443,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": ".handlecallback()",
       "source_file": "server/src/integrations/types.ts",
       "source_location": "L33"
+    },
+    {
+      "id": "server_test_integrations_delhivery_api_test_stubfetch",
+      "label": "stubFetch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "stubfetch()",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "server_test_integrations_shopify_test_computetesthmac",
+      "label": "computeTestHmac()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "computetesthmac()",
+      "source_file": "server/test/integrations/shopify.test.ts",
+      "source_location": "L7"
     },
     {
       "id": "src_components_ui_dropdown_menu_dropdownmenucheckboxitem",
@@ -3593,64 +3582,136 @@
       "source_location": "L122"
     },
     {
-      "id": "server_src_integrations_delhivery_api_asstring",
-      "label": "asString()",
+      "id": "src_pages_dashboard_attentioncard",
+      "label": "AttentionCard()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "asstring()",
-      "source_file": "server/src/integrations/delhivery-api.ts",
-      "source_location": "L27"
+      "norm_label": "attentioncard()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L356"
     },
     {
-      "id": "server_src_integrations_delhivery_api_isrecord",
-      "label": "isRecord()",
+      "id": "src_pages_dashboard_dailysummarycard",
+      "label": "DailySummaryCard()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "isrecord()",
-      "source_file": "server/src/integrations/delhivery-api.ts",
-      "source_location": "L23"
+      "norm_label": "dailysummarycard()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L312"
     },
     {
-      "id": "server_src_integrations_delhivery_api_trackshipment",
-      "label": "trackShipment()",
+      "id": "src_pages_dashboard_dashboard",
+      "label": "Dashboard()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "trackshipment()",
-      "source_file": "server/src/integrations/delhivery-api.ts",
-      "source_location": "L33"
+      "norm_label": "dashboard()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L46"
     },
     {
-      "id": "server_src_integrations_delhivery_status_mapdelhiverystatus",
-      "label": "mapDelhiveryStatus()",
+      "id": "src_pages_dashboard_ministat",
+      "label": "MiniStat()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "mapdelhiverystatus()",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L19"
+      "norm_label": "ministat()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L287"
     },
     {
-      "id": "server_test_integrations_delhivery_api_test_stubfetch",
-      "label": "stubFetch()",
+      "id": "src_pages_dashboard_prioritydot",
+      "label": "PriorityDot()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "stubfetch()",
-      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "norm_label": "prioritydot()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L302"
+    },
+    {
+      "id": "src_pages_dashboard_splitbar",
+      "label": "SplitBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "splitbar()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L257"
+    },
+    {
+      "id": "server_src_lib_state_token_getsecret",
+      "label": "getSecret()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "getsecret()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "server_src_lib_state_token_signstate",
+      "label": "signState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "signstate()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "server_src_lib_state_token_verifystate",
+      "label": "verifyState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "verifystate()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "server_test_routes_integrations_test_computetesthmac",
+      "label": "computeTestHmac()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "computetesthmac()",
+      "source_file": "server/test/routes/integrations.test.ts",
       "source_location": "L8"
+    },
+    {
+      "id": "src_components_dashboard_kpi_card_kpicard",
+      "label": "KpiCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 84,
+      "community_name": "kpi-card.tsx",
+      "file_type": "code",
+      "norm_label": "kpicard()",
+      "source_file": "src/components/dashboard/kpi-card.tsx",
+      "source_location": "L27"
     },
     {
       "id": "src_lib_utils_cn",
@@ -4618,39 +4679,6 @@
       "source_location": "L8"
     },
     {
-      "id": "src_pages_dashboard",
-      "label": "dashboard.tsx",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "dashboard.tsx",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_pages_dashboard_datefmt",
-      "label": "dateFmt",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "datefmt",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_pages_dashboard_empty_tasks",
-      "label": "EMPTY_TASKS",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "select.tsx",
-      "file_type": "code",
-      "norm_label": "empty_tasks",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L44"
-    },
-    {
       "id": "src_components_dashboard_creatives_panel",
       "label": "creatives-panel.tsx",
       "_origin": "ast",
@@ -4660,28 +4688,6 @@
       "norm_label": "creatives-panel.tsx",
       "source_file": "src/components/dashboard/creatives-panel.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_dashboard_kpi_card",
-      "label": "kpi-card.tsx",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "kpi-card.tsx",
-      "source_file": "src/components/dashboard/kpi-card.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_dashboard_kpi_card_accentmap",
-      "label": "accentMap",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "react",
-      "file_type": "code",
-      "norm_label": "accentmap",
-      "source_file": "src/components/dashboard/kpi-card.tsx",
-      "source_location": "L19"
     },
     {
       "id": "src_components_ui_input",
@@ -4726,6 +4732,17 @@
       "norm_label": "tabs",
       "source_file": "src/components/ui/tabs.tsx",
       "source_location": "L5"
+    },
+    {
+      "id": "src_pages_connect_claim",
+      "label": "connect-claim.tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "connect-claim.tsx",
+      "source_file": "src/pages/connect-claim.tsx",
+      "source_location": "L1"
     },
     {
       "id": "src_pages_geography",
@@ -5707,6 +5724,17 @@
       "source_location": "L1"
     },
     {
+      "id": "server_src_lib_connector_registry",
+      "label": "connector-registry.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "connector-registry.ts",
+      "source_file": "server/src/lib/connector-registry.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_src_lib_connector_registry_connectors",
       "label": "connectors",
       "_origin": "ast",
@@ -5737,17 +5765,6 @@
       "file_type": "code",
       "norm_label": "shop-domain.ts",
       "source_file": "server/src/lib/shop-domain.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_lib_state_token",
-      "label": "state-token.ts",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "state-token.ts",
-      "source_file": "server/src/lib/state-token.ts",
       "source_location": "L1"
     },
     {
@@ -5990,7 +6007,7 @@
       "file_type": "code",
       "norm_label": "router",
       "source_file": "server/src/routes/integrations.ts",
-      "source_location": "L7"
+      "source_location": "L8"
     },
     {
       "id": "server_src_routes_pending_connections",
@@ -6169,17 +6186,6 @@
       "source_location": "L1"
     },
     {
-      "id": "server_test_lib_state_token_test",
-      "label": "state-token.test.ts",
-      "_origin": "ast",
-      "community": 29,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "state-token.test.ts",
-      "source_file": "server/test/lib/state-token.test.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_test_middleware_auth_test",
       "label": "auth.test.ts",
       "_origin": "ast",
@@ -6244,6 +6250,17 @@
       "file_type": "code",
       "norm_label": "@/pages/blended-marketing",
       "source_file": "@/pages/blended-marketing"
+    },
+    {
+      "id": "connect_claim",
+      "label": "@/pages/connect-claim",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "App.tsx",
+      "confidence": "EXTRACTED",
+      "file_type": "code",
+      "norm_label": "@/pages/connect-claim",
+      "source_file": "@/pages/connect-claim"
     },
     {
       "id": "connect_pick_accounts",
@@ -6398,6 +6415,17 @@
       "norm_label": "blendedmarketing",
       "source_file": "src/App.tsx",
       "source_location": "L16"
+    },
+    {
+      "id": "src_app_connectclaim",
+      "label": "ConnectClaim",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "connectclaim",
+      "source_file": "src/App.tsx",
+      "source_location": "L21"
     },
     {
       "id": "src_app_connectpickaccounts",
@@ -7302,17 +7330,6 @@
       "source_location": "L9"
     },
     {
-      "id": "server_test_integrations_shopify_test",
-      "label": "shopify.test.ts",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "test-db.ts",
-      "file_type": "code",
-      "norm_label": "shopify.test.ts",
-      "source_file": "server/test/integrations/shopify.test.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_test_lib_access_test",
       "label": "access.test.ts",
       "_origin": "ast",
@@ -7544,17 +7561,6 @@
       "source_location": "L1"
     },
     {
-      "id": "server_test_routes_integrations_test",
-      "label": "integrations.test.ts",
-      "_origin": "ast",
-      "community": 58,
-      "community_name": "test-db.ts",
-      "file_type": "code",
-      "norm_label": "integrations.test.ts",
-      "source_file": "server/test/routes/integrations.test.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_test_routes_pending_connections_test",
       "label": "routes/pending-connections.test.ts",
       "_origin": "ast",
@@ -7574,6 +7580,17 @@
       "file_type": "code",
       "norm_label": "shopify-data.test.ts",
       "source_file": "server/test/routes/shopify-data.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_routes_shopify_install_link_test",
+      "label": "shopify-install-link.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "shopify-install-link.test.ts",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
       "source_location": "L1"
     },
     {
@@ -8163,6 +8180,28 @@
       "source_location": "L1"
     },
     {
+      "id": "server_src_integrations_google",
+      "label": "google.ts",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "google.ts",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_google_googleconnector",
+      "label": "googleConnector",
+      "_origin": "ast",
+      "community": 60,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "googleconnector",
+      "source_file": "server/src/integrations/google.ts",
+      "source_location": "L163"
+    },
+    {
       "id": "server_package_dependencies",
       "label": "dependencies",
       "_origin": "ast",
@@ -8339,17 +8378,6 @@
       "source_location": "L22"
     },
     {
-      "id": "server_package_devdependencies_node_pg_migrate",
-      "label": "node-pg-migrate",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "node-pg-migrate",
-      "source_file": "server/package.json",
-      "source_location": "L30"
-    },
-    {
       "id": "server_package_devdependencies_supertest",
       "label": "supertest",
       "_origin": "ast",
@@ -8359,6 +8387,17 @@
       "norm_label": "supertest",
       "source_file": "server/package.json",
       "source_location": "L31"
+    },
+    {
+      "id": "server_package_devdependencies_types_cors",
+      "label": "@types/cors",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "devDependencies",
+      "file_type": "code",
+      "norm_label": "@types/cors",
+      "source_file": "server/package.json",
+      "source_location": "L23"
     },
     {
       "id": "server_package_devdependencies_types_express",
@@ -8416,17 +8455,6 @@
       "source_location": "L34"
     },
     {
-      "id": "node_pg_migrate",
-      "label": "node-pg-migrate",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "devDependencies",
-      "file_type": "concept",
-      "norm_label": "node-pg-migrate",
-      "source_file": "server/package.json",
-      "source_location": "L30"
-    },
-    {
       "id": "server_package_json_types_node",
       "label": "@types/node",
       "_origin": "ast",
@@ -8447,6 +8475,17 @@
       "norm_label": "supertest",
       "source_file": "server/package.json",
       "source_location": "L31"
+    },
+    {
+      "id": "types_cors",
+      "label": "@types/cors",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "devDependencies",
+      "file_type": "concept",
+      "norm_label": "@types/cors",
+      "source_file": "server/package.json",
+      "source_location": "L23"
     },
     {
       "id": "types_express",
@@ -8574,7 +8613,7 @@
       "node_kind": "heading",
       "norm_label": "delhivery (plan 3)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L229"
+      "source_location": "L253"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_error_handling",
@@ -8586,7 +8625,7 @@
       "node_kind": "heading",
       "norm_label": "error handling",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L293"
+      "source_location": "L317"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_findings_from_current_provider_docs_context7_2026_09_27",
@@ -8610,7 +8649,7 @@
       "node_kind": "heading",
       "norm_label": "frontend",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L273"
+      "source_location": "L297"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_goal",
@@ -8634,7 +8673,7 @@
       "node_kind": "heading",
       "norm_label": "meta (plan 4)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L186"
+      "source_location": "L210"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_non_goals",
@@ -8682,7 +8721,7 @@
       "node_kind": "heading",
       "norm_label": "prerequisites / operator setup",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L351"
+      "source_location": "L375"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_rollout_one_spec_five_plans",
@@ -8694,7 +8733,7 @@
       "node_kind": "heading",
       "norm_label": "rollout: one spec, five plans",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L335"
+      "source_location": "L359"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_routes",
@@ -8718,7 +8757,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L305"
+      "source_location": "L329"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shiprocket_plan_2",
@@ -8730,7 +8769,7 @@
       "node_kind": "heading",
       "norm_label": "shiprocket (plan 2)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L200"
+      "source_location": "L224"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shopify_plan_1_then_plan_5",
@@ -8754,7 +8793,7 @@
       "node_kind": "heading",
       "norm_label": "shopify tracking-number capture (plan 3, prerequisite for delhivery)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L217"
+      "source_location": "L241"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_simple_one_click_integrations_shopify_meta_couriers",
@@ -8778,7 +8817,7 @@
       "node_kind": "heading",
       "norm_label": "testing",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L321"
+      "source_location": "L345"
     },
     {
       "id": "docs_superpowers_plans_2026_09_02_shopify_integration",
@@ -10427,33 +10466,66 @@
       "source_location": "L2322"
     },
     {
-      "id": "server_src_integrations_google",
-      "label": "google.ts",
+      "id": "server_src_integrations_delhivery",
+      "label": "delhivery.ts",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "google.ts",
-      "source_file": "server/src/integrations/google.ts",
+      "norm_label": "delhivery.ts",
+      "source_file": "server/src/integrations/delhivery.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_google_googleconnector",
-      "label": "googleConnector",
+      "id": "server_src_integrations_delhivery_api",
+      "label": "delhivery-api.ts",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "googleconnector",
-      "source_file": "server/src/integrations/google.ts",
-      "source_location": "L163"
+      "norm_label": "delhivery-api.ts",
+      "source_file": "server/src/integrations/delhivery-api.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status",
+      "label": "delhivery-status.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "delhivery-status.ts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_dispatched_parts",
+      "label": "DISPATCHED_PARTS",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "dispatched_parts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_in_transit_parts",
+      "label": "IN_TRANSIT_PARTS",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "in_transit_parts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L17"
     },
     {
       "id": "server_src_integrations_meta",
       "label": "meta.ts",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "meta.ts",
       "source_file": "server/src/integrations/meta.ts",
@@ -10464,7 +10536,7 @@
       "label": "metaConnector",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "metaconnector",
       "source_file": "server/src/integrations/meta.ts",
@@ -10475,7 +10547,7 @@
       "label": "shopify.ts",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "shopify.ts",
       "source_file": "server/src/integrations/shopify.ts",
@@ -10486,7 +10558,7 @@
       "label": "shopifyConnector",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "shopifyconnector",
       "source_file": "server/src/integrations/shopify.ts",
@@ -10497,21 +10569,54 @@
       "label": "integrations/types.ts",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
       "norm_label": "integrations/types.ts",
       "source_file": "server/src/integrations/types.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_lib_connector_registry",
-      "label": "connector-registry.ts",
+      "id": "server_test_integrations_delhivery_api_test",
+      "label": "delhivery-api.test.ts",
       "_origin": "ast",
       "community": 79,
-      "community_name": "google.ts",
+      "community_name": "meta.ts",
       "file_type": "code",
-      "norm_label": "connector-registry.ts",
-      "source_file": "server/src/lib/connector-registry.ts",
+      "norm_label": "delhivery-api.test.ts",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_integrations_delhivery_api_test_track_fixture",
+      "label": "TRACK_FIXTURE",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "track_fixture",
+      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "server_test_integrations_delhivery_status_test",
+      "label": "delhivery-status.test.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "delhivery-status.test.ts",
+      "source_file": "server/test/integrations/delhivery-status.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_integrations_shopify_test",
+      "label": "shopify.test.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "meta.ts",
+      "file_type": "code",
+      "norm_label": "shopify.test.ts",
+      "source_file": "server/test/integrations/shopify.test.ts",
       "source_location": "L1"
     },
     {
@@ -10579,6 +10684,126 @@
       "norm_label": "dropdownmenutrigger",
       "source_file": "src/components/ui/dropdown-menu.tsx",
       "source_location": "L7"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link",
+      "label": "2026-09-29-shopify-install-link.md",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "2026-09-29-shopify-install-link.md",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "label": "Global Constraints",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "global constraints",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_shopify_install_link_flow_plan_5_of_5_implementation_plan",
+      "label": "Shopify Install-Link Flow (Plan 5 of 5) Implementation Plan",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "shopify install-link flow (plan 5 of 5) implementation plan",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_1_statepayload_clientid_and_teammemberid_become_optional",
+      "label": "Task 1: `StatePayload` \u2014 `clientId` and `teamMemberId` become optional",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1: `statepayload` \u2014 `clientid` and `teammemberid` become optional",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L25"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_2_the_install_route",
+      "label": "Task 2: The install route",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2: the install route",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L115"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_3_callback_route_branches_on_whether_clientid_is_known",
+      "label": "Task 3: Callback route branches on whether `clientId` is known",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3: callback route branches on whether `clientid` is known",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L237"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_4_the_claim_route",
+      "label": "Task 4: The `claim` route",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4: the `claim` route",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L355"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_5_end_to_end_route_test_through_the_whole_install_link_flow",
+      "label": "Task 5: End-to-end route test through the whole install-link flow",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5: end-to-end route test through the whole install-link flow",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L521"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_6_frontend_the_claim_page",
+      "label": "Task 6: Frontend \u2014 the claim page",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6: frontend \u2014 the claim page",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L634"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_7_final_verification_sharing_the_install_link_real_account_checklist_graph_refresh",
+      "label": "Task 7: Final verification, sharing the install link, real-account checklist, graph refresh",
+      "_origin": "ast",
+      "community": 80,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 7: final verification, sharing the install link, real-account checklist, graph refresh",
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L803"
     },
     {
       "id": "docs_superpowers_plans_2026_09_28_delhivery_integration",
@@ -10701,92 +10926,92 @@
       "source_location": "L1161"
     },
     {
-      "id": "server_src_integrations_delhivery",
-      "label": "delhivery.ts",
+      "id": "src_pages_dashboard",
+      "label": "dashboard.tsx",
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "delhivery.ts",
-      "source_file": "server/src/integrations/delhivery.ts",
+      "norm_label": "dashboard.tsx",
+      "source_file": "src/pages/dashboard.tsx",
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_delhivery_api",
-      "label": "delhivery-api.ts",
+      "id": "src_pages_dashboard_datefmt",
+      "label": "dateFmt",
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery.ts",
+      "community_name": "dashboard.tsx",
       "file_type": "code",
-      "norm_label": "delhivery-api.ts",
-      "source_file": "server/src/integrations/delhivery-api.ts",
+      "norm_label": "datefmt",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_pages_dashboard_empty_tasks",
+      "label": "EMPTY_TASKS",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "dashboard.tsx",
+      "file_type": "code",
+      "norm_label": "empty_tasks",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L44"
+    },
+    {
+      "id": "server_src_lib_state_token",
+      "label": "state-token.ts",
+      "_origin": "ast",
+      "community": 83,
+      "community_name": "state-token.ts",
+      "file_type": "code",
+      "norm_label": "state-token.ts",
+      "source_file": "server/src/lib/state-token.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_delhivery_status",
-      "label": "delhivery-status.ts",
+      "id": "server_test_lib_state_token_test",
+      "label": "state-token.test.ts",
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
+      "community": 83,
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "delhivery-status.ts",
-      "source_file": "server/src/integrations/delhivery-status.ts",
+      "norm_label": "state-token.test.ts",
+      "source_file": "server/test/lib/state-token.test.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_delhivery_status_dispatched_parts",
-      "label": "DISPATCHED_PARTS",
+      "id": "server_test_routes_integrations_test",
+      "label": "integrations.test.ts",
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
+      "community": 83,
+      "community_name": "state-token.ts",
       "file_type": "code",
-      "norm_label": "dispatched_parts",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_delhivery_status_in_transit_parts",
-      "label": "IN_TRANSIT_PARTS",
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
-      "file_type": "code",
-      "norm_label": "in_transit_parts",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "server_test_integrations_delhivery_api_test",
-      "label": "delhivery-api.test.ts",
-      "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
-      "file_type": "code",
-      "norm_label": "delhivery-api.test.ts",
-      "source_file": "server/test/integrations/delhivery-api.test.ts",
+      "norm_label": "integrations.test.ts",
+      "source_file": "server/test/routes/integrations.test.ts",
       "source_location": "L1"
     },
     {
-      "id": "server_test_integrations_delhivery_api_test_track_fixture",
-      "label": "TRACK_FIXTURE",
+      "id": "src_components_dashboard_kpi_card",
+      "label": "kpi-card.tsx",
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
+      "community": 84,
+      "community_name": "kpi-card.tsx",
       "file_type": "code",
-      "norm_label": "track_fixture",
-      "source_file": "server/test/integrations/delhivery-api.test.ts",
-      "source_location": "L16"
+      "norm_label": "kpi-card.tsx",
+      "source_file": "src/components/dashboard/kpi-card.tsx",
+      "source_location": "L1"
     },
     {
-      "id": "server_test_integrations_delhivery_status_test",
-      "label": "delhivery-status.test.ts",
+      "id": "src_components_dashboard_kpi_card_accentmap",
+      "label": "accentMap",
       "_origin": "ast",
-      "community": 82,
-      "community_name": "delhivery.ts",
+      "community": 84,
+      "community_name": "kpi-card.tsx",
       "file_type": "code",
-      "norm_label": "delhivery-status.test.ts",
-      "source_file": "server/test/integrations/delhivery-status.test.ts",
-      "source_location": "L1"
+      "norm_label": "accentmap",
+      "source_file": "src/components/dashboard/kpi-card.tsx",
+      "source_location": "L19"
     },
     {
       "id": "server_package_scripts",
@@ -10853,6 +11078,28 @@
       "norm_label": "test",
       "source_file": "server/package.json",
       "source_location": "L10"
+    },
+    {
+      "id": "server_package_devdependencies_node_pg_migrate",
+      "label": "node-pg-migrate",
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "node-pg-migrate",
+      "file_type": "code",
+      "norm_label": "node-pg-migrate",
+      "source_file": "server/package.json",
+      "source_location": "L30"
+    },
+    {
+      "id": "node_pg_migrate",
+      "label": "node-pg-migrate",
+      "_origin": "ast",
+      "community": 86,
+      "community_name": "node-pg-migrate",
+      "file_type": "concept",
+      "norm_label": "node-pg-migrate",
+      "source_file": "server/package.json",
+      "source_location": "L30"
     },
     {
       "id": "server_package",
@@ -11116,28 +11363,6 @@
       "norm_label": "typescript",
       "source_file": "server/package.json",
       "source_location": "L33"
-    },
-    {
-      "id": "server_package_devdependencies_types_cors",
-      "label": "@types/cors",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "@types/cors",
-      "file_type": "code",
-      "norm_label": "@types/cors",
-      "source_file": "server/package.json",
-      "source_location": "L23"
-    },
-    {
-      "id": "types_cors",
-      "label": "@types/cors",
-      "_origin": "ast",
-      "community": 94,
-      "community_name": "@types/cors",
-      "file_type": "concept",
-      "norm_label": "@types/cors",
-      "source_file": "server/package.json",
-      "source_location": "L23"
     },
     {
       "id": "server_package_devdependencies_types_jsonwebtoken",
@@ -12075,7 +12300,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L33",
+      "source_location": "L34",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections_lockpendingforupdate",
+      "target": "server_src_lib_crypto_decrypttoken",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -12087,7 +12324,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -12231,6 +12468,18 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test_token",
+      "target": "server_test_helpers_test_jwt_signtestjwt",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
       "source_location": "L10",
       "weight": 1.0
     },
@@ -13899,7 +14148,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -13911,7 +14160,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -13923,7 +14172,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -14228,6 +14477,18 @@
     },
     {
       "source": "server_src_routes_integrations",
+      "target": "server_src_lib_state_token_signstate",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/integrations.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_integrations",
       "target": "server_src_lib_state_token_verifystate",
       "relation": "imports",
       "_origin": "ast",
@@ -14260,6 +14521,18 @@
       "context": "import",
       "source_file": "server/src/routes/integrations.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_integrations",
+      "target": "server_src_lib_shop_domain_normalizeshopdomain",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/integrations.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -14300,7 +14573,7 @@
     },
     {
       "source": "server_src_routes_pending_connections",
-      "target": "server_src_lib_pending_connections_deletepending",
+      "target": "server_src_lib_pending_connections_lockpendingforupdate",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -16027,6 +16300,18 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_routes_integrations_test",
+      "target": "server_src_lib_state_token_verifystate",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/integrations.test.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_routes_pending_connections_test",
       "target": "server_src_index_app",
       "relation": "imports",
@@ -16132,6 +16417,66 @@
       "context": "import",
       "source_file": "server/test/routes/shopify-data.test.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_src_index_app",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_helpers_test_jwt_signtestjwt",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_src_lib_crypto_decrypttoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -17175,7 +17520,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -17187,7 +17532,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -17584,6 +17929,18 @@
       "context": "import",
       "source_file": "server/src/routes/integrations.ts",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_integrations",
+      "target": "server_src_lib_shop_domain",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/integrations.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -19015,6 +19372,54 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_src_index",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_helpers_test_jwt",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_src_lib_crypto",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_routes_sync_test",
       "target": "server_src_index",
       "relation": "imports_from",
@@ -19647,6 +20052,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "src/pages/all-clients.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "src_pages_connect_claim",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/pages/connect-claim.tsx",
       "source_location": "L1",
       "weight": 1.0
     },
@@ -20919,6 +21336,105 @@
       "weight": 1.0
     },
     {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_shopify_install_link_flow_plan_5_of_5_implementation_plan",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_2_the_install_route",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L115",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_3_callback_route_branches_on_whether_clientid_is_known",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L237",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_1_statepayload_clientid_and_teammemberid_become_optional",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_4_the_claim_route",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L355",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_5_end_to_end_route_test_through_the_whole_install_link_flow",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L521",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_6_frontend_the_claim_page",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L634",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_task_7_final_verification_sharing_the_install_link_real_account_checklist_graph_refresh",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L803",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_29_shopify_install_link_shopify_install_link_flow_plan_5_of_5_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_29_shopify_install_link_global_constraints",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-29-shopify-install-link.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
       "source": "docs_superpowers_specs_2026_08_31_backend_integrations_design",
       "target": "docs_superpowers_specs_2026_08_31_backend_integrations_design_backend_v1_auth_billing_and_multi_platform_integrations",
       "relation": "contains",
@@ -21344,7 +21860,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L186",
+      "source_location": "L210",
       "weight": 1.0
     },
     {
@@ -21355,7 +21871,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L200",
+      "source_location": "L224",
       "weight": 1.0
     },
     {
@@ -21366,7 +21882,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L217",
+      "source_location": "L241",
       "weight": 1.0
     },
     {
@@ -21377,7 +21893,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L229",
+      "source_location": "L253",
       "weight": 1.0
     },
     {
@@ -21410,7 +21926,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L273",
+      "source_location": "L297",
       "weight": 1.0
     },
     {
@@ -21421,7 +21937,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L293",
+      "source_location": "L317",
       "weight": 1.0
     },
     {
@@ -21432,7 +21948,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L305",
+      "source_location": "L329",
       "weight": 1.0
     },
     {
@@ -21443,7 +21959,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L321",
+      "source_location": "L345",
       "weight": 1.0
     },
     {
@@ -21454,7 +21970,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L335",
+      "source_location": "L359",
       "weight": 1.0
     },
     {
@@ -21465,7 +21981,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L351",
+      "source_location": "L375",
       "weight": 1.0
     },
     {
@@ -23236,7 +23752,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L14",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -23247,7 +23763,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -23258,7 +23774,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L42",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -23269,7 +23785,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L59",
+      "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_pending_connections_lockpendingforupdate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L69",
       "weight": 1.0
     },
     {
@@ -23280,7 +23807,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/lib/pending-connections.ts",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -23566,7 +24093,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/routes/integrations.ts",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -24164,6 +24691,28 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_routes_shopify_install_link_test_token",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_shopify_install_link_test",
+      "target": "server_test_routes_shopify_install_link_test_computetesthmac",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/routes/shopify-install-link.test.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
       "source": "server_tsconfig",
       "target": "server_tsconfig_include",
       "relation": "contains",
@@ -24407,13 +24956,24 @@
     },
     {
       "source": "src_app",
+      "target": "src_app_connectclaim",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app",
       "target": "src_app_routefallback",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -24424,7 +24984,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx",
-      "source_location": "L30",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -26397,6 +26957,28 @@
       "weight": 1.0
     },
     {
+      "source": "src_pages_connect_claim",
+      "target": "src_pages_connect_claim_connectclaim",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/connect-claim.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "src_pages_connect_claim",
+      "target": "src_pages_connect_claim_pendinginfo",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/connect-claim.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
       "source": "src_pages_connect_pick_accounts",
       "target": "src_pages_connect_pick_accounts_pendinginfo",
       "relation": "contains",
@@ -27754,6 +28336,15 @@
     },
     {
       "source": "src_app",
+      "target": "connect_claim",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx"
+    },
+    {
+      "source": "src_app",
       "target": "connect_pick_accounts",
       "relation": "dynamic_import",
       "_origin": "ast",
@@ -28477,5 +29068,5 @@
       "source_file": "README.md"
     }
   ],
-  "built_at_commit": "8dda3a702fe802cad5b2d284580db6700803badc"
+  "built_at_commit": "086d49cb2221f8920d39eba6b73b42a3f04a3219"
 }
