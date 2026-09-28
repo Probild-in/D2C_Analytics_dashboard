@@ -1,8 +1,7 @@
 import { Router } from "express";
-import pool from "../db.js";
 import { connectors } from "../lib/connector-registry.js";
 import { verifyState } from "../lib/state-token.js";
-import { encryptToken } from "../lib/crypto.js";
+import { saveConnection } from "../lib/connection-store.js";
 
 const router = Router();
 
@@ -39,28 +38,24 @@ router.get("/:platform/callback", async (req, res) => {
     redirectError("Unknown platform");
     return;
   }
+  if (connector.authType !== "oauth") {
+    redirectError("This platform does not use OAuth");
+    return;
+  }
 
   try {
     const { externalAccountId, accessToken, refreshToken, expiresAt } = await connector.handleCallback(query, {
       clientId: statePayload.clientId,
     });
-    await pool.query(
-      `insert into platform_connections
-         (client_id, platform, status, access_token, refresh_token, token_expires_at, external_account_id, connected_by)
-       values ($1, $2, 'connected', $3, $4, $5, $6, $7)
-       on conflict (client_id, platform, external_account_id)
-       do update set status = 'connected', access_token = excluded.access_token,
-         refresh_token = excluded.refresh_token, token_expires_at = excluded.token_expires_at`,
-      [
-        statePayload.clientId,
-        platform,
-        encryptToken(accessToken),
-        refreshToken ? encryptToken(refreshToken) : null,
-        expiresAt ?? null,
-        externalAccountId,
-        statePayload.teamMemberId,
-      ],
-    );
+    await saveConnection({
+      clientId: statePayload.clientId,
+      platform,
+      externalAccountId,
+      accessToken,
+      refreshToken,
+      expiresAt,
+      connectedBy: statePayload.teamMemberId,
+    });
     const params = new URLSearchParams({ connection: "success" });
     res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
   } catch {

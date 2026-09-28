@@ -323,23 +323,6 @@ export function getGeoBreakdown(clientId: string, level: "state" | "city" = "sta
     .sort((a, b) => b.sales - a.sales);
 }
 
-export function getCourierBreakdown(clientId: string) {
-  const rand = mulberry32(seedFromString(clientId + ":courier"));
-  const base = CLIENT_BASE[clientId] ?? CLIENT_BASE["abc-fashion"];
-  return COURIERS.map((name) => {
-    const orders = Math.round((base.orders / 4) * (0.5 + rand() * 1.2));
-    const rtoPercent = Math.max(4, base.rto + (rand() - 0.5) * 16);
-    return {
-      name,
-      orders,
-      delivered: Math.round(orders * (1 - rtoPercent / 100 - 0.04)),
-      rtoPercent: Math.round(rtoPercent * 10) / 10,
-      avgDeliveryDays: Math.round((2.5 + rand() * 3) * 10) / 10,
-      ndrPercent: Math.round((4 + rand() * 8) * 10) / 10,
-    };
-  }).sort((a, b) => b.orders - a.orders);
-}
-
 const CAMPAIGN_NAMES = [
   "Summer Sale — Prospecting",
   "Retargeting — Cart Abandoners",

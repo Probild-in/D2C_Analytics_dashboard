@@ -104,6 +104,37 @@ describe("POST /api/clients/:id/connections/:platform/authorize", () => {
     expect(res.status).toBe(400);
   });
 
+  it("accepts a bare store name and normalizes it", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "ABC-Fashion" });
+    expect(res.status).toBe(200);
+    expect(res.body.authorizeUrl).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+  });
+
+  it("accepts a pasted Shopify admin URL", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "https://admin.shopify.com/store/abc-fashion/orders" });
+    expect(res.status).toBe(200);
+    expect(res.body.authorizeUrl).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+  });
+
+  it("returns a friendly message for an unrecognizable store", async () => {
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/connections/shopify/authorize")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ shopDomain: "not a store" });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("invalid_shop_domain");
+    expect(res.body.error.message).toContain("store name");
+  });
+
   it("404s for a client the user cannot access", async () => {
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access) values

@@ -1,5 +1,16 @@
-export interface Connector {
+// Thrown by a credentials connector when the provider says the credentials are wrong.
+// The message is shown to the end user, so keep it human-readable and free of secrets.
+export class CredentialsRejectedError extends Error {}
+
+interface BaseConnector {
   platform: string;
+  sync(connectionId: string): Promise<{ recordsSynced: number }>;
+  disconnect(connectionId: string): Promise<void>;
+}
+
+// Connects by redirecting the user to the provider and handling the callback.
+export interface OAuthConnector extends BaseConnector {
+  authType: "oauth";
   getAuthUrl(clientId: string, state: string): string;
   handleCallback(query: Record<string, string>, context: { clientId: string }): Promise<{
     externalAccountId: string;
@@ -7,6 +18,22 @@ export interface Connector {
     refreshToken?: string;
     expiresAt?: Date;
   }>;
-  sync(connectionId: string): Promise<{ recordsSynced: number }>;
-  disconnect(connectionId: string): Promise<void>;
 }
+
+// Connects from a form: the connector validates the credentials live against the provider.
+export interface CredentialsConnector extends BaseConnector {
+  authType: "credentials";
+  connectWithCredentials(
+    clientId: string,
+    credentials: Record<string, string>,
+  ): Promise<{
+    externalAccountId: string;
+    accessToken: string;
+    expiresAt?: Date;
+    // Secrets the connector needs later (e.g. Shiprocket email + password for re-login).
+    // The route stores them encrypted in platform_connections.credentials.
+    credentials?: Record<string, string>;
+  }>;
+}
+
+export type Connector = OAuthConnector | CredentialsConnector;

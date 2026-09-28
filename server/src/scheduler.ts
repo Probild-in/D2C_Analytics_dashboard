@@ -23,7 +23,7 @@ export async function runScheduledSyncs(platform: string) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       console.error(`Sync failed for connection ${row.id}:`, err);
       try {
-        await pool.query("update platform_connections set status = 'error' where id = $1", [row.id]);
+        await pool.query("update platform_connections set status = 'error' where id = $1 and status <> 'disconnected'", [row.id]);
         await pool.query(
           "insert into sync_logs (connection_id, started_at, finished_at, error) values ($1, $2, now(), $3)",
           [row.id, startedAt, errorMessage],
@@ -64,6 +64,26 @@ export function startScheduler() {
     "0 */6 * * *",
     () => {
       runScheduledSyncs("google").catch((err) => console.error("Google scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
+
+  // Courier statuses change through the day and Shiprocket's list endpoint is cheap, so sync
+  // hourly like Shopify, offset to minute 15 so the two don't hit the database together.
+  cron.schedule(
+    "15 * * * *",
+    () => {
+      runScheduledSyncs("courier_shiprocket").catch((err) => console.error("Shiprocket scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
+
+  // Same hourly cadence, offset to minute 30 so Shopify (:00), Shiprocket (:15) and
+  // Delhivery (:30) don't hit the database in the same minute.
+  cron.schedule(
+    "30 * * * *",
+    () => {
+      runScheduledSyncs("courier_delhivery").catch((err) => console.error("Delhivery scheduled sync failed:", err));
     },
     { noOverlap: true },
   );

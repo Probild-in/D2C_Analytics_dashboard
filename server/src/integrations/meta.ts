@@ -1,4 +1,4 @@
-import type { Connector } from "./types.js";
+import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
 
@@ -95,8 +95,9 @@ async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
   }
 }
 
-export const metaConnector: Connector = {
+export const metaConnector: OAuthConnector = {
   platform: "meta",
+  authType: "oauth",
 
   getAuthUrl(_clientId: string, state: string): string {
     const { appId } = getCredentials();
@@ -249,7 +250,7 @@ export const metaConnector: Connector = {
       }
     }
 
-    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);
+    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1 and status <> 'disconnected'", [connectionId]);
     return { recordsSynced };
   },
 

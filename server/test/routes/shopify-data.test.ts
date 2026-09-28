@@ -346,3 +346,94 @@ describe("GET /api/clients/:id/geography", () => {
     expect(res.body[0].name).toBe("Mumbai");
   });
 });
+
+describe("GET /api/clients/:id/sales rto_orders from shipments", () => {
+  it("uses shipment RTO (by order date) instead of Shopify statuses once the client has shipments", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666666', 'abc-fashion', 'courier_shiprocket', 'connected', 'ops@abc.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'A', now(), 500, 'RTO Initiated', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'B', now(), 700, 'Delivered', 'Prepaid')`,
+    );
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, courier_name, status, ordered_at) values
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S1', 'Delhivery', 'RTO Delivered', now()),
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S2', 'Delhivery', 'RTO Initiated', now()),
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S3', 'Delhivery', 'Delivered', now())`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients/abc-fashion/sales?days=2").set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const today = res.body[res.body.length - 1];
+    expect(today.orders).toBe(2);
+    expect(today.rtoOrders).toBe(2); // the two RTO shipments, not the one Shopify order labelled RTO
+    expect(res.body[0].rtoOrders).toBe(0);
+  });
+
+  it("sums per-client RTO correctly when only some scoped clients have shipments (clientId=all)", async () => {
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('xyz-beauty', 'XYZ Beauty', 'Beauty', 'bg-rose-500', 'X')`,
+    );
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666666', 'abc-fashion', 'courier_shiprocket', 'connected', 'ops@abc.com'),
+       ('77777777-7777-7777-7777-777777777773', 'xyz-beauty', 'shopify', 'connected', 'xyz-beauty.myshopify.com')`,
+    );
+    // abc-fashion has shipments: 2 RTO, 1 delivered -> shipment-derived RTO = 2.
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, courier_name, status, ordered_at) values
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S1', 'Delhivery', 'RTO Delivered', now()),
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S2', 'Delhivery', 'RTO Initiated', now()),
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S3', 'Delhivery', 'Delivered', now())`,
+    );
+    // xyz-beauty has zero shipments ever, but 3 Shopify orders labelled RTO -> Shopify-derived RTO = 3.
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('xyz-beauty', '77777777-7777-7777-7777-777777777773', '1', 'P', now(), 500, 'RTO Initiated', 'COD'),
+       ('xyz-beauty', '77777777-7777-7777-7777-777777777773', '2', 'Q', now(), 500, 'RTO Delivered', 'COD'),
+       ('xyz-beauty', '77777777-7777-7777-7777-777777777773', '3', 'R', now(), 500, 'RTO Initiated', 'COD')`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients/all/sales?days=1").set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    // Correct value is the sum of each client's own basis (2 shipment-based + 3 Shopify-derived = 5),
+    // not the scope-wide "any client has shipments" switch that would drop xyz-beauty's 3.
+    expect(res.body[0].rtoOrders).toBe(5);
+  });
+
+  it("falls back to Shopify-derived RTO when a client's only shipment has a null ordered_at (unparseable order date)", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666666', 'abc-fashion', 'courier_shiprocket', 'connected', 'ops@abc.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'A', now(), 500, 'RTO Initiated', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'B', now(), 700, 'Delivered', 'Prepaid')`,
+    );
+    // The client's only shipment has a null ordered_at (e.g. Shiprocket's created_at
+    // failed to parse). It must NOT flag the client as "has shipments", or the RTO
+    // trend silently reports 0 instead of falling back to Shopify's own RTO orders.
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, courier_name, status, ordered_at) values
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'S1', 'Delhivery', 'RTO Delivered', null)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients/abc-fashion/sales?days=1").set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body[0].rtoOrders).toBe(1); // the one Shopify RTO Initiated order, not 0
+  });
+});
