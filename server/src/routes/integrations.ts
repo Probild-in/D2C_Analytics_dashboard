@@ -104,7 +104,7 @@ router.get("/:platform/callback", async (req, res) => {
     // type === "pending": the client and team member are already known from the state
     // token (this is Meta's multi-account case, not Shopify's install-link claim, which
     // has neither — plan 5 creates its own pending rows directly, not through this route).
-    const pendingId = await createPending(platform, statePayload.clientId, statePayload.teamMemberId, {
+    const pendingId = await createPending(platform, statePayload.clientId ?? null, statePayload.teamMemberId ?? null, {
       accessToken: result.accessToken,
       expiresAt: result.expiresAt,
       candidates: result.candidates,

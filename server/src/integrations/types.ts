@@ -30,7 +30,7 @@ interface BaseConnector {
 export interface OAuthConnector extends BaseConnector {
   authType: "oauth";
   getAuthUrl(clientId: string, state: string): string;
-  handleCallback(query: Record<string, string>, context: { clientId: string }): Promise<OAuthCallbackResult>;
+  handleCallback(query: Record<string, string>, context: { clientId: string | undefined }): Promise<OAuthCallbackResult>;
 }
 
 // Connects from a form: the connector validates the credentials live against the provider.
