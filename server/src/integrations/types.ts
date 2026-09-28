@@ -30,6 +30,11 @@ interface BaseConnector {
 export interface OAuthConnector extends BaseConnector {
   authType: "oauth";
   getAuthUrl(clientId: string, state: string): string;
+  // context.clientId is undefined only when the state token was signed by Shopify's public
+  // install-link route (no client known yet). Every other OAuth flow (Meta, Google) always
+  // signs its state through the authenticated /authorize route, which always sets clientId —
+  // so those connectors' own handleCallback implementations can keep dereferencing
+  // context.clientId unconditionally.
   handleCallback(query: Record<string, string>, context: { clientId: string | undefined }): Promise<OAuthCallbackResult>;
 }
 

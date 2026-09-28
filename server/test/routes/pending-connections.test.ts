@@ -203,6 +203,17 @@ describe("POST /api/connections/pending/:id/claim", () => {
     expect((await testPool.query("select 1 from pending_connections where id = $1", [id])).rowCount).toBe(1);
   });
 
+  it("400s wrong_pending_type for a claim row with no shop in its payload", async () => {
+    const id = await createPending("shopify", null, null, { accessToken: "x" });
+    const res = await request(app)
+      .post(`/api/connections/pending/${id}/claim`)
+      .set("Authorization", `Bearer ${token()}`)
+      .send({ clientId: "abc-fashion" });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("wrong_pending_type");
+    expect((await testPool.query("select 1 from platform_connections")).rowCount).toBe(0);
+  });
+
   it("only lets one of two concurrent claims for different clients succeed", async () => {
     await testPool.query(
       `insert into clients (id, name, category, logo_color, logo_initial) values

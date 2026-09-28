@@ -228,4 +228,27 @@ describe("GET /api/integrations/shopify/install", () => {
     const payload = await verifyState(state);
     expect(payload).toEqual({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com", clientId: undefined, teamMemberId: undefined });
   });
+
+  describe("when the Shopify connector is misconfigured", () => {
+    const originalApiKey = process.env.SHOPIFY_API_KEY;
+
+    beforeEach(() => {
+      delete process.env.SHOPIFY_API_KEY;
+    });
+
+    afterEach(() => {
+      if (originalApiKey === undefined) {
+        delete process.env.SHOPIFY_API_KEY;
+      } else {
+        process.env.SHOPIFY_API_KEY = originalApiKey;
+      }
+    });
+
+    it("redirects to a friendly error instead of crashing when SHOPIFY_API_KEY is unset", async () => {
+      const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "abc-fashion" });
+      expect(res.status).toBe(302);
+      expect(res.headers.location).toContain("https://d2c.probild.in/#/manage-clients");
+      expect(res.headers.location).toContain("connection=error");
+    });
+  });
 });

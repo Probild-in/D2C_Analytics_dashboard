@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import type { Location } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { useApp } from "@/store/app-context";
 import { Button } from "@/components/ui/button";
@@ -7,13 +8,17 @@ import { Input } from "@/components/ui/input";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { authReady, userEmail } = useApp();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
+  const from = (location.state as { from?: Location } | null)?.from;
+  const redirectTo = from ? `${from.pathname}${from.search}` : "/";
+
   if (authReady && userEmail) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={redirectTo} replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +29,7 @@ export default function Login() {
       setError(signInError.message);
       return;
     }
-    navigate("/");
+    navigate(redirectTo);
   };
 
   return (

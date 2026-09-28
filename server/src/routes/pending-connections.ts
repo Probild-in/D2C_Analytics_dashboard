@@ -102,6 +102,13 @@ router.post("/:id/claim", requireAuth, async (req, res, next) => {
       // /select action, not this one.
       throw new HttpError(400, "wrong_pending_type", "This connection already knows its client.");
     }
+    if (!pending.payload.shop) {
+      // A claim-type row (clientId === null) with no shop in its payload isn't a real
+      // Shopify install-link claim — there's nothing to claim. Can't happen through the
+      // currently-shipped code paths, but fail loudly rather than saving an empty
+      // externalAccountId.
+      throw new HttpError(400, "wrong_pending_type", "This connection has no account choice to make.");
+    }
 
     const chosenClientId = (req.body as { clientId?: unknown }).clientId;
     if (typeof chosenClientId !== "string" || !chosenClientId) {
@@ -117,7 +124,7 @@ router.post("/:id/claim", requireAuth, async (req, res, next) => {
     await saveConnection({
       clientId: chosenClientId,
       platform: pending.platform,
-      externalAccountId: pending.payload.shop ?? "",
+      externalAccountId: pending.payload.shop,
       accessToken: pending.payload.accessToken,
       expiresAt: pending.payload.expiresAt,
       connectedBy: req.auth!.userId,
