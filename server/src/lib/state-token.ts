@@ -1,9 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 
 export interface StatePayload {
-  clientId: string;
+  clientId?: string;
   platform: string;
-  teamMemberId: string;
+  teamMemberId?: string;
   shopDomain?: string;
 }
 
@@ -26,9 +26,9 @@ export async function signState(payload: StatePayload): Promise<string> {
 export async function verifyState(token: string): Promise<StatePayload> {
   const { payload } = await jwtVerify(token, getSecret());
   return {
-    clientId: payload.clientId as string,
+    clientId: payload.clientId as string | undefined,
     platform: payload.platform as string,
-    teamMemberId: payload.teamMemberId as string,
+    teamMemberId: payload.teamMemberId as string | undefined,
     shopDomain: payload.shopDomain as string | undefined,
   };
 }
