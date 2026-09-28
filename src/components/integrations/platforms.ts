@@ -78,6 +78,16 @@ export const PLATFORMS: PlatformMeta[] = [
       { name: "password", label: "API user password", type: "password" },
     ],
   },
+  {
+    key: "courier_delhivery",
+    label: "Delhivery",
+    description: "Shipments, delivery status, NDR and RTO by courier",
+    icon: Truck,
+    authType: "credentials",
+    helper:
+      "Paste your Delhivery API token (from the Delhivery portal). Delhivery has no bulk order list, so shipments are matched from the tracking numbers your Shopify orders already carry — connect Shopify first for this to find anything. Connecting only checks that you entered something, not that the token actually works with Delhivery — the first sync will reveal whether it's valid, and a bad token will show the connection as \"Needs attention\".",
+    fields: [{ name: "token", label: "API token", type: "password" }],
+  },
 ];
 
 // A client can have several rows per platform over time (reconnects, old disconnects).

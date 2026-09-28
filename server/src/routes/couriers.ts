@@ -5,7 +5,7 @@ const router = Router();
 
 const KNOWN_COURIERS = [
   { id: "courier_shiprocket", name: "Shiprocket", available: true },
-  { id: "courier_delhivery", name: "Delhivery", available: false },
+  { id: "courier_delhivery", name: "Delhivery", available: true },
   { id: "courier_shadowfax", name: "Shadowfax", available: false },
 ];
 

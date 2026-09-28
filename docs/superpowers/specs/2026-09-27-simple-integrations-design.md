@@ -231,7 +231,15 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   connection, sync reads `shopify_orders` rows where
   `tracking_company ilike '%delhivery%' and tracking_number is not null` (best-effort
   string match — a merchant might type "Delhivery Surface", "DL", or something else this
-  misses; accepted gap) and tracks each `tracking_number` as an AWB, capped per sync run.
+  misses; accepted gap) and tracks each `tracking_number` as an AWB, capped per sync run
+  within a 30-day lookback window on the order date (matching Shiprocket's own window).
+  A client's Shopify orders fulfilled *before* the tracking-capture migration landed have
+  no `tracking_number`/`tracking_company` until Shopify next reports an update on them
+  (Shopify sync only re-fetches orders updated since the last sync) — there is no one-off
+  backfill of historical orders. In practice this means a newly-connected Delhivery client
+  sees little or nothing at first; documented here rather than silently discovered later.
+  A one-off fix, if ever needed, is nulling `last_synced_at` on the client's Shopify
+  connection once, which forces its next sync to re-fetch full order history.
 - Form: a single API token field (helper text pointing at the Delhivery portal, with a
   caveat that connecting only validates the token's *shape*, not that it works — see
   below).

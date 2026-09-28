@@ -77,4 +77,14 @@ export function startScheduler() {
     },
     { noOverlap: true },
   );
+
+  // Same hourly cadence, offset to minute 30 so Shopify (:00), Shiprocket (:15) and
+  // Delhivery (:30) don't hit the database in the same minute.
+  cron.schedule(
+    "30 * * * *",
+    () => {
+      runScheduledSyncs("courier_delhivery").catch((err) => console.error("Delhivery scheduled sync failed:", err));
+    },
+    { noOverlap: true },
+  );
 }
