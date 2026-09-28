@@ -83,7 +83,7 @@ function getCredentials(): { appId: string; appSecret: string } {
   return { appId, appSecret };
 }
 
-async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
+export async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
   const result = await pool.query(
     `select
        coalesce(p.included_meta_accounts, 0) + coalesce(s.extra_meta_accounts, 0) as limit,
