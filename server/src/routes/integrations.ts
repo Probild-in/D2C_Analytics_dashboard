@@ -2,6 +2,7 @@ import { Router } from "express";
 import { connectors } from "../lib/connector-registry.js";
 import { verifyState } from "../lib/state-token.js";
 import { saveConnection } from "../lib/connection-store.js";
+import { createPending } from "../lib/pending-connections.js";
 
 const router = Router();
 
@@ -44,20 +45,33 @@ router.get("/:platform/callback", async (req, res) => {
   }
 
   try {
-    const { externalAccountId, accessToken, refreshToken, expiresAt } = await connector.handleCallback(query, {
-      clientId: statePayload.clientId,
+    const result = await connector.handleCallback(query, { clientId: statePayload.clientId });
+
+    if (result.type === "connected") {
+      await saveConnection({
+        clientId: statePayload.clientId,
+        platform,
+        externalAccountId: result.externalAccountId,
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        expiresAt: result.expiresAt,
+        connectedBy: statePayload.teamMemberId,
+      });
+      const params = new URLSearchParams({ connection: "success" });
+      res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+      return;
+    }
+
+    // type === "pending": the client and team member are already known from the state
+    // token (this is Meta's multi-account case, not Shopify's install-link claim, which
+    // has neither — plan 5 creates its own pending rows directly, not through this route).
+    const pendingId = await createPending(platform, statePayload.clientId, statePayload.teamMemberId, {
+      accessToken: result.accessToken,
+      expiresAt: result.expiresAt,
+      candidates: result.candidates,
     });
-    await saveConnection({
-      clientId: statePayload.clientId,
-      platform,
-      externalAccountId,
-      accessToken,
-      refreshToken,
-      expiresAt,
-      connectedBy: statePayload.teamMemberId,
-    });
-    const params = new URLSearchParams({ connection: "success" });
-    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+    const params = new URLSearchParams({ pending: pendingId });
+    res.redirect(`${frontendUrl}/#/connect/pick-accounts?${params.toString()}`);
   } catch {
     redirectError("Failed to connect — please try again");
   }

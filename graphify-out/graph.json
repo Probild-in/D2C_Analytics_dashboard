@@ -306,6 +306,19 @@
       "source_location": "L6"
     },
     {
+      "id": "server_src_integrations_payment_gateway_paymentgateway",
+      "label": "PaymentGateway",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "PaymentGateway",
+      "file_type": "code",
+      "norm_label": "paymentgateway",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_store_app_context_appcontextvalue",
       "label": "AppContextValue",
       "_callable": true,
@@ -358,6 +371,32 @@
       "source_location": "L54"
     },
     {
+      "id": "src_pages_connect_pick_accounts_candidate",
+      "label": "Candidate",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "connect-pick-accounts.tsx",
+      "file_type": "code",
+      "norm_label": "candidate",
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_pages_connect_pick_accounts_pendinginfo",
+      "label": "PendingInfo",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 25,
+      "community_name": "connect-pick-accounts.tsx",
+      "file_type": "code",
+      "norm_label": "pendinginfo",
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L12"
+    },
+    {
       "id": "server_src_lib_connection_store_saveconnectioninput",
       "label": "SaveConnectionInput",
       "_callable": true,
@@ -382,6 +421,19 @@
       "norm_label": "httperror",
       "source_file": "server/src/lib/http-error.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "server_src_lib_state_token_statepayload",
+      "label": "StatePayload",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "statepayload",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L3"
     },
     {
       "id": "server_src_middleware_auth_request",
@@ -462,6 +514,45 @@
       "source_location": "L3"
     },
     {
+      "id": "server_src_integrations_types_credentialsrejectederror",
+      "label": "CredentialsRejectedError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "credentialsrejectederror",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "server_src_lib_pending_connections_pendingpayload",
+      "label": "PendingPayload",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "pendingpayload",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L6"
+    },
+    {
+      "id": "server_src_lib_pending_connections_pendingrow",
+      "label": "PendingRow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "pendingrow",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L14"
+    },
+    {
       "id": "src_components_layout_nav_config_navgroup",
       "label": "NavGroup",
       "_callable": true,
@@ -486,45 +577,6 @@
       "norm_label": "navitem",
       "source_file": "src/components/layout/nav-config.ts",
       "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_meta_metaad",
-      "label": "MetaAd",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "metaad",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "server_src_integrations_meta_metacampaign",
-      "label": "MetaCampaign",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "metacampaign",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "server_src_integrations_meta_metainsightrow",
-      "label": "MetaInsightRow",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "metainsightrow",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L14"
     },
     {
       "id": "src_components_integrations_platforms_connection",
@@ -644,6 +696,19 @@
       "source_location": "L11"
     },
     {
+      "id": "server_src_integrations_shiprocket_status_shipmentstatus",
+      "label": "ShipmentStatus",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "shipmentstatus",
+      "source_file": "server/src/integrations/shiprocket-status.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_lib_api_apierror",
       "label": "ApiError",
       "_callable": true,
@@ -696,17 +761,82 @@
       "source_location": "L56"
     },
     {
+      "id": "server_src_integrations_meta_metaad",
+      "label": "MetaAd",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "metaad",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "server_src_integrations_meta_metacampaign",
+      "label": "MetaCampaign",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "metacampaign",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "server_src_integrations_meta_metainsightrow",
+      "label": "MetaInsightRow",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "metainsightrow",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L14"
+    },
+    {
+      "id": "server_src_integrations_shopify_shopifyorder",
+      "label": "ShopifyOrder",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "shopifyorder",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L9"
+    },
+    {
+      "id": "server_src_integrations_types_baseconnector",
+      "label": "BaseConnector",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "baseconnector",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L23"
+    },
+    {
       "id": "server_src_integrations_types_connector",
       "label": "Connector",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
+      "community": 79,
+      "community_name": "google.ts",
       "file_type": "code",
       "norm_label": "connector",
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L39"
+      "source_location": "L52"
     },
     {
       "id": "server_src_integrations_types_credentialsconnector",
@@ -714,25 +844,38 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
+      "community": 79,
+      "community_name": "google.ts",
       "file_type": "code",
       "norm_label": "credentialsconnector",
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L24"
+      "source_location": "L37"
     },
     {
-      "id": "server_src_integrations_types_credentialsrejectederror",
-      "label": "CredentialsRejectedError",
+      "id": "server_src_integrations_types_oauthcallbackresult",
+      "label": "OAuthCallbackResult",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
+      "community": 79,
+      "community_name": "google.ts",
       "file_type": "code",
-      "norm_label": "credentialsrejectederror",
+      "norm_label": "oauthcallbackresult",
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L3"
+      "source_location": "L8"
+    },
+    {
+      "id": "server_src_integrations_types_oauthconnector",
+      "label": "OAuthConnector",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "oauthconnector",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L30"
     },
     {
       "id": "server_src_integrations_delhivery_api_delhiveryautherror",
@@ -741,7 +884,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "delhiveryautherror",
       "source_file": "server/src/integrations/delhivery-api.ts",
@@ -754,63 +897,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "delhiverytrackedshipment",
       "source_file": "server/src/integrations/delhivery-api.ts",
       "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_shopify_shopifyorder",
-      "label": "ShopifyOrder",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "shopifyorder",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "server_src_integrations_types_baseconnector",
-      "label": "BaseConnector",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "baseconnector",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L5"
-    },
-    {
-      "id": "server_src_integrations_types_oauthconnector",
-      "label": "OAuthConnector",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "oauthconnector",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "server_src_integrations_shiprocket_status_shipmentstatus",
-      "label": "ShipmentStatus",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "shipmentstatus",
-      "source_file": "server/src/integrations/shiprocket-status.ts",
-      "source_location": "L1"
     },
     {
       "id": "server_src_integrations_delhivery_status_shipmentstatus",
@@ -818,38 +909,12 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 86,
-      "community_name": "delhivery-status.ts",
+      "community": 82,
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "shipmentstatus",
       "source_file": "server/src/integrations/delhivery-status.ts",
       "source_location": "L6"
-    },
-    {
-      "id": "server_src_lib_state_token_statepayload",
-      "label": "StatePayload",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 88,
-      "community_name": "state-token.ts",
-      "file_type": "code",
-      "norm_label": "statepayload",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "server_src_integrations_payment_gateway_paymentgateway",
-      "label": "PaymentGateway",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "PaymentGateway",
-      "file_type": "code",
-      "norm_label": "paymentgateway",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_data_mock_generatesalesseries",
@@ -1164,6 +1229,78 @@
       "source_location": "L10"
     },
     {
+      "id": "src_pages_dashboard_attentioncard",
+      "label": "AttentionCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "attentioncard()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L356"
+    },
+    {
+      "id": "src_pages_dashboard_dailysummarycard",
+      "label": "DailySummaryCard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "dailysummarycard()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L312"
+    },
+    {
+      "id": "src_pages_dashboard_dashboard",
+      "label": "Dashboard()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "dashboard()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L46"
+    },
+    {
+      "id": "src_pages_dashboard_ministat",
+      "label": "MiniStat()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "ministat()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L287"
+    },
+    {
+      "id": "src_pages_dashboard_prioritydot",
+      "label": "PriorityDot()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "prioritydot()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L302"
+    },
+    {
+      "id": "src_pages_dashboard_splitbar",
+      "label": "SplitBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "splitbar()",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L257"
+    },
+    {
       "id": "src_components_dashboard_creatives_panel_creativedetaildialog",
       "label": "CreativeDetailDialog()",
       "_callable": true,
@@ -1272,6 +1409,42 @@
       "source_location": "L27"
     },
     {
+      "id": "src_components_ui_tabs_tabscontent",
+      "label": "TabsContent()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tabscontent()",
+      "source_file": "src/components/ui/tabs.tsx",
+      "source_location": "L33"
+    },
+    {
+      "id": "src_components_ui_tabs_tabslist",
+      "label": "TabsList()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tabslist()",
+      "source_file": "src/components/ui/tabs.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_components_ui_tabs_tabstrigger",
+      "label": "TabsTrigger()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tabstrigger()",
+      "source_file": "src/components/ui/tabs.tsx",
+      "source_location": "L19"
+    },
+    {
       "id": "src_pages_geography_geography",
       "label": "Geography()",
       "_callable": true,
@@ -1368,76 +1541,40 @@
       "source_location": "L53"
     },
     {
-      "id": "src_pages_dashboard_attentioncard",
-      "label": "AttentionCard()",
+      "id": "server_src_integrations_payment_gateway_paymentgateway_cancelsubscription",
+      "label": ".cancelSubscription()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
-      "community_name": "dashboard.tsx",
+      "community_name": "PaymentGateway",
       "file_type": "code",
-      "norm_label": "attentioncard()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L356"
+      "norm_label": ".cancelsubscription()",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L4"
     },
     {
-      "id": "src_pages_dashboard_dailysummarycard",
-      "label": "DailySummaryCard()",
+      "id": "server_src_integrations_payment_gateway_paymentgateway_chargeinvoice",
+      "label": ".chargeInvoice()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
-      "community_name": "dashboard.tsx",
+      "community_name": "PaymentGateway",
       "file_type": "code",
-      "norm_label": "dailysummarycard()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L312"
+      "norm_label": ".chargeinvoice()",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L3"
     },
     {
-      "id": "src_pages_dashboard_dashboard",
-      "label": "Dashboard()",
+      "id": "server_src_integrations_payment_gateway_paymentgateway_createsubscription",
+      "label": ".createSubscription()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
-      "community_name": "dashboard.tsx",
+      "community_name": "PaymentGateway",
       "file_type": "code",
-      "norm_label": "dashboard()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L46"
-    },
-    {
-      "id": "src_pages_dashboard_ministat",
-      "label": "MiniStat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "ministat()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L287"
-    },
-    {
-      "id": "src_pages_dashboard_prioritydot",
-      "label": "PriorityDot()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "prioritydot()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L302"
-    },
-    {
-      "id": "src_pages_dashboard_splitbar",
-      "label": "SplitBar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "splitbar()",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L257"
+      "norm_label": ".createsubscription()",
+      "source_file": "server/src/integrations/payment-gateway.ts",
+      "source_location": "L2"
     },
     {
       "id": "src_pages_tasks_newtaskdialog",
@@ -1764,40 +1901,16 @@
       "source_location": "L9"
     },
     {
-      "id": "src_components_ui_tabs_tabscontent",
-      "label": "TabsContent()",
+      "id": "src_pages_connect_pick_accounts_connectpickaccounts",
+      "label": "ConnectPickAccounts()",
       "_callable": true,
       "_origin": "ast",
       "community": 25,
-      "community_name": "tabs.tsx",
+      "community_name": "connect-pick-accounts.tsx",
       "file_type": "code",
-      "norm_label": "tabscontent()",
-      "source_file": "src/components/ui/tabs.tsx",
-      "source_location": "L33"
-    },
-    {
-      "id": "src_components_ui_tabs_tabslist",
-      "label": "TabsList()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "tabs.tsx",
-      "file_type": "code",
-      "norm_label": "tabslist()",
-      "source_file": "src/components/ui/tabs.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_components_ui_tabs_tabstrigger",
-      "label": "TabsTrigger()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "tabs.tsx",
-      "file_type": "code",
-      "norm_label": "tabstrigger()",
-      "source_file": "src/components/ui/tabs.tsx",
-      "source_location": "L19"
+      "norm_label": "connectpickaccounts()",
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L18"
     },
     {
       "id": "src_components_ui_tooltip_tooltipcontent",
@@ -1968,6 +2081,42 @@
       "source_location": "L8"
     },
     {
+      "id": "server_src_lib_state_token_getsecret",
+      "label": "getSecret()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "getsecret()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L10"
+    },
+    {
+      "id": "server_src_lib_state_token_signstate",
+      "label": "signState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "signstate()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "server_src_lib_state_token_verifystate",
+      "label": "verifyState()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "verifystate()",
+      "source_file": "server/src/lib/state-token.ts",
+      "source_location": "L26"
+    },
+    {
       "id": "server_src_middleware_auth_requireauth",
       "label": "requireAuth()",
       "_callable": true,
@@ -2121,7 +2270,7 @@
       "file_type": "code",
       "norm_label": "app()",
       "source_file": "src/App.tsx",
-      "source_location": "L29"
+      "source_location": "L30"
     },
     {
       "id": "src_app_routefallback",
@@ -2133,7 +2282,7 @@
       "file_type": "code",
       "norm_label": "routefallback()",
       "source_file": "src/App.tsx",
-      "source_location": "L21"
+      "source_location": "L22"
     },
     {
       "id": "src_components_ui_badge_badge",
@@ -2364,6 +2513,42 @@
       "source_location": "L3"
     },
     {
+      "id": "server_src_lib_pending_connections_createpending",
+      "label": "createPending()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "createpending()",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "server_src_lib_pending_connections_deletepending",
+      "label": "deletePending()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "deletepending()",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L59"
+    },
+    {
+      "id": "server_src_lib_pending_connections_readpending",
+      "label": "readPending()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "readpending()",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L42"
+    },
+    {
       "id": "server_test_helpers_fake_courier_installfakecourier",
       "label": "installFakeCourier()",
       "_callable": true,
@@ -2398,6 +2583,54 @@
       "norm_label": "signtestjwt()",
       "source_file": "server/test/helpers/test-jwt.ts",
       "source_location": "L3"
+    },
+    {
+      "id": "server_test_integrations_delhivery_test_insertconnection",
+      "label": "insertConnection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "insertconnection()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "server_test_integrations_delhivery_test_insertshopifyconnection",
+      "label": "insertShopifyConnection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "insertshopifyconnection()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L33"
+    },
+    {
+      "id": "server_test_integrations_delhivery_test_insertshopifyorder",
+      "label": "insertShopifyOrder()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "insertshopifyorder()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "server_test_integrations_delhivery_test_stubdelhivery",
+      "label": "stubDelhivery()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "stubdelhivery()",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L49"
     },
     {
       "id": "server_test_integrations_shiprocket_test_insertconnection",
@@ -2616,6 +2849,18 @@
       "source_location": "L8"
     },
     {
+      "id": "server_test_routes_pending_connections_test_token",
+      "label": "token()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "token()",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L10"
+    },
+    {
       "id": "src_components_layout_app_shell_appshell",
       "label": "AppShell()",
       "_callable": true,
@@ -2710,66 +2955,6 @@
       "norm_label": "topbar()",
       "source_file": "src/components/layout/topbar.tsx",
       "source_location": "L17"
-    },
-    {
-      "id": "server_src_integrations_meta_assertundermetaaccountlimit",
-      "label": "assertUnderMetaAccountLimit()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "assertundermetaaccountlimit()",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L78"
-    },
-    {
-      "id": "server_src_integrations_meta_extractpurchases",
-      "label": "extractPurchases()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "extractpurchases()",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L56"
-    },
-    {
-      "id": "server_src_integrations_meta_getcredentials",
-      "label": "getCredentials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "getcredentials()",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L69"
-    },
-    {
-      "id": "server_src_integrations_meta_getredirecturi",
-      "label": "getRedirectUri()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "getredirecturi()",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L61"
-    },
-    {
-      "id": "server_src_integrations_meta_mapcampaignstatus",
-      "label": "mapCampaignStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "mapcampaignstatus()",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L45"
     },
     {
       "id": "src_components_integrations_credentials_dialog_credentialsdialog",
@@ -2914,6 +3099,18 @@
       "norm_label": "shiprocketlogin()",
       "source_file": "server/src/integrations/shiprocket-api.ts",
       "source_location": "L82"
+    },
+    {
+      "id": "server_src_integrations_shiprocket_status_mapshiprocketstatus",
+      "label": "mapShiprocketStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "mapshiprocketstatus()",
+      "source_file": "server/src/integrations/shiprocket-status.ts",
+      "source_location": "L19"
     },
     {
       "id": "server_test_integrations_shiprocket_api_test_stubfetch",
@@ -3072,6 +3269,222 @@
       "source_location": "L115"
     },
     {
+      "id": "server_src_integrations_meta_assertundermetaaccountlimit",
+      "label": "assertUnderMetaAccountLimit()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "assertundermetaaccountlimit()",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L86"
+    },
+    {
+      "id": "server_src_integrations_meta_extractpurchases",
+      "label": "extractPurchases()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "extractpurchases()",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L56"
+    },
+    {
+      "id": "server_src_integrations_meta_getcredentials",
+      "label": "getCredentials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getcredentials()",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L77"
+    },
+    {
+      "id": "server_src_integrations_meta_getloginconfigid",
+      "label": "getLoginConfigId()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getloginconfigid()",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L69"
+    },
+    {
+      "id": "server_src_integrations_meta_getredirecturi",
+      "label": "getRedirectUri()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getredirecturi()",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L61"
+    },
+    {
+      "id": "server_src_integrations_meta_mapcampaignstatus",
+      "label": "mapCampaignStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "mapcampaignstatus()",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L45"
+    },
+    {
+      "id": "server_src_integrations_shopify_firstfulfillmenttracking",
+      "label": "firstFulfillmentTracking()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "firstfulfillmenttracking()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L31"
+    },
+    {
+      "id": "server_src_integrations_shopify_getcredentials",
+      "label": "getCredentials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getcredentials()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L55"
+    },
+    {
+      "id": "server_src_integrations_shopify_getredirecturi",
+      "label": "getRedirectUri()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "getredirecturi()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L47"
+    },
+    {
+      "id": "server_src_integrations_shopify_maporderstatus",
+      "label": "mapOrderStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "maporderstatus()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "server_src_integrations_shopify_mappaymentmethod",
+      "label": "mapPaymentMethod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "mappaymentmethod()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L42"
+    },
+    {
+      "id": "server_src_integrations_shopify_parsenextlink",
+      "label": "parseNextLink()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "parsenextlink()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L67"
+    },
+    {
+      "id": "server_src_integrations_shopify_verifycallbackhmac",
+      "label": "verifyCallbackHmac()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "verifycallbackhmac()",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L78"
+    },
+    {
+      "id": "server_src_integrations_types_baseconnector_disconnect",
+      "label": ".disconnect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": ".disconnect()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L26"
+    },
+    {
+      "id": "server_src_integrations_types_baseconnector_sync",
+      "label": ".sync()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": ".sync()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "server_src_integrations_types_credentialsconnector_connectwithcredentials",
+      "label": ".connectWithCredentials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": ".connectwithcredentials()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L39"
+    },
+    {
+      "id": "server_src_integrations_types_oauthconnector_getauthurl",
+      "label": ".getAuthUrl()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": ".getauthurl()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L32"
+    },
+    {
+      "id": "server_src_integrations_types_oauthconnector_handlecallback",
+      "label": ".handleCallback()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": ".handlecallback()",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L33"
+    },
+    {
       "id": "src_components_ui_dropdown_menu_dropdownmenucheckboxitem",
       "label": "DropdownMenuCheckboxItem()",
       "_callable": true,
@@ -3180,72 +3593,12 @@
       "source_location": "L122"
     },
     {
-      "id": "server_src_integrations_types_credentialsconnector_connectwithcredentials",
-      "label": ".connectWithCredentials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": ".connectwithcredentials()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L26"
-    },
-    {
-      "id": "server_test_integrations_delhivery_test_insertconnection",
-      "label": "insertConnection()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "insertconnection()",
-      "source_file": "server/test/integrations/delhivery.test.ts",
-      "source_location": "L25"
-    },
-    {
-      "id": "server_test_integrations_delhivery_test_insertshopifyconnection",
-      "label": "insertShopifyConnection()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "insertshopifyconnection()",
-      "source_file": "server/test/integrations/delhivery.test.ts",
-      "source_location": "L33"
-    },
-    {
-      "id": "server_test_integrations_delhivery_test_insertshopifyorder",
-      "label": "insertShopifyOrder()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "insertshopifyorder()",
-      "source_file": "server/test/integrations/delhivery.test.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "server_test_integrations_delhivery_test_stubdelhivery",
-      "label": "stubDelhivery()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "stubdelhivery()",
-      "source_file": "server/test/integrations/delhivery.test.ts",
-      "source_location": "L49"
-    },
-    {
       "id": "server_src_integrations_delhivery_api_asstring",
       "label": "asString()",
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "asstring()",
       "source_file": "server/src/integrations/delhivery-api.ts",
@@ -3257,7 +3610,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "isrecord()",
       "source_file": "server/src/integrations/delhivery-api.ts",
@@ -3269,11 +3622,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "trackshipment()",
       "source_file": "server/src/integrations/delhivery-api.ts",
       "source_location": "L33"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_mapdelhiverystatus",
+      "label": "mapDelhiveryStatus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery.ts",
+      "file_type": "code",
+      "norm_label": "mapdelhiverystatus()",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L19"
     },
     {
       "id": "server_test_integrations_delhivery_api_test_stubfetch",
@@ -3281,203 +3646,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "stubfetch()",
       "source_file": "server/test/integrations/delhivery-api.test.ts",
       "source_location": "L8"
-    },
-    {
-      "id": "server_src_integrations_shopify_firstfulfillmenttracking",
-      "label": "firstFulfillmentTracking()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "firstfulfillmenttracking()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L31"
-    },
-    {
-      "id": "server_src_integrations_shopify_getcredentials",
-      "label": "getCredentials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "getcredentials()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L55"
-    },
-    {
-      "id": "server_src_integrations_shopify_getredirecturi",
-      "label": "getRedirectUri()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "getredirecturi()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L47"
-    },
-    {
-      "id": "server_src_integrations_shopify_maporderstatus",
-      "label": "mapOrderStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "maporderstatus()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "server_src_integrations_shopify_mappaymentmethod",
-      "label": "mapPaymentMethod()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "mappaymentmethod()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L42"
-    },
-    {
-      "id": "server_src_integrations_shopify_parsenextlink",
-      "label": "parseNextLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "parsenextlink()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L67"
-    },
-    {
-      "id": "server_src_integrations_shopify_verifycallbackhmac",
-      "label": "verifyCallbackHmac()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": "verifycallbackhmac()",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L78"
-    },
-    {
-      "id": "server_src_integrations_types_baseconnector_disconnect",
-      "label": ".disconnect()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": ".disconnect()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L8"
-    },
-    {
-      "id": "server_src_integrations_types_baseconnector_sync",
-      "label": ".sync()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": ".sync()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L7"
-    },
-    {
-      "id": "server_src_integrations_types_oauthconnector_getauthurl",
-      "label": ".getAuthUrl()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": ".getauthurl()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L14"
-    },
-    {
-      "id": "server_src_integrations_types_oauthconnector_handlecallback",
-      "label": ".handleCallback()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
-      "file_type": "code",
-      "norm_label": ".handlecallback()",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L15"
-    },
-    {
-      "id": "server_src_integrations_shiprocket_status_mapshiprocketstatus",
-      "label": "mapShiprocketStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "mapshiprocketstatus()",
-      "source_file": "server/src/integrations/shiprocket-status.ts",
-      "source_location": "L19"
-    },
-    {
-      "id": "server_src_integrations_delhivery_status_mapdelhiverystatus",
-      "label": "mapDelhiveryStatus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "delhivery-status.ts",
-      "file_type": "code",
-      "norm_label": "mapdelhiverystatus()",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L19"
-    },
-    {
-      "id": "server_src_lib_state_token_getsecret",
-      "label": "getSecret()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 88,
-      "community_name": "state-token.ts",
-      "file_type": "code",
-      "norm_label": "getsecret()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L10"
-    },
-    {
-      "id": "server_src_lib_state_token_signstate",
-      "label": "signState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 88,
-      "community_name": "state-token.ts",
-      "file_type": "code",
-      "norm_label": "signstate()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "server_src_lib_state_token_verifystate",
-      "label": "verifyState()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 88,
-      "community_name": "state-token.ts",
-      "file_type": "code",
-      "norm_label": "verifystate()",
-      "source_file": "server/src/lib/state-token.ts",
-      "source_location": "L26"
     },
     {
       "id": "src_lib_utils_cn",
@@ -3574,42 +3747,6 @@
       "norm_label": "trimzero()",
       "source_file": "src/lib/utils.ts",
       "source_location": "L31"
-    },
-    {
-      "id": "server_src_integrations_payment_gateway_paymentgateway_cancelsubscription",
-      "label": ".cancelSubscription()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "PaymentGateway",
-      "file_type": "code",
-      "norm_label": ".cancelsubscription()",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "server_src_integrations_payment_gateway_paymentgateway_chargeinvoice",
-      "label": ".chargeInvoice()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "PaymentGateway",
-      "file_type": "code",
-      "norm_label": ".chargeinvoice()",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L3"
-    },
-    {
-      "id": "server_src_integrations_payment_gateway_paymentgateway_createsubscription",
-      "label": ".createSubscription()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 91,
-      "community_name": "PaymentGateway",
-      "file_type": "code",
-      "norm_label": ".createsubscription()",
-      "source_file": "server/src/integrations/payment-gateway.ts",
-      "source_location": "L2"
     },
     {
       "id": "src_data_mock",
@@ -4481,6 +4618,39 @@
       "source_location": "L8"
     },
     {
+      "id": "src_pages_dashboard",
+      "label": "dashboard.tsx",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "dashboard.tsx",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_pages_dashboard_datefmt",
+      "label": "dateFmt",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "datefmt",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_pages_dashboard_empty_tasks",
+      "label": "EMPTY_TASKS",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "select.tsx",
+      "file_type": "code",
+      "norm_label": "empty_tasks",
+      "source_file": "src/pages/dashboard.tsx",
+      "source_location": "L44"
+    },
+    {
       "id": "src_components_dashboard_creatives_panel",
       "label": "creatives-panel.tsx",
       "_origin": "ast",
@@ -4534,6 +4704,28 @@
       "norm_label": "input",
       "source_file": "src/components/ui/input.tsx",
       "source_location": "L4"
+    },
+    {
+      "id": "src_components_ui_tabs",
+      "label": "tabs.tsx",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tabs.tsx",
+      "source_file": "src/components/ui/tabs.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_ui_tabs_tabs",
+      "label": "Tabs",
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "react",
+      "file_type": "code",
+      "norm_label": "tabs",
+      "source_file": "src/components/ui/tabs.tsx",
+      "source_location": "L5"
     },
     {
       "id": "src_pages_geography",
@@ -4600,39 +4792,6 @@
       "norm_label": "palette",
       "source_file": "src/components/ui/avatar.tsx",
       "source_location": "L33"
-    },
-    {
-      "id": "src_pages_dashboard",
-      "label": "dashboard.tsx",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "dashboard.tsx",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_pages_dashboard_datefmt",
-      "label": "dateFmt",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "datefmt",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L43"
-    },
-    {
-      "id": "src_pages_dashboard_empty_tasks",
-      "label": "EMPTY_TASKS",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "dashboard.tsx",
-      "file_type": "code",
-      "norm_label": "empty_tasks",
-      "source_file": "src/pages/dashboard.tsx",
-      "source_location": "L44"
     },
     {
       "id": "src_pages_tasks",
@@ -5317,26 +5476,15 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_ui_tabs",
-      "label": "tabs.tsx",
+      "id": "src_pages_connect_pick_accounts",
+      "label": "connect-pick-accounts.tsx",
       "_origin": "ast",
       "community": 25,
-      "community_name": "tabs.tsx",
+      "community_name": "connect-pick-accounts.tsx",
       "file_type": "code",
-      "norm_label": "tabs.tsx",
-      "source_file": "src/components/ui/tabs.tsx",
+      "norm_label": "connect-pick-accounts.tsx",
+      "source_file": "src/pages/connect-pick-accounts.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_components_ui_tabs_tabs",
-      "label": "Tabs",
-      "_origin": "ast",
-      "community": 25,
-      "community_name": "tabs.tsx",
-      "file_type": "code",
-      "norm_label": "tabs",
-      "source_file": "src/components/ui/tabs.tsx",
-      "source_location": "L5"
     },
     {
       "id": "src_components_ui_tooltip",
@@ -5512,7 +5660,7 @@
       "file_type": "code",
       "norm_label": "allowedorigins",
       "source_file": "server/src/index.ts",
-      "source_location": "L19"
+      "source_location": "L20"
     },
     {
       "id": "server_src_integrations_payment_gateway",
@@ -5589,6 +5737,17 @@
       "file_type": "code",
       "norm_label": "shop-domain.ts",
       "source_file": "server/src/lib/shop-domain.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_lib_state_token",
+      "label": "state-token.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "state-token.ts",
+      "source_file": "server/src/lib/state-token.ts",
       "source_location": "L1"
     },
     {
@@ -5831,7 +5990,29 @@
       "file_type": "code",
       "norm_label": "router",
       "source_file": "server/src/routes/integrations.ts",
-      "source_location": "L6"
+      "source_location": "L7"
+    },
+    {
+      "id": "server_src_routes_pending_connections",
+      "label": "routes/pending-connections.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "routes/pending-connections.ts",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_routes_pending_connections_router",
+      "label": "router",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "router",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L10"
     },
     {
       "id": "server_src_routes_shopify_data",
@@ -5988,6 +6169,17 @@
       "source_location": "L1"
     },
     {
+      "id": "server_test_lib_state_token_test",
+      "label": "state-token.test.ts",
+      "_origin": "ast",
+      "community": 29,
+      "community_name": "index.ts",
+      "file_type": "code",
+      "norm_label": "state-token.test.ts",
+      "source_file": "server/test/lib/state-token.test.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_test_middleware_auth_test",
       "label": "auth.test.ts",
       "_origin": "ast",
@@ -6052,6 +6244,17 @@
       "file_type": "code",
       "norm_label": "@/pages/blended-marketing",
       "source_file": "@/pages/blended-marketing"
+    },
+    {
+      "id": "connect_pick_accounts",
+      "label": "@/pages/connect-pick-accounts",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "App.tsx",
+      "confidence": "EXTRACTED",
+      "file_type": "code",
+      "norm_label": "@/pages/connect-pick-accounts",
+      "source_file": "@/pages/connect-pick-accounts"
     },
     {
       "id": "dashboard",
@@ -6195,6 +6398,17 @@
       "norm_label": "blendedmarketing",
       "source_file": "src/App.tsx",
       "source_location": "L16"
+    },
+    {
+      "id": "src_app_connectpickaccounts",
+      "label": "ConnectPickAccounts",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "App.tsx",
+      "file_type": "code",
+      "norm_label": "connectpickaccounts",
+      "source_file": "src/App.tsx",
+      "source_location": "L20"
     },
     {
       "id": "src_app_dashboard",
@@ -6876,7 +7090,29 @@
       "file_type": "code",
       "norm_label": "app",
       "source_file": "server/src/index.ts",
-      "source_location": "L18"
+      "source_location": "L19"
+    },
+    {
+      "id": "server_src_integrations_delhivery_delhiveryconnector",
+      "label": "delhiveryConnector",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "delhiveryconnector",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "server_src_integrations_shiprocket_shiprocketconnector",
+      "label": "shiprocketConnector",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "shiprocketconnector",
+      "source_file": "server/src/integrations/shiprocket.ts",
+      "source_location": "L16"
     },
     {
       "id": "server_src_lib_crypto",
@@ -6887,6 +7123,17 @@
       "file_type": "code",
       "norm_label": "crypto.ts",
       "source_file": "server/src/lib/crypto.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_lib_pending_connections",
+      "label": "lib/pending-connections.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "lib/pending-connections.ts",
+      "source_file": "server/src/lib/pending-connections.ts",
       "source_location": "L1"
     },
     {
@@ -7000,6 +7247,17 @@
       "source_location": "L1"
     },
     {
+      "id": "server_test_integrations_delhivery_test",
+      "label": "delhivery.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "delhivery.test.ts",
+      "source_file": "server/test/integrations/delhivery.test.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_test_integrations_google_test",
       "label": "google.test.ts",
       "_origin": "ast",
@@ -7077,6 +7335,17 @@
       "source_location": "L1"
     },
     {
+      "id": "server_test_lib_pending_connections_test",
+      "label": "lib/pending-connections.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "lib/pending-connections.test.ts",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_test_migration_006_test",
       "label": "migration-006.test.ts",
       "_origin": "ast",
@@ -7118,6 +7387,17 @@
       "file_type": "code",
       "norm_label": "migration-009.test.ts",
       "source_file": "server/test/migration-009.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_migration_010_test",
+      "label": "migration-010.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "migration-010.test.ts",
+      "source_file": "server/test/migration-010.test.ts",
       "source_location": "L1"
     },
     {
@@ -7272,6 +7552,17 @@
       "file_type": "code",
       "norm_label": "integrations.test.ts",
       "source_file": "server/test/routes/integrations.test.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_test_routes_pending_connections_test",
+      "label": "routes/pending-connections.test.ts",
+      "_origin": "ast",
+      "community": 58,
+      "community_name": "test-db.ts",
+      "file_type": "code",
+      "norm_label": "routes/pending-connections.test.ts",
+      "source_file": "server/test/routes/pending-connections.test.ts",
       "source_location": "L1"
     },
     {
@@ -7872,17 +8163,6 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_meta",
-      "label": "meta.ts",
-      "_origin": "ast",
-      "community": 60,
-      "community_name": "meta.ts",
-      "file_type": "code",
-      "norm_label": "meta.ts",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_package_dependencies",
       "label": "dependencies",
       "_origin": "ast",
@@ -8059,6 +8339,17 @@
       "source_location": "L22"
     },
     {
+      "id": "server_package_devdependencies_node_pg_migrate",
+      "label": "node-pg-migrate",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "devDependencies",
+      "file_type": "code",
+      "norm_label": "node-pg-migrate",
+      "source_file": "server/package.json",
+      "source_location": "L30"
+    },
+    {
       "id": "server_package_devdependencies_supertest",
       "label": "supertest",
       "_origin": "ast",
@@ -8079,17 +8370,6 @@
       "norm_label": "@types/express",
       "source_file": "server/package.json",
       "source_location": "L24"
-    },
-    {
-      "id": "server_package_devdependencies_types_jsonwebtoken",
-      "label": "@types/jsonwebtoken",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "devDependencies",
-      "file_type": "code",
-      "norm_label": "@types/jsonwebtoken",
-      "source_file": "server/package.json",
-      "source_location": "L25"
     },
     {
       "id": "server_package_devdependencies_types_node",
@@ -8136,6 +8416,17 @@
       "source_location": "L34"
     },
     {
+      "id": "node_pg_migrate",
+      "label": "node-pg-migrate",
+      "_origin": "ast",
+      "community": 62,
+      "community_name": "devDependencies",
+      "file_type": "concept",
+      "norm_label": "node-pg-migrate",
+      "source_file": "server/package.json",
+      "source_location": "L30"
+    },
+    {
       "id": "server_package_json_types_node",
       "label": "@types/node",
       "_origin": "ast",
@@ -8167,17 +8458,6 @@
       "norm_label": "@types/express",
       "source_file": "server/package.json",
       "source_location": "L24"
-    },
-    {
-      "id": "types_jsonwebtoken",
-      "label": "@types/jsonwebtoken",
-      "_origin": "ast",
-      "community": 62,
-      "community_name": "devDependencies",
-      "file_type": "concept",
-      "norm_label": "@types/jsonwebtoken",
-      "source_file": "server/package.json",
-      "source_location": "L25"
     },
     {
       "id": "types_node_cron",
@@ -8294,7 +8574,7 @@
       "node_kind": "heading",
       "norm_label": "delhivery (plan 3)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L213"
+      "source_location": "L229"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_error_handling",
@@ -8306,7 +8586,7 @@
       "node_kind": "heading",
       "norm_label": "error handling",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L265"
+      "source_location": "L293"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_findings_from_current_provider_docs_context7_2026_09_27",
@@ -8330,7 +8610,7 @@
       "node_kind": "heading",
       "norm_label": "frontend",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L249"
+      "source_location": "L273"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_goal",
@@ -8354,7 +8634,7 @@
       "node_kind": "heading",
       "norm_label": "meta (plan 4)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L170"
+      "source_location": "L186"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_non_goals",
@@ -8402,7 +8682,7 @@
       "node_kind": "heading",
       "norm_label": "prerequisites / operator setup",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L315"
+      "source_location": "L351"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_rollout_one_spec_five_plans",
@@ -8414,7 +8694,7 @@
       "node_kind": "heading",
       "norm_label": "rollout: one spec, five plans",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L299"
+      "source_location": "L335"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_routes",
@@ -8438,7 +8718,7 @@
       "node_kind": "heading",
       "norm_label": "security",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L275"
+      "source_location": "L305"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shiprocket_plan_2",
@@ -8450,7 +8730,7 @@
       "node_kind": "heading",
       "norm_label": "shiprocket (plan 2)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L184"
+      "source_location": "L200"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_shopify_plan_1_then_plan_5",
@@ -8474,7 +8754,7 @@
       "node_kind": "heading",
       "norm_label": "shopify tracking-number capture (plan 3, prerequisite for delhivery)",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L201"
+      "source_location": "L217"
     },
     {
       "id": "docs_superpowers_specs_2026_09_27_simple_integrations_design_simple_one_click_integrations_shopify_meta_couriers",
@@ -8498,7 +8778,7 @@
       "node_kind": "heading",
       "norm_label": "testing",
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L285"
+      "source_location": "L321"
     },
     {
       "id": "docs_superpowers_plans_2026_09_02_shopify_integration",
@@ -9848,15 +10128,48 @@
       "source_location": "L1"
     },
     {
-      "id": "server_src_integrations_shiprocket_shiprocketconnector",
-      "label": "shiprocketConnector",
+      "id": "server_src_integrations_shiprocket_status",
+      "label": "shiprocket-status.ts",
       "_origin": "ast",
       "community": 72,
       "community_name": "shiprocket.ts",
       "file_type": "code",
-      "norm_label": "shiprocketconnector",
-      "source_file": "server/src/integrations/shiprocket.ts",
-      "source_location": "L16"
+      "norm_label": "shiprocket-status.ts",
+      "source_file": "server/src/integrations/shiprocket-status.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_shiprocket_status_dispatched_exact",
+      "label": "DISPATCHED_EXACT",
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "dispatched_exact",
+      "source_file": "server/src/integrations/shiprocket-status.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "server_src_integrations_shiprocket_status_dispatched_parts",
+      "label": "DISPATCHED_PARTS",
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "dispatched_parts",
+      "source_file": "server/src/integrations/shiprocket-status.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "server_src_integrations_shiprocket_status_in_transit_parts",
+      "label": "IN_TRANSIT_PARTS",
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "in_transit_parts",
+      "source_file": "server/src/integrations/shiprocket-status.ts",
+      "source_location": "L13"
     },
     {
       "id": "server_test_integrations_shiprocket_api_test",
@@ -9879,6 +10192,17 @@
       "norm_label": "orders_fixture",
       "source_file": "server/test/integrations/shiprocket-api.test.ts",
       "source_location": "L42"
+    },
+    {
+      "id": "server_test_integrations_shiprocket_status_test",
+      "label": "shiprocket-status.test.ts",
+      "_origin": "ast",
+      "community": 72,
+      "community_name": "shiprocket.ts",
+      "file_type": "code",
+      "norm_label": "shiprocket-status.test.ts",
+      "source_file": "server/test/integrations/shiprocket-status.test.ts",
+      "source_location": "L1"
     },
     {
       "id": "src_lib_api",
@@ -10125,6 +10449,72 @@
       "source_location": "L163"
     },
     {
+      "id": "server_src_integrations_meta",
+      "label": "meta.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "meta.ts",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_meta_metaconnector",
+      "label": "metaConnector",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "metaconnector",
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L106"
+    },
+    {
+      "id": "server_src_integrations_shopify",
+      "label": "shopify.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "shopify.ts",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_shopify_shopifyconnector",
+      "label": "shopifyConnector",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "shopifyconnector",
+      "source_file": "server/src/integrations/shopify.ts",
+      "source_location": "L91"
+    },
+    {
+      "id": "server_src_integrations_types",
+      "label": "integrations/types.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "integrations/types.ts",
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_lib_connector_registry",
+      "label": "connector-registry.ts",
+      "_origin": "ast",
+      "community": 79,
+      "community_name": "google.ts",
+      "file_type": "code",
+      "norm_label": "connector-registry.ts",
+      "source_file": "server/src/lib/connector-registry.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_ui_dropdown_menu",
       "label": "dropdown-menu.tsx",
       "_origin": "ast",
@@ -10189,94 +10579,6 @@
       "norm_label": "dropdownmenutrigger",
       "source_file": "src/components/ui/dropdown-menu.tsx",
       "source_location": "L7"
-    },
-    {
-      "id": "server_src_integrations_delhivery",
-      "label": "delhivery.ts",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "delhivery.ts",
-      "source_file": "server/src/integrations/delhivery.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_integrations_delhivery_delhiveryconnector",
-      "label": "delhiveryConnector",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "delhiveryconnector",
-      "source_file": "server/src/integrations/delhivery.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_delhivery_terminal_statuses",
-      "label": "TERMINAL_STATUSES",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "terminal_statuses",
-      "source_file": "server/src/integrations/delhivery.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "server_src_integrations_meta_metaconnector",
-      "label": "metaConnector",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "metaconnector",
-      "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L98"
-    },
-    {
-      "id": "server_src_integrations_shopify_shopifyconnector",
-      "label": "shopifyConnector",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "shopifyconnector",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L91"
-    },
-    {
-      "id": "server_src_integrations_types",
-      "label": "integrations/types.ts",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "integrations/types.ts",
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_lib_connector_registry",
-      "label": "connector-registry.ts",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "connector-registry.ts",
-      "source_file": "server/src/lib/connector-registry.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_test_integrations_delhivery_test",
-      "label": "delhivery.test.ts",
-      "_origin": "ast",
-      "community": 80,
-      "community_name": "connector-registry.ts",
-      "file_type": "code",
-      "norm_label": "delhivery.test.ts",
-      "source_file": "server/test/integrations/delhivery.test.ts",
-      "source_location": "L1"
     },
     {
       "id": "docs_superpowers_plans_2026_09_28_delhivery_integration",
@@ -10399,22 +10701,66 @@
       "source_location": "L1161"
     },
     {
+      "id": "server_src_integrations_delhivery",
+      "label": "delhivery.ts",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery.ts",
+      "file_type": "code",
+      "norm_label": "delhivery.ts",
+      "source_file": "server/src/integrations/delhivery.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "server_src_integrations_delhivery_api",
       "label": "delhivery-api.ts",
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "delhivery-api.ts",
       "source_file": "server/src/integrations/delhivery-api.ts",
       "source_location": "L1"
     },
     {
+      "id": "server_src_integrations_delhivery_status",
+      "label": "delhivery-status.ts",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery.ts",
+      "file_type": "code",
+      "norm_label": "delhivery-status.ts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_dispatched_parts",
+      "label": "DISPATCHED_PARTS",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery.ts",
+      "file_type": "code",
+      "norm_label": "dispatched_parts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L16"
+    },
+    {
+      "id": "server_src_integrations_delhivery_status_in_transit_parts",
+      "label": "IN_TRANSIT_PARTS",
+      "_origin": "ast",
+      "community": 82,
+      "community_name": "delhivery.ts",
+      "file_type": "code",
+      "norm_label": "in_transit_parts",
+      "source_file": "server/src/integrations/delhivery-status.ts",
+      "source_location": "L17"
+    },
+    {
       "id": "server_test_integrations_delhivery_api_test",
       "label": "delhivery-api.test.ts",
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "delhivery-api.test.ts",
       "source_file": "server/test/integrations/delhivery-api.test.ts",
@@ -10425,76 +10771,21 @@
       "label": "TRACK_FIXTURE",
       "_origin": "ast",
       "community": 82,
-      "community_name": "delhivery-api.ts",
+      "community_name": "delhivery.ts",
       "file_type": "code",
       "norm_label": "track_fixture",
       "source_file": "server/test/integrations/delhivery-api.test.ts",
       "source_location": "L16"
     },
     {
-      "id": "server_src_integrations_shopify",
-      "label": "shopify.ts",
+      "id": "server_test_integrations_delhivery_status_test",
+      "label": "delhivery-status.test.ts",
       "_origin": "ast",
-      "community": 83,
-      "community_name": "shopify.ts",
+      "community": 82,
+      "community_name": "delhivery.ts",
       "file_type": "code",
-      "norm_label": "shopify.ts",
-      "source_file": "server/src/integrations/shopify.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_integrations_shiprocket_status",
-      "label": "shiprocket-status.ts",
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "shiprocket-status.ts",
-      "source_file": "server/src/integrations/shiprocket-status.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_integrations_shiprocket_status_dispatched_exact",
-      "label": "DISPATCHED_EXACT",
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "dispatched_exact",
-      "source_file": "server/src/integrations/shiprocket-status.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "server_src_integrations_shiprocket_status_dispatched_parts",
-      "label": "DISPATCHED_PARTS",
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "dispatched_parts",
-      "source_file": "server/src/integrations/shiprocket-status.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "server_src_integrations_shiprocket_status_in_transit_parts",
-      "label": "IN_TRANSIT_PARTS",
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "in_transit_parts",
-      "source_file": "server/src/integrations/shiprocket-status.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "server_test_integrations_shiprocket_status_test",
-      "label": "shiprocket-status.test.ts",
-      "_origin": "ast",
-      "community": 84,
-      "community_name": "shiprocket-status.ts",
-      "file_type": "code",
-      "norm_label": "shiprocket-status.test.ts",
-      "source_file": "server/test/integrations/shiprocket-status.test.ts",
+      "norm_label": "delhivery-status.test.ts",
+      "source_file": "server/test/integrations/delhivery-status.test.ts",
       "source_location": "L1"
     },
     {
@@ -10564,50 +10855,6 @@
       "source_location": "L10"
     },
     {
-      "id": "server_src_integrations_delhivery_status",
-      "label": "delhivery-status.ts",
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "delhivery-status.ts",
-      "file_type": "code",
-      "norm_label": "delhivery-status.ts",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "server_src_integrations_delhivery_status_dispatched_parts",
-      "label": "DISPATCHED_PARTS",
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "delhivery-status.ts",
-      "file_type": "code",
-      "norm_label": "dispatched_parts",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L16"
-    },
-    {
-      "id": "server_src_integrations_delhivery_status_in_transit_parts",
-      "label": "IN_TRANSIT_PARTS",
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "delhivery-status.ts",
-      "file_type": "code",
-      "norm_label": "in_transit_parts",
-      "source_file": "server/src/integrations/delhivery-status.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "server_test_integrations_delhivery_status_test",
-      "label": "delhivery-status.test.ts",
-      "_origin": "ast",
-      "community": 86,
-      "community_name": "delhivery-status.ts",
-      "file_type": "code",
-      "norm_label": "delhivery-status.test.ts",
-      "source_file": "server/test/integrations/delhivery-status.test.ts",
-      "source_location": "L1"
-    },
-    {
       "id": "server_package",
       "label": "server/package.json",
       "_origin": "ast",
@@ -10663,48 +10910,124 @@
       "source_location": "L5"
     },
     {
-      "id": "server_src_lib_state_token",
-      "label": "state-token.ts",
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business",
+      "label": "2026-09-28-meta-login-for-business.md",
       "_origin": "ast",
-      "community": 88,
-      "community_name": "state-token.ts",
-      "file_type": "code",
-      "norm_label": "state-token.ts",
-      "source_file": "server/src/lib/state-token.ts",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "2026-09-28-meta-login-for-business.md",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
       "source_location": "L1"
     },
     {
-      "id": "server_test_lib_state_token_test",
-      "label": "state-token.test.ts",
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "label": "Global Constraints",
       "_origin": "ast",
-      "community": 88,
-      "community_name": "state-token.ts",
-      "file_type": "code",
-      "norm_label": "state-token.test.ts",
-      "source_file": "server/test/lib/state-token.test.ts",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "global constraints",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L13"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_meta_login_for_business_ad_account_picker_plan_4_of_5_implementation_plan",
+      "label": "Meta Login for Business + Ad-Account Picker (Plan 4 of 5) Implementation Plan",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "meta login for business + ad-account picker (plan 4 of 5) implementation plan",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
       "source_location": "L1"
     },
     {
-      "id": "server_package_devdependencies_node_pg_migrate",
-      "label": "node-pg-migrate",
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_1_migration_010_pending_connections_table",
+      "label": "Task 1: Migration 010 \u2014 `pending_connections` table",
       "_origin": "ast",
       "community": 89,
-      "community_name": "node-pg-migrate",
-      "file_type": "code",
-      "norm_label": "node-pg-migrate",
-      "source_file": "server/package.json",
-      "source_location": "L30"
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 1: migration 010 \u2014 `pending_connections` table",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L25"
     },
     {
-      "id": "node_pg_migrate",
-      "label": "node-pg-migrate",
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_2_oauthconnector_handlecallback_returns_a_discriminated_union",
+      "label": "Task 2: `OAuthConnector.handleCallback` returns a discriminated union",
       "_origin": "ast",
       "community": 89,
-      "community_name": "node-pg-migrate",
-      "file_type": "concept",
-      "norm_label": "node-pg-migrate",
-      "source_file": "server/package.json",
-      "source_location": "L30"
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 2: `oauthconnector.handlecallback` returns a discriminated union",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L137"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_3_meta_connector_config_id_and_the_ad_account_picker_branch",
+      "label": "Task 3: Meta connector \u2014 `config_id` and the ad-account picker branch",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 3: meta connector \u2014 `config_id` and the ad-account picker branch",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L255"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_4_callback_route_branches_on_type_pending_connections_storage_helper",
+      "label": "Task 4: Callback route branches on `type`; `pending-connections` storage helper",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 4: callback route branches on `type`; `pending-connections` storage helper",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L430"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_5_pending_connections_api_route_get_and_select",
+      "label": "Task 5: `pending-connections` API route \u2014 `GET` and `select`",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 5: `pending-connections` api route \u2014 `get` and `select`",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L735"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_6_frontend_the_pick_accounts_page",
+      "label": "Task 6: Frontend \u2014 the pick-accounts page",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 6: frontend \u2014 the pick-accounts page",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L1003"
+    },
+    {
+      "id": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_7_final_verification_operator_setup_docs_real_account_checklist_graph_refresh",
+      "label": "Task 7: Final verification, operator setup docs, real-account checklist, graph refresh",
+      "_origin": "ast",
+      "community": 89,
+      "community_name": "Global Constraints",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "task 7: final verification, operator setup docs, real-account checklist, graph refresh",
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L1182"
     },
     {
       "id": "src_lib_utils",
@@ -10815,6 +11138,28 @@
       "norm_label": "@types/cors",
       "source_file": "server/package.json",
       "source_location": "L23"
+    },
+    {
+      "id": "server_package_devdependencies_types_jsonwebtoken",
+      "label": "@types/jsonwebtoken",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "@types/jsonwebtoken",
+      "file_type": "code",
+      "norm_label": "@types/jsonwebtoken",
+      "source_file": "server/package.json",
+      "source_location": "L25"
+    },
+    {
+      "id": "types_jsonwebtoken",
+      "label": "@types/jsonwebtoken",
+      "_origin": "ast",
+      "community": 95,
+      "community_name": "@types/jsonwebtoken",
+      "file_type": "concept",
+      "norm_label": "@types/jsonwebtoken",
+      "source_file": "server/package.json",
+      "source_location": "L25"
     },
     {
       "id": "public_creatives_demo_22",
@@ -11722,6 +12067,30 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_lib_pending_connections_createpending",
+      "target": "server_src_lib_crypto_encrypttoken",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L33",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections_readpending",
+      "target": "server_src_lib_crypto_decrypttoken",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L55",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_lib_state_token_signstate",
       "target": "server_src_lib_state_token_getsecret",
       "relation": "calls",
@@ -11851,6 +12220,18 @@
       "context": "call",
       "source_file": "server/test/routes/courier-data.test.ts",
       "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test_token",
+      "target": "server_test_helpers_test_jwt_signtestjwt",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -12995,7 +13376,7 @@
     },
     {
       "source": "server_src_index",
-      "target": "server_src_scheduler_startscheduler",
+      "target": "server_src_routes_pending_connections_router",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13003,6 +13384,18 @@
       "context": "import",
       "source_file": "server/src/index.ts",
       "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index",
+      "target": "server_src_scheduler_startscheduler",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/index.ts",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -13498,6 +13891,42 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_db_pool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_crypto_decrypttoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_crypto_encrypttoken",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_middleware_auth",
       "target": "server_src_lib_http_error_httperror",
       "relation": "imports",
@@ -13819,6 +14248,102 @@
       "context": "import",
       "source_file": "server/src/routes/integrations.ts",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_integrations",
+      "target": "server_src_lib_pending_connections_createpending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/integrations.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_db_pool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_access_assertclientaccess",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_http_error_httperror",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_pending_connections_deletepending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_pending_connections_readpending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_connection_store_saveconnection",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_integrations_meta_assertundermetaaccountlimit",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -14446,6 +14971,66 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_src_lib_pending_connections_createpending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_src_lib_pending_connections_deletepending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_src_lib_pending_connections_readpending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_lib_shop_domain_test",
       "target": "server_src_lib_shop_domain_normalizeshopdomain",
       "relation": "imports",
@@ -14634,6 +15219,30 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/test/migration-009.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_010_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-010.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_010_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-010.test.ts",
       "source_location": "L2",
       "weight": 1.0
     },
@@ -15414,6 +16023,66 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/test/routes/integrations.test.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_src_index_app",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_test_helpers_test_db_resettestdb",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_test_helpers_test_db_testpool",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_test_helpers_test_jwt_signtestjwt",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_src_lib_pending_connections_createpending",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
       "source_location": "L6",
       "weight": 1.0
     },
@@ -16067,7 +16736,7 @@
     },
     {
       "source": "server_src_index",
-      "target": "server_src_scheduler",
+      "target": "server_src_routes_pending_connections",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -16075,6 +16744,18 @@
       "context": "import",
       "source_file": "server/src/index.ts",
       "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_index",
+      "target": "server_src_scheduler",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/index.ts",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -16486,6 +17167,30 @@
       "weight": 1.0
     },
     {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_crypto",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
       "source": "server_src_middleware_auth",
       "target": "server_src_lib_http_error",
       "relation": "imports_from",
@@ -16867,6 +17572,102 @@
       "context": "import",
       "source_file": "server/src/routes/integrations.ts",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_integrations",
+      "target": "server_src_lib_pending_connections",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/integrations.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_middleware_auth",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_access",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_http_error",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_pending_connections",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_lib_connection_store",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_integrations_meta",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -17386,6 +18187,30 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_lib_pending_connections_test",
+      "target": "server_src_lib_pending_connections",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/lib/pending-connections.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
       "source": "server_test_lib_shop_domain_test",
       "target": "server_src_lib_shop_domain",
       "relation": "imports_from",
@@ -17514,6 +18339,18 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/test/migration-009.test.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_migration_010_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/migration-010.test.ts",
       "source_location": "L2",
       "weight": 1.0
     },
@@ -18090,6 +18927,54 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "server/test/routes/integrations.test.ts",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_src_index",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_test_helpers_test_db",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_test_helpers_test_jwt",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_src_lib_pending_connections",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "server/test/routes/pending-connections.test.ts",
       "source_location": "L6",
       "weight": 1.0
     },
@@ -18766,6 +19651,18 @@
       "weight": 1.0
     },
     {
+      "source": "src_pages_connect_pick_accounts",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "src_pages_dashboard",
       "target": "ref_react",
       "relation": "imports_from",
@@ -18906,7 +19803,7 @@
       "confidence_score": 1.0,
       "context": "type",
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L24",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -18918,7 +19815,7 @@
       "confidence_score": 1.0,
       "context": "type",
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L12",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -19923,6 +20820,105 @@
       "weight": 1.0
     },
     {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_meta_login_for_business_ad_account_picker_plan_4_of_5_implementation_plan",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_6_frontend_the_pick_accounts_page",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L1003",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_7_final_verification_operator_setup_docs_real_account_checklist_graph_refresh",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L1182",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_2_oauthconnector_handlecallback_returns_a_discriminated_union",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L137",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_1_migration_010_pending_connections_table",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L25",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_3_meta_connector_config_id_and_the_ad_account_picker_branch",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L255",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_4_callback_route_branches_on_type_pending_connections_storage_helper",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L430",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_task_5_pending_connections_api_route_get_and_select",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L735",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_superpowers_plans_2026_09_28_meta_login_for_business_meta_login_for_business_ad_account_picker_plan_4_of_5_implementation_plan",
+      "target": "docs_superpowers_plans_2026_09_28_meta_login_for_business_global_constraints",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/superpowers/plans/2026-09-28-meta-login-for-business.md",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
       "source": "docs_superpowers_specs_2026_08_31_backend_integrations_design",
       "target": "docs_superpowers_specs_2026_08_31_backend_integrations_design_backend_v1_auth_billing_and_multi_platform_integrations",
       "relation": "contains",
@@ -20348,7 +21344,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L170",
+      "source_location": "L186",
       "weight": 1.0
     },
     {
@@ -20359,7 +21355,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L184",
+      "source_location": "L200",
       "weight": 1.0
     },
     {
@@ -20370,7 +21366,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L201",
+      "source_location": "L217",
       "weight": 1.0
     },
     {
@@ -20381,7 +21377,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L213",
+      "source_location": "L229",
       "weight": 1.0
     },
     {
@@ -20414,7 +21410,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L249",
+      "source_location": "L273",
       "weight": 1.0
     },
     {
@@ -20425,7 +21421,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L265",
+      "source_location": "L293",
       "weight": 1.0
     },
     {
@@ -20436,7 +21432,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L275",
+      "source_location": "L305",
       "weight": 1.0
     },
     {
@@ -20447,7 +21443,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L285",
+      "source_location": "L321",
       "weight": 1.0
     },
     {
@@ -20458,7 +21454,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L299",
+      "source_location": "L335",
       "weight": 1.0
     },
     {
@@ -20469,7 +21465,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/superpowers/specs/2026-09-27-simple-integrations-design.md",
-      "source_location": "L315",
+      "source_location": "L351",
       "weight": 1.0
     },
     {
@@ -21371,7 +22367,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/index.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -21382,18 +22378,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/index.ts",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "server_src_integrations_delhivery",
-      "target": "server_src_integrations_delhivery_terminal_statuses",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server/src/integrations/delhivery.ts",
-      "source_location": "L12",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -21651,6 +22636,17 @@
     },
     {
       "source": "server_src_integrations_meta",
+      "target": "server_src_integrations_meta_metaconnector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/meta.ts",
+      "source_location": "L106",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_meta",
       "target": "server_src_integrations_meta_metainsightrow",
       "relation": "contains",
       "_origin": "ast",
@@ -21706,7 +22702,7 @@
     },
     {
       "source": "server_src_integrations_meta",
-      "target": "server_src_integrations_meta_getcredentials",
+      "target": "server_src_integrations_meta_getloginconfigid",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -21717,13 +22713,13 @@
     },
     {
       "source": "server_src_integrations_meta",
-      "target": "server_src_integrations_meta_assertundermetaaccountlimit",
+      "target": "server_src_integrations_meta_getcredentials",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L78",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -21739,13 +22735,13 @@
     },
     {
       "source": "server_src_integrations_meta",
-      "target": "server_src_integrations_meta_metaconnector",
+      "target": "server_src_integrations_meta_assertundermetaaccountlimit",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/meta.ts",
-      "source_location": "L98",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -22058,24 +23054,13 @@
     },
     {
       "source": "server_src_integrations_types",
-      "target": "server_src_integrations_types_oauthconnector",
+      "target": "server_src_integrations_types_baseconnector",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L12",
-      "weight": 1.0
-    },
-    {
-      "source": "server_src_integrations_types",
-      "target": "server_src_integrations_types_credentialsconnector",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "server/src/integrations/types.ts",
-      "source_location": "L24",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -22091,24 +23076,46 @@
     },
     {
       "source": "server_src_integrations_types",
+      "target": "server_src_integrations_types_oauthconnector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_types",
+      "target": "server_src_integrations_types_credentialsconnector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/integrations/types.ts",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_integrations_types",
       "target": "server_src_integrations_types_connector",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L39",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
       "source": "server_src_integrations_types",
-      "target": "server_src_integrations_types_baseconnector",
+      "target": "server_src_integrations_types_oauthcallbackresult",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L5",
+      "source_location": "L8",
       "weight": 1.0
     },
     {
@@ -22219,6 +23226,61 @@
       "confidence_score": 1.0,
       "source_file": "server/src/lib/http-error.ts",
       "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_pending_connections_pendingrow",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_pending_connections_createpending",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_pending_connections_readpending",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_pending_connections_deletepending",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_lib_pending_connections",
+      "target": "server_src_lib_pending_connections_pendingpayload",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/lib/pending-connections.ts",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -22504,7 +23566,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/routes/integrations.ts",
-      "source_location": "L6",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_routes_pending_connections_router",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/src/routes/pending-connections.ts",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -23080,6 +24153,17 @@
       "weight": 1.0
     },
     {
+      "source": "server_test_routes_pending_connections_test",
+      "target": "server_test_routes_pending_connections_test_token",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "server/test/routes/pending-connections.test.ts",
+      "source_location": "L10",
+      "weight": 1.0
+    },
+    {
       "source": "server_tsconfig",
       "target": "server_tsconfig_include",
       "relation": "contains",
@@ -23312,13 +24396,24 @@
     },
     {
       "source": "src_app",
+      "target": "src_app_connectpickaccounts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app",
       "target": "src_app_routefallback",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx",
-      "source_location": "L21",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -23329,7 +24424,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/App.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -25302,6 +26397,39 @@
       "weight": 1.0
     },
     {
+      "source": "src_pages_connect_pick_accounts",
+      "target": "src_pages_connect_pick_accounts_pendinginfo",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "src_pages_connect_pick_accounts",
+      "target": "src_pages_connect_pick_accounts_connectpickaccounts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L18",
+      "weight": 1.0
+    },
+    {
+      "source": "src_pages_connect_pick_accounts",
+      "target": "src_pages_connect_pick_accounts_candidate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/pages/connect-pick-accounts.tsx",
+      "source_location": "L7",
+      "weight": 1.0
+    },
+    {
       "source": "src_pages_dashboard",
       "target": "src_pages_dashboard_splitbar",
       "relation": "contains",
@@ -26626,6 +27754,15 @@
     },
     {
       "source": "src_app",
+      "target": "connect_pick_accounts",
+      "relation": "dynamic_import",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/App.tsx"
+    },
+    {
+      "source": "src_app",
       "target": "dashboard",
       "relation": "dynamic_import",
       "_origin": "ast",
@@ -26755,7 +27892,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L7",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -26766,7 +27903,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L8",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -26777,7 +27914,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L26",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -26788,7 +27925,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L14",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -26799,7 +27936,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "server/src/integrations/types.ts",
-      "source_location": "L15",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -26915,6 +28052,18 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "server/src/routes/couriers.ts",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "server_src_routes_pending_connections",
+      "target": "server_src_middleware_auth_requireauth",
+      "relation": "indirect_call",
+      "_origin": "ast",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "context": "argument",
+      "source_file": "server/src/routes/pending-connections.ts",
       "source_location": "L12",
       "weight": 1.0
     },
@@ -27328,5 +28477,5 @@
       "source_file": "README.md"
     }
   ],
-  "built_at_commit": "0e93799e24c76770f67b9168dd4023197b8303cc"
+  "built_at_commit": "8dda3a702fe802cad5b2d284580db6700803badc"
 }

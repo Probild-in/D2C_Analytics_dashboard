@@ -13,6 +13,7 @@ import courierDataRouter from "./routes/courier-data.js";
 import campaignsRouter from "./routes/campaigns.js";
 import tasksRouter from "./routes/tasks.js";
 import teamMembersRouter from "./routes/team-members.js";
+import pendingConnectionsRouter from "./routes/pending-connections.js";
 import { startScheduler } from "./scheduler.js";
 
 const app = express();
@@ -34,6 +35,7 @@ app.use("/api/clients/:id/couriers", courierDataRouter);
 app.use("/api/couriers", couriersRouter);
 app.use("/api/integrations", integrationsRouter);
 app.use("/api/team-members", teamMembersRouter);
+app.use("/api/connections/pending", pendingConnectionsRouter);
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ status: "ok" });

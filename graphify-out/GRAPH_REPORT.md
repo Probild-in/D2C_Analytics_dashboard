@@ -1,16 +1,16 @@
-# Graph Report - orbitd2cdashboard  (2026-09-28)
+# Graph Report - orbitd2cdashboard  (2026-09-29)
 
 ## Corpus Check
-- 163 files · ~132,492 words
+- 171 files · ~142,405 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 974 nodes · 1386 edges · 95 communities (66 shown, 29 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.81)
+- 1003 nodes · 1455 edges · 89 communities (61 shown, 28 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 18 edges (avg confidence: 0.82)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `0e93799e`
+- Built from commit: `8dda3a70`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -32,14 +32,14 @@
 - creatives-panel.tsx
 - react
 - avatar.tsx
-- dashboard.tsx
+- PaymentGateway
 - tasks.tsx
 - app-context.tsx
 - manage-clients.tsx
 - google-ads.tsx
 - operations.tsx
 - popover.tsx
-- tabs.tsx
+- connect-pick-accounts.tsx
 - tooltip.tsx
 - meta-ads.tsx
 - products.tsx
@@ -67,7 +67,6 @@
 - Favicon (Orbit Icon)
 - test-db.ts
 - Backend v1: Auth, Billing, and Multi-Platform Integrations
-- meta.ts
 - dependencies
 - devDependencies
 - Simple One-Click Integrations: Shopify, Meta, Couriers
@@ -84,33 +83,28 @@
 - supabase.ts
 - Global Constraints
 - google.ts
-- connector-registry.ts
 - Global Constraints
-- delhivery-api.ts
-- shopify.ts
-- shiprocket-status.ts
+- delhivery.ts
 - scripts
-- delhivery-status.ts
 - server/package.json
-- state-token.ts
-- node-pg-migrate
+- Global Constraints
 - tsx
-- PaymentGateway
 - @types/supertest
 - typescript
 - @types/cors
+- @types/jsonwebtoken
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 35 edges
-2. `testPool` - 29 edges
-3. `resetTestDb()` - 29 edges
-4. `signTestJwt()` - 21 edges
-5. `pool` - 19 edges
-6. `app` - 19 edges
+1. `react` - 36 edges
+2. `testPool` - 32 edges
+3. `resetTestDb()` - 32 edges
+4. `signTestJwt()` - 23 edges
+5. `pool` - 21 edges
+6. `app` - 20 edges
 7. `compilerOptions` - 19 edges
-8. `encryptToken()` - 16 edges
-9. `File Structure` - 16 edges
-10. `HttpError` - 15 edges
+8. `encryptToken()` - 18 edges
+9. `HttpError` - 16 edges
+10. `File Structure` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `<title>Orbit</title>` --references--> `Orbit — D2C Analytics & Operations Dashboard`  [INFERRED]
@@ -121,8 +115,8 @@
   index.html → README.md
 - `/src/main.tsx entry script` --conceptually_related_to--> `React 19`  [INFERRED]
   index.html → README.md
-- `insertConnection()` --calls--> `encryptToken()`  [EXTRACTED]
-  server/test/integrations/delhivery.test.ts → server/src/lib/crypto.ts
+- `buildApp()` --indirect_call--> `requireAuth()`  [INFERRED]
+  server/test/middleware/auth.test.ts → server/src/middleware/auth.ts
 
 ## Import Cycles
 - None detected.
@@ -131,7 +125,7 @@
 - **Dashboard pages driven by the seeded mock data layer** — readme_src_data_mock, readme_dashboard_page, readme_all_clients_page, readme_shopify_sales_page, readme_operations_rto_page, readme_products_page, readme_geography_page, readme_meta_ads_page, readme_google_ads_page, readme_blended_marketing_page, readme_tasks_page, readme_manage_clients_page [EXTRACTED 1.00]
 - **Orbit frontend technology stack** — readme_react19, readme_typescript, readme_vite, readme_tailwindcss, readme_radixui, readme_recharts, readme_reactrouter [EXTRACTED 1.00]
 
-## Communities (95 total, 29 thin omitted)
+## Communities (89 total, 28 thin omitted)
 
 ### Community 0 - "mock.ts"
 Cohesion: 0.07
@@ -147,7 +141,7 @@ Nodes (30): oxlint, devDependencies, oxlint, tailwindcss, @tailwindcss/vite, @ty
 
 ### Community 3 - "App.tsx"
 Cohesion: 0.07
-Nodes (13): AllClients, App(), BlendedMarketing, Dashboard, Geography, GoogleAds, Login, ManageClients (+5 more)
+Nodes (14): AllClients, App(), BlendedMarketing, ConnectPickAccounts, Dashboard, Geography, GoogleAds, Login (+6 more)
 
 ### Community 4 - "src/data/mock.ts (seeded pseudo-random mock data layer)"
 Cohesion: 0.08
@@ -186,16 +180,16 @@ Cohesion: 0.22
 Nodes (3): Dialog, DialogClose, DialogTrigger
 
 ### Community 13 - "select.tsx"
-Cohesion: 0.22
-Nodes (3): Select, SelectGroup, SelectValue
+Cohesion: 0.10
+Nodes (5): Select, SelectGroup, SelectValue, dateFmt, EMPTY_TASKS
 
 ### Community 14 - "creatives-panel.tsx"
 Cohesion: 0.29
 Nodes (6): Demo Creative 22 (Overhead Man Crossing Road), creativeImageUrl(), CreativeThumbnail(), formatIcon(), isCarouselFormat(), isVideoFormat()
 
 ### Community 15 - "react"
-Cohesion: 0.17
-Nodes (5): react, accentMap, KpiCardProps, Input, EMPTY_GEO
+Cohesion: 0.12
+Nodes (6): react, accentMap, KpiCardProps, Input, Tabs, EMPTY_GEO
 
 ### Community 16 - "avatar.tsx"
 Cohesion: 0.32
@@ -234,8 +228,8 @@ Cohesion: 0.25
 Nodes (5): ACTIVITY_ICON, EMPTY_CAMPAIGNS, EMPTY_CREATIVES, EMPTY_NOTES, STATUS_VARIANT
 
 ### Community 29 - "index.ts"
-Cohesion: 0.07
-Nodes (42): pool, allowedOrigins, stubPaymentGateway, assertClientAccess(), getAccessibleClientIds(), resolveClientScope(), saveConnection(), SaveConnectionInput (+34 more)
+Cohesion: 0.06
+Nodes (47): pool, allowedOrigins, stubPaymentGateway, assertClientAccess(), getAccessibleClientIds(), resolveClientScope(), saveConnection(), SaveConnectionInput (+39 more)
 
 ### Community 30 - "badge.tsx"
 Cohesion: 0.67
@@ -250,16 +244,12 @@ Cohesion: 0.47
 Nodes (3): useClientResource(), EMPTY_SALES, usePeriodData()
 
 ### Community 58 - "test-db.ts"
-Cohesion: 0.10
-Nodes (21): app, decryptToken(), encryptToken(), getKey(), expectedTables, FAKE_COURIER_PLATFORM, installFakeCourier(), __dirname (+13 more)
+Cohesion: 0.07
+Nodes (31): app, delhiveryConnector, shiprocketConnector, CredentialsRejectedError, decryptToken(), encryptToken(), getKey(), createPending() (+23 more)
 
 ### Community 59 - "Backend v1: Auth, Billing, and Multi-Platform Integrations"
 Cohesion: 0.06
 Nodes (34): Backend Foundation Implementation Plan, File Structure, Global Constraints, Task 10: Courier picker scaffold, Task 11: Provision Supabase and connect the frontend, Task 1: Scaffold the server project, Task 2: Database schema migration, Task 3: Supabase Auth JWT verification middleware (+26 more)
-
-### Community 60 - "meta.ts"
-Cohesion: 0.22
-Nodes (3): MetaAd, MetaCampaign, MetaInsightRow
 
 ### Community 61 - "dependencies"
 Cohesion: 0.13
@@ -267,7 +257,7 @@ Nodes (15): cors, dotenv, express, jose, jsonwebtoken, node-cron, pg, dependenci
 
 ### Community 62 - "devDependencies"
 Cohesion: 0.13
-Nodes (15): devDependencies, supertest, @types/express, @types/jsonwebtoken, @types/node, @types/node-cron, @types/pg, vitest (+7 more)
+Nodes (15): node-pg-migrate, devDependencies, node-pg-migrate, supertest, @types/express, @types/node, @types/node-cron, @types/pg (+7 more)
 
 ### Community 63 - "Simple One-Click Integrations: Shopify, Meta, Couriers"
 Cohesion: 0.08
@@ -306,69 +296,53 @@ Cohesion: 0.40
 Nodes (3): ClientSummary, EMPTY_SUMMARY, statusMeta
 
 ### Community 72 - "shiprocket.ts"
-Cohesion: 0.25
-Nodes (13): asDate(), asString(), fetchOrdersPage(), isRecord(), parseOrder(), parseShipment(), ShiprocketAuthError, shiprocketLogin() (+5 more)
+Cohesion: 0.17
+Nodes (17): asDate(), asString(), fetchOrdersPage(), isRecord(), parseOrder(), parseShipment(), ShiprocketAuthError, shiprocketLogin() (+9 more)
 
 ### Community 78 - "Global Constraints"
 Cohesion: 0.15
 Nodes (12): Global Constraints, Shiprocket + Shipments + Operations (Plan 2 of 5) Implementation Plan, Task 10: Final verification, real-account checklist, graph refresh, Task 1: Harden `/connect` logging and clear secrets on disconnect, Task 2: Rate limiter — per-user bucket and key eviction, Task 3: Migration 007 — `shipments` table, Task 4: Shiprocket status mapper and API client, Task 5: Shiprocket connector, registry, couriers list, scheduler (+4 more)
 
 ### Community 79 - "google.ts"
-Cohesion: 0.19
-Nodes (9): getDeveloperToken(), getOAuthCredentials(), GoogleAdRow, GoogleCampaignRow, googleConnector, GoogleMetricsRow, refreshAccessToken(), runGaqlQuery() (+1 more)
-
-### Community 80 - "connector-registry.ts"
-Cohesion: 0.19
-Nodes (8): delhiveryConnector, TERMINAL_STATUSES, metaConnector, shopifyConnector, Connector, CredentialsConnector, CredentialsRejectedError, insertConnection()
+Cohesion: 0.06
+Nodes (21): getDeveloperToken(), getOAuthCredentials(), GoogleAdRow, GoogleCampaignRow, googleConnector, GoogleMetricsRow, refreshAccessToken(), runGaqlQuery() (+13 more)
 
 ### Community 81 - "Global Constraints"
 Cohesion: 0.20
 Nodes (9): Delhivery Integration (Plan 3 of 5) Implementation Plan, Global Constraints, Task 1: Migration 009 — Shopify tracking-number columns, Task 2: Capture Shopify's tracking number and company during sync, Task 3: Delhivery status mapper and API client (explicitly unsourced), Task 4: Delhivery connector, registry, couriers list, scheduler, Task 5: Route-level test through the real Delhivery connector, Task 6: Frontend — add Delhivery to the Integrations panel (+1 more)
 
-### Community 82 - "delhivery-api.ts"
-Cohesion: 0.33
-Nodes (6): asString(), DelhiveryAuthError, DelhiveryTrackedShipment, isRecord(), trackShipment(), TRACK_FIXTURE
-
-### Community 83 - "shopify.ts"
-Cohesion: 0.13
-Nodes (3): ShopifyOrder, BaseConnector, OAuthConnector
-
-### Community 84 - "shiprocket-status.ts"
-Cohesion: 0.33
-Nodes (5): DISPATCHED_EXACT, DISPATCHED_PARTS, IN_TRANSIT_PARTS, mapShiprocketStatus(), ShipmentStatus
+### Community 82 - "delhivery.ts"
+Cohesion: 0.19
+Nodes (10): asString(), DelhiveryAuthError, DelhiveryTrackedShipment, isRecord(), trackShipment(), DISPATCHED_PARTS, IN_TRANSIT_PARTS, mapDelhiveryStatus() (+2 more)
 
 ### Community 85 - "scripts"
 Cohesion: 0.33
 Nodes (6): scripts, build, dev, migrate, start, test
 
-### Community 86 - "delhivery-status.ts"
-Cohesion: 0.40
-Nodes (4): DISPATCHED_PARTS, IN_TRANSIT_PARTS, mapDelhiveryStatus(), ShipmentStatus
-
 ### Community 87 - "server/package.json"
 Cohesion: 0.40
 Nodes (4): name, private, type, version
 
-### Community 88 - "state-token.ts"
-Cohesion: 0.60
-Nodes (4): getSecret(), signState(), StatePayload, verifyState()
+### Community 89 - "Global Constraints"
+Cohesion: 0.20
+Nodes (9): Global Constraints, Meta Login for Business + Ad-Account Picker (Plan 4 of 5) Implementation Plan, Task 1: Migration 010 — `pending_connections` table, Task 2: `OAuthConnector.handleCallback` returns a discriminated union, Task 3: Meta connector — `config_id` and the ad-account picker branch, Task 4: Callback route branches on `type`; `pending-connections` storage helper, Task 5: `pending-connections` API route — `GET` and `select`, Task 6: Frontend — the pick-accounts page (+1 more)
 
 ## Knowledge Gaps
-- **433 isolated node(s):** `$schema`, `typescript`, `oxc`, `react/rules-of-hooks`, `warn` (+428 more)
+- **445 isolated node(s):** `$schema`, `typescript`, `oxc`, `react/rules-of-hooks`, `warn` (+440 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **28 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `App.tsx`, `topbar.tsx`, `dropdown-menu.tsx`, `sales.tsx`, `plugins`, `dialog.tsx`, `select.tsx`, `creatives-panel.tsx`, `avatar.tsx`, `dashboard.tsx`, `tasks.tsx`, `app-context.tsx`, `card.tsx`, `manage-clients.tsx`, `google-ads.tsx`, `operations.tsx`, `popover.tsx`, `tabs.tsx`, `tooltip.tsx`, `meta-ads.tsx`, `products.tsx`, `badge.tsx`, `button.tsx`, `use-period-data.ts`, `platforms.ts`, `all-clients.tsx`?**
-  _High betweenness centrality (0.188) - this node is a cross-community bridge._
-- **Why does `pool` connect `index.ts` to `shiprocket.ts`, `google.ts`, `connector-registry.ts`, `shopify.ts`, `test-db.ts`, `meta.ts`?**
-  _High betweenness centrality (0.018) - this node is a cross-community bridge._
+- **Why does `react` connect `react` to `App.tsx`, `topbar.tsx`, `dropdown-menu.tsx`, `sales.tsx`, `plugins`, `dialog.tsx`, `select.tsx`, `creatives-panel.tsx`, `avatar.tsx`, `tasks.tsx`, `app-context.tsx`, `card.tsx`, `manage-clients.tsx`, `google-ads.tsx`, `operations.tsx`, `popover.tsx`, `connect-pick-accounts.tsx`, `tooltip.tsx`, `meta-ads.tsx`, `products.tsx`, `badge.tsx`, `button.tsx`, `use-period-data.ts`, `platforms.ts`, `all-clients.tsx`?**
+  _High betweenness centrality (0.158) - this node is a cross-community bridge._
+- **Why does `pool` connect `index.ts` to `shiprocket.ts`, `delhivery.ts`, `test-db.ts`, `google.ts`?**
+  _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **Why does `plugins` connect `plugins` to `react`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
 - **What connects `$schema`, `typescript`, `oxc` to the rest of the system?**
-  _433 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _445 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `mock.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.06765327695560254 - nodes in this community are weakly interconnected._
 - **Should `dependencies` be split into smaller, more focused modules?**

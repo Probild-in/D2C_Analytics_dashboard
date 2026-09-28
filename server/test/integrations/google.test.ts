@@ -60,6 +60,7 @@ describe("googleConnector.handleCallback", () => {
       }),
     );
     const result = await googleConnector.handleCallback({ code: "auth-code-123" }, { clientId: "abc-fashion" });
+    expect(result.type).toBe("connected");
     expect(result.externalAccountId).toBe("1234567890");
     expect(result.accessToken).toBe("ya29.real-token");
     expect(result.refreshToken).toBe("1//real-refresh-token");

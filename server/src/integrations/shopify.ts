@@ -124,7 +124,7 @@ export const shopifyConnector: OAuthConnector = {
       throw new Error(`Shopify token exchange failed: ${res.status}`);
     }
     const body = (await res.json()) as { access_token: string };
-    return { externalAccountId: shop, accessToken: body.access_token };
+    return { type: "connected", externalAccountId: shop, accessToken: body.access_token };
   },
 
   async sync(connectionId: string) {
