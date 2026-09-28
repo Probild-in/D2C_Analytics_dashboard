@@ -160,28 +160,52 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   existing server test runner) and validates with the existing regex. The frontend sends
   the raw text. Pressing Enter connects. Then the existing redirect → Shopify login/approve →
   callback flow.
-- **Plan 5, install link — corrected from the earlier draft.** Shopify's own current docs
-  (fetched directly; Context7's `apps` doc set covers only the newer CLI-managed
-  installation, not this app's legacy authorization-code-grant flow) do NOT describe an
-  HMAC-signed request to a merchant-facing "App URL" before OAuth begins — that shape only
-  applies to the OAuth *callback* (already implemented, already verified). The confirmed
-  legacy flow is simpler: `GET /integrations/shopify/install?shop=` is a route ON OUR OWN
-  server, not something Shopify signs. It normalizes and validates `shop` (reusing
-  `normalizeShopDomain`), signs a state token with no `clientId` (the same `signState`
-  used everywhere else, minus that one field), and redirects into the EXACT same
-  `getAuthUrl`/OAuth-authorize flow already built — no new HMAC logic, no new Shopify
-  endpoint. The callback (unchanged shape, already HMAC-verifies via
-  `verifyCallbackHmac`) returns `{ type: "connected", externalAccountId: shop, accessToken
-  }` as it does today; the route, seeing `statePayload.clientId` is absent, stores `{
-  accessToken }` (plus `shop`, kept outside the encrypted payload since it's not a secret)
-  in `pending_connections` instead of calling `saveConnection`, and redirects to
-  `#/connect/claim?pending=<id>`. There the logged-in user picks which client the store
-  belongs to; `POST /connections/pending/:id/claim` (same router as Meta's picker) creates
-  the connection (existing Shopify has no per-client account limit, so no limit check
-  needed here) and deletes the pending row.
+- **Plan 5, install link — corrected from the earlier draft, finalized here.** Shopify's
+  own current docs (fetched directly; Context7's `apps` doc set covers only the newer
+  CLI-managed installation, not this app's legacy authorization-code-grant flow) do NOT
+  describe an HMAC-signed request to a merchant-facing "App URL" before OAuth begins —
+  that shape only applies to the OAuth *callback* (already implemented, already
+  verified). The confirmed legacy flow is simpler: `GET /integrations/shopify/install?shop=`
+  is a route ON OUR OWN server, not something Shopify signs, and not linked from
+  anywhere inside the dashboard — it exists purely as a URL an agency pastes into an
+  email/message for a merchant to click, or types in themselves. It normalizes and
+  validates `shop` (reusing `normalizeShopDomain`), signs a state token with no
+  `clientId`/`teamMemberId` (both become optional on `StatePayload`; `signState` is
+  otherwise unchanged), and redirects into the EXACT same `getAuthUrl`/OAuth-authorize
+  flow already built — no new HMAC logic, no new Shopify endpoint, no change to
+  `shopifyConnector.handleCallback` (it always returns `{ type: "connected",
+  externalAccountId: shop, accessToken }` regardless of why it was called — Shopify's
+  OAuth always yields exactly one shop, there is no "multiple candidates" ambiguity the
+  way Meta has).
+- The BRANCHING happens one layer up, in the callback route
+  (`server/src/routes/integrations.ts`), which already receives `result.type ===
+  "connected"` either way: if `statePayload.clientId` is present (every existing flow —
+  Shopify's own domain-field connect, Meta, Google), behavior is completely unchanged. If
+  absent (only the install-link case can produce this), the route stores `{ accessToken,
+  shop: result.externalAccountId }` in `pending_connections` (both `client_id` and
+  `team_member_id` null; `PendingPayload`'s `shop?: string` field, already declared in
+  plan 4 but never populated until now, is what carries it) instead of calling
+  `saveConnection`, and redirects to `#/connect/claim?pending=<id>`.
+- There the logged-in user picks which client the store belongs to, from the same
+  client list `useApp()` already exposes everywhere else in the dashboard.
+  `POST /connections/pending/:id/claim` (added to the SAME router Meta's plan 4 built,
+  `server/src/routes/pending-connections.ts`, reusing its `lockPendingForUpdate` — the
+  claim must be atomic for the same reason plan 4's select had to become atomic) 400s
+  `wrong_pending_type` if the row already has a `clientId` (a Meta-type row hitting the
+  wrong action), otherwise calls `assertClientAccess` on the CHOSEN client id from the
+  request body (existing Shopify has no per-client account limit, so no limit check is
+  needed here) and creates the connection. Unlike plan 4's `GET`/`select`, an access
+  failure here is a genuine, distinct 404/403 — not folded into `pending_expired` —
+  because the person on the claim page already knows the link is real (they're choosing
+  among clients they can see); the "never confirm a stale link was ever valid" concern
+  from plan 4 doesn't apply once the row's existence is already established by the page
+  having loaded.
 - This is the same `pending_connections` mechanism Meta's picker uses, with the opposite
   half of the row known at creation time (Shopify: token known, client unknown; Meta:
   client known, token known, only the *account* unknown) — one router handles both.
+  `GET /connections/pending/:id` needs no change: it already skips `assertClientAccess`
+  when `clientId` is null (any logged-in user can view/claim an unclaimed install link)
+  and already omits `candidates`/includes `shop` correctly based on what the payload has.
 
 ### Meta (plan 4)
 
