@@ -160,12 +160,28 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   existing server test runner) and validates with the existing regex. The frontend sends
   the raw text. Pressing Enter connects. Then the existing redirect → Shopify login/approve →
   callback flow.
-- **Plan 5, install link**: `GET /integrations/shopify/install?shop=&hmac=&...` verifies
-  the HMAC, then starts OAuth with a state token that has no `clientId`. The callback
-  stores the token in `pending_connections` and redirects to
-  `#/connect/claim?pending=<id>`, where the logged-in user picks which client the store
-  belongs to. `POST /connections/claim` then creates the connection (with limit check) and
-  deletes the pending row.
+- **Plan 5, install link — corrected from the earlier draft.** Shopify's own current docs
+  (fetched directly; Context7's `apps` doc set covers only the newer CLI-managed
+  installation, not this app's legacy authorization-code-grant flow) do NOT describe an
+  HMAC-signed request to a merchant-facing "App URL" before OAuth begins — that shape only
+  applies to the OAuth *callback* (already implemented, already verified). The confirmed
+  legacy flow is simpler: `GET /integrations/shopify/install?shop=` is a route ON OUR OWN
+  server, not something Shopify signs. It normalizes and validates `shop` (reusing
+  `normalizeShopDomain`), signs a state token with no `clientId` (the same `signState`
+  used everywhere else, minus that one field), and redirects into the EXACT same
+  `getAuthUrl`/OAuth-authorize flow already built — no new HMAC logic, no new Shopify
+  endpoint. The callback (unchanged shape, already HMAC-verifies via
+  `verifyCallbackHmac`) returns `{ type: "connected", externalAccountId: shop, accessToken
+  }` as it does today; the route, seeing `statePayload.clientId` is absent, stores `{
+  accessToken }` (plus `shop`, kept outside the encrypted payload since it's not a secret)
+  in `pending_connections` instead of calling `saveConnection`, and redirects to
+  `#/connect/claim?pending=<id>`. There the logged-in user picks which client the store
+  belongs to; `POST /connections/pending/:id/claim` (same router as Meta's picker) creates
+  the connection (existing Shopify has no per-client account limit, so no limit check
+  needed here) and deletes the pending row.
+- This is the same `pending_connections` mechanism Meta's picker uses, with the opposite
+  half of the row known at creation time (Shopify: token known, client unknown; Meta:
+  client known, token known, only the *account* unknown) — one router handles both.
 
 ### Meta (plan 4)
 
@@ -268,7 +284,11 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   ships with plan 2, its first consumer; plan 1 builds only the OAuth card path.
 - Handles the `?connection=success|error&message=` return params (already emitted by the
   callback) with a toast/banner.
-- Plan 4/5 add two pages: `connect/pick-accounts` and `connect/claim`.
+- Plan 4/5 add two pages: `connect/pick-accounts` (Meta: pick which ad account) and
+  `connect/claim` (Shopify: pick which client). Both read `GET
+  /api/connections/pending/:id` for their data and post to a `select`/`claim` action on
+  the same id; both show "This link expired, please connect again" on a 404/expired
+  response.
 
 ## Error handling
 
@@ -276,7 +296,9 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
 - Account limit reached: existing 403 message shown on the card.
 - Sync failure: connection goes to `error` (card shows "Needs attention" + Reconnect),
   next scheduled run retries, as today.
-- Pending connection expired: page shows "This link expired, please connect again".
+- Pending connection expired, already claimed/selected, or not found: same "This link
+  expired, please connect again" message (deliberately not distinguished, so the message
+  never implies whether a stale link was ever valid).
 - Courier token expiry (Shiprocket): silent re-login; if the stored password is no longer
   valid the connection goes to `error` and the card asks for new credentials.
 
@@ -286,7 +308,13 @@ Hourly node-cron job per courier platform through the existing `runScheduledSync
   never returned to the browser.
 - OAuth state stays a signed 10-minute JWT; `pending_connections` rows expire in 30
   minutes and are single-use.
-- Shopify install route verifies HMAC before doing anything else.
+- Shopify install route validates the `shop` domain (server-side, same regex as the
+  existing connect flow) before redirecting — the route itself isn't Shopify-signed (see
+  the corrected plan 5 section above); the OAuth *callback* that follows it still
+  HMAC-verifies exactly as it does today, which is where forgery is actually prevented.
+- `pending_connections.payload` is encrypted the same way as every other stored token; the
+  picker/claim GET endpoints never return it, only the decrypted candidate list/shop
+  domain needed to render the choice.
 - Credential connect endpoint requires auth and `assertClientAccess`, and is rate limited
   per user to blunt credential-stuffing use.
 
