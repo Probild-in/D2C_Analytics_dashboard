@@ -132,4 +132,42 @@ describe("GET /api/integrations/:platform/callback", () => {
     const conn = await testPool.query("select * from platform_connections");
     expect(conn.rowCount).toBe(0);
   });
+
+  it("redirects to the pick-accounts page when Meta's callback returns type 'pending'", async () => {
+    process.env.META_APP_ID = "test-app-id";
+    process.env.META_APP_SECRET = "test-app-secret";
+    process.env.META_LOGIN_CONFIG_ID = "test-config-id";
+    // Note: the brief's team_members insert is omitted here — this file's beforeEach
+    // (above) already inserts that same row, and repeating it violates team_members_pkey.
+    // A subscriptions row is added here (not in the brief) because metaConnector.handleCallback
+    // calls assertUnderMetaAccountLimit, which requires one for the client.
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, extra_meta_accounts) values
+       ('abc-fashion', 'small', 'active', 0)`,
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/oauth/access_token")) return new Response(JSON.stringify({ access_token: "meta-token" }), { status: 200 });
+        return new Response(
+          JSON.stringify({ data: [{ id: "act_111", name: "A" }, { id: "act_222", name: "B" }] }),
+          { status: 200 },
+        );
+      }),
+    );
+    const state = await signState({
+      clientId: "abc-fashion",
+      platform: "meta",
+      teamMemberId: "11111111-1111-1111-1111-111111111111",
+    });
+    const res = await request(app).get("/api/integrations/meta/callback").query({ code: "auth-code", state });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/connect/pick-accounts");
+    expect(res.headers.location).toContain("pending=");
+    expect((await testPool.query("select 1 from platform_connections")).rowCount).toBe(0);
+    expect((await testPool.query("select client_id, team_member_id from pending_connections")).rows).toEqual([
+      { client_id: "abc-fashion", team_member_id: "11111111-1111-1111-1111-111111111111" },
+    ]);
+  });
 });
