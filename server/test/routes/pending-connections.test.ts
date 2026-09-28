@@ -60,6 +60,7 @@ describe("GET /api/connections/pending/:id", () => {
       .get(`/api/connections/pending/${id}`)
       .set("Authorization", `Bearer ${signTestJwt({ sub: SCOPED, email: "scoped@agency.com" })}`);
     expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("pending_expired");
   });
 });
 
@@ -128,5 +129,20 @@ describe("POST /api/connections/pending/:id/select", () => {
       .set("Authorization", `Bearer ${signTestJwt({ sub: SCOPED, email: "scoped@agency.com" })}`)
       .send({ externalAccountId: "act_1" });
     expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("pending_expired");
+  });
+
+  it("only lets one of two concurrent selects succeed, even against the account limit", async () => {
+    const id = await createPending("meta", "abc-fashion", RIYA, {
+      accessToken: "chosen-token",
+      candidates: [{ id: "act_1", label: "Main" }, { id: "act_2", label: "Retargeting" }],
+    });
+    const [first, second] = await Promise.all([
+      request(app).post(`/api/connections/pending/${id}/select`).set("Authorization", `Bearer ${token()}`).send({ externalAccountId: "act_1" }),
+      request(app).post(`/api/connections/pending/${id}/select`).set("Authorization", `Bearer ${token()}`).send({ externalAccountId: "act_2" }),
+    ]);
+    const statuses = [first.status, second.status].sort();
+    expect(statuses).toEqual([200, 404]);
+    expect((await testPool.query("select count(*) from platform_connections")).rows[0].count).toBe("1");
   });
 });

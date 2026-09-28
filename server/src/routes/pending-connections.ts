@@ -3,7 +3,7 @@ import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { assertClientAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
-import { readPending, deletePending } from "../lib/pending-connections.js";
+import { readPending, lockPendingForUpdate } from "../lib/pending-connections.js";
 import { saveConnection } from "../lib/connection-store.js";
 import { assertUnderMetaAccountLimit } from "../integrations/meta.js";
 
@@ -16,7 +16,11 @@ router.get("/:id", requireAuth, async (req, res, next) => {
       throw new HttpError(404, "pending_expired", "This link expired, please connect again.");
     }
     if (pending.clientId) {
-      await assertClientAccess(pool, req.auth!.userId, pending.clientId);
+      try {
+        await assertClientAccess(pool, req.auth!.userId, pending.clientId);
+      } catch {
+        throw new HttpError(404, "pending_expired", "This link expired, please connect again.");
+      }
     }
     res.json({
       platform: pending.platform,
@@ -31,8 +35,10 @@ router.get("/:id", requireAuth, async (req, res, next) => {
 });
 
 router.post("/:id/select", requireAuth, async (req, res, next) => {
+  const client = await pool.connect();
   try {
-    const pending = await readPending(req.params.id);
+    await client.query("begin");
+    const pending = await lockPendingForUpdate(client, req.params.id);
     if (!pending) {
       throw new HttpError(404, "pending_expired", "This link expired, please connect again.");
     }
@@ -41,7 +47,11 @@ router.post("/:id/select", requireAuth, async (req, res, next) => {
       // the /claim action plan 5 adds, not this one.
       throw new HttpError(400, "wrong_pending_type", "This connection has no account choice to make.");
     }
-    await assertClientAccess(pool, req.auth!.userId, pending.clientId);
+    try {
+      await assertClientAccess(pool, req.auth!.userId, pending.clientId);
+    } catch {
+      throw new HttpError(404, "pending_expired", "This link expired, please connect again.");
+    }
 
     const externalAccountId = (req.body as { externalAccountId?: unknown }).externalAccountId;
     const candidate = pending.payload.candidates?.find((c) => c.id === externalAccountId);
@@ -67,11 +77,15 @@ router.post("/:id/select", requireAuth, async (req, res, next) => {
       expiresAt: pending.payload.expiresAt,
       connectedBy: pending.teamMemberId ?? req.auth!.userId,
     });
-    await deletePending(req.params.id);
+    await client.query("delete from pending_connections where id = $1", [req.params.id]);
+    await client.query("commit");
 
     res.json({ platform: pending.platform, status: "connected", externalAccountId: candidate.id });
   } catch (err) {
+    await client.query("rollback").catch(() => {});
     next(err);
+  } finally {
+    client.release();
   }
 });
 

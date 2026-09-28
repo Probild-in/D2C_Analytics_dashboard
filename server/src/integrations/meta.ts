@@ -140,7 +140,7 @@ export const metaConnector: OAuthConnector = {
     const tokenBody = (await tokenRes.json()) as { access_token: string; expires_in?: number };
 
     const adAccountsRes = await fetch(
-      `https://graph.facebook.com/${META_API_VERSION}/me/adaccounts?fields=id,name&access_token=${tokenBody.access_token}`,
+      `https://graph.facebook.com/${META_API_VERSION}/me/adaccounts?fields=id,name&limit=100&access_token=${tokenBody.access_token}`,
     );
     if (!adAccountsRes.ok) {
       throw new Error(`Meta ad accounts fetch failed: ${adAccountsRes.status}`);

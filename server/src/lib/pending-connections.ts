@@ -1,3 +1,4 @@
+import type pg from "pg";
 import pool from "../db.js";
 import { encryptToken, decryptToken } from "./crypto.js";
 
@@ -58,4 +59,27 @@ export async function readPending(id: string): Promise<PendingRow | null> {
 
 export async function deletePending(id: string): Promise<void> {
   await pool.query("delete from pending_connections where id = $1", [id]);
+}
+
+// Reads a pending row FOR UPDATE, for use inside a transaction that will act on it and
+// then either delete it (consuming it) or let the transaction roll back (leaving it for a
+// retry). Unlike readPending, this does not decrypt/parse payload — callers that need the
+// parsed payload should call readPending as usual for read-only paths (the GET route);
+// this is only for the select/claim mutation path where a lock matters.
+export async function lockPendingForUpdate(client: pg.PoolClient, id: string): Promise<PendingRow | null> {
+  const result = await client.query(
+    `select platform, client_id, team_member_id, payload
+     from pending_connections
+     where id = $1 and expires_at > now()
+     for update`,
+    [id],
+  );
+  if (result.rowCount === 0) return null;
+  const row = result.rows[0];
+  return {
+    platform: row.platform,
+    clientId: row.client_id,
+    teamMemberId: row.team_member_id,
+    payload: JSON.parse(decryptToken(row.payload)) as PendingPayload,
+  };
 }
