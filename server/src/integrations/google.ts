@@ -229,6 +229,7 @@ export const googleConnector: OAuthConnector = {
     const externalAccountId = customersBody.resourceNames[0].split("/")[1];
 
     return {
+      type: "connected",
       externalAccountId,
       accessToken: tokenBody.access_token,
       refreshToken: tokenBody.refresh_token,

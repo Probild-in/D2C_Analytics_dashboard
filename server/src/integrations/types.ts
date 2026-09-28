@@ -2,6 +2,24 @@
 // The message is shown to the end user, so keep it human-readable and free of secrets.
 export class CredentialsRejectedError extends Error {}
 
+// handleCallback's result: either the OAuth login resolved to exactly one account and is
+// ready to save, or it granted several and the user needs to pick one (Meta's ad-account
+// picker) or the account owning it isn't known yet (Shopify's install-link claim, plan 5).
+export type OAuthCallbackResult =
+  | {
+      type: "connected";
+      externalAccountId: string;
+      accessToken: string;
+      refreshToken?: string;
+      expiresAt?: Date;
+    }
+  | {
+      type: "pending";
+      accessToken: string;
+      expiresAt?: Date;
+      candidates: { id: string; label: string }[];
+    };
+
 interface BaseConnector {
   platform: string;
   sync(connectionId: string): Promise<{ recordsSynced: number }>;
@@ -12,12 +30,7 @@ interface BaseConnector {
 export interface OAuthConnector extends BaseConnector {
   authType: "oauth";
   getAuthUrl(clientId: string, state: string): string;
-  handleCallback(query: Record<string, string>, context: { clientId: string }): Promise<{
-    externalAccountId: string;
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt?: Date;
-  }>;
+  handleCallback(query: Record<string, string>, context: { clientId: string }): Promise<OAuthCallbackResult>;
 }
 
 // Connects from a form: the connector validates the credentials live against the provider.

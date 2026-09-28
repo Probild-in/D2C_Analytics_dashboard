@@ -48,7 +48,7 @@ describe("shopifyConnector.handleCallback", () => {
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
     const hmac = computeTestHmac(query, "test-api-secret");
     const result = await shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" });
-    expect(result).toEqual({ externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
+    expect(result).toEqual({ type: "connected", externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
   });
 
   it("throws if the token exchange fails", async () => {
