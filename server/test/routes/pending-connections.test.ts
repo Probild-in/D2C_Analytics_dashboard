@@ -146,3 +146,75 @@ describe("POST /api/connections/pending/:id/select", () => {
     expect((await testPool.query("select count(*) from platform_connections")).rows[0].count).toBe("1");
   });
 });
+
+describe("POST /api/connections/pending/:id/claim", () => {
+  it("creates the connection for the chosen client and deletes the pending row", async () => {
+    const id = await createPending("shopify", null, null, { accessToken: "shop-token", shop: "abc-fashion.myshopify.com" });
+    const res = await request(app)
+      .post(`/api/connections/pending/${id}/claim`)
+      .set("Authorization", `Bearer ${token()}`)
+      .send({ clientId: "abc-fashion" });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ platform: "shopify", status: "connected", externalAccountId: "abc-fashion.myshopify.com" });
+    const conn = await testPool.query("select client_id, platform, external_account_id, connected_by from platform_connections");
+    expect(conn.rows).toEqual([{ client_id: "abc-fashion", platform: "shopify", external_account_id: "abc-fashion.myshopify.com", connected_by: RIYA }]);
+    expect((await testPool.query("select 1 from pending_connections where id = $1", [id])).rowCount).toBe(0);
+  });
+
+  it("404s for an unknown or expired id", async () => {
+    const res = await request(app)
+      .post("/api/connections/pending/00000000-0000-0000-0000-000000000000/claim")
+      .set("Authorization", `Bearer ${token()}`)
+      .send({ clientId: "abc-fashion" });
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("pending_expired");
+  });
+
+  it("400s wrong_pending_type for a row that already has a client (Meta's case)", async () => {
+    const id = await createPending("meta", "abc-fashion", RIYA, { accessToken: "x", candidates: [{ id: "act_1", label: "Main" }] });
+    const res = await request(app)
+      .post(`/api/connections/pending/${id}/claim`)
+      .set("Authorization", `Bearer ${token()}`)
+      .send({ clientId: "abc-fashion" });
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("wrong_pending_type");
+    expect((await testPool.query("select 1 from platform_connections")).rowCount).toBe(0);
+  });
+
+  it("400s invalid_client when clientId is missing", async () => {
+    const id = await createPending("shopify", null, null, { accessToken: "x", shop: "abc-fashion.myshopify.com" });
+    const res = await request(app)
+      .post(`/api/connections/pending/${id}/claim`)
+      .set("Authorization", `Bearer ${token()}`)
+      .send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("invalid_client");
+  });
+
+  it("rejects (but does not say 'expired') a client the user cannot access", async () => {
+    const id = await createPending("shopify", null, null, { accessToken: "x", shop: "abc-fashion.myshopify.com" });
+    const res = await request(app)
+      .post(`/api/connections/pending/${id}/claim`)
+      .set("Authorization", `Bearer ${signTestJwt({ sub: SCOPED, email: "scoped@agency.com" })}`)
+      .send({ clientId: "abc-fashion" });
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).not.toBe("pending_expired");
+    expect((await testPool.query("select 1 from pending_connections where id = $1", [id])).rowCount).toBe(1);
+  });
+
+  it("only lets one of two concurrent claims for different clients succeed", async () => {
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('xyz-beauty', 'XYZ Beauty', 'Beauty', 'bg-rose-500', 'X')`,
+    );
+    const id = await createPending("shopify", null, null, { accessToken: "shop-token", shop: "abc-fashion.myshopify.com" });
+    const [first, second] = await Promise.all([
+      request(app).post(`/api/connections/pending/${id}/claim`).set("Authorization", `Bearer ${token()}`).send({ clientId: "abc-fashion" }),
+      request(app).post(`/api/connections/pending/${id}/claim`).set("Authorization", `Bearer ${token()}`).send({ clientId: "xyz-beauty" }),
+    ]);
+    const statuses = [first.status, second.status].sort();
+    expect(statuses).toEqual([200, 404]);
+    expect((await testPool.query("select count(*) from platform_connections")).rows[0].count).toBe("1");
+  });
+});

@@ -89,4 +89,49 @@ router.post("/:id/select", requireAuth, async (req, res, next) => {
   }
 });
 
+router.post("/:id/claim", requireAuth, async (req, res, next) => {
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    const pending = await lockPendingForUpdate(client, req.params.id);
+    if (!pending) {
+      throw new HttpError(404, "pending_expired", "This link expired, please connect again.");
+    }
+    if (pending.clientId) {
+      // A row created by Meta's picker (plan 4) already has a client — that's the
+      // /select action, not this one.
+      throw new HttpError(400, "wrong_pending_type", "This connection already knows its client.");
+    }
+
+    const chosenClientId = (req.body as { clientId?: unknown }).clientId;
+    if (typeof chosenClientId !== "string" || !chosenClientId) {
+      throw new HttpError(400, "invalid_client", "Choose which client this store belongs to.");
+    }
+    // Deliberately NOT rewritten to pending_expired: the person on this page already
+    // knows the link is real (it loaded and showed a shop domain) — an access failure
+    // here means they picked a client they don't have access to, which is worth saying
+    // plainly, unlike plan 4's GET/select where the link's very existence must stay
+    // undisclosed to an unauthorized prober.
+    await assertClientAccess(pool, req.auth!.userId, chosenClientId);
+
+    await saveConnection({
+      clientId: chosenClientId,
+      platform: pending.platform,
+      externalAccountId: pending.payload.shop ?? "",
+      accessToken: pending.payload.accessToken,
+      expiresAt: pending.payload.expiresAt,
+      connectedBy: req.auth!.userId,
+    });
+    await client.query("delete from pending_connections where id = $1", [req.params.id]);
+    await client.query("commit");
+
+    res.json({ platform: pending.platform, status: "connected", externalAccountId: pending.payload.shop });
+  } catch (err) {
+    await client.query("rollback").catch(() => {});
+    next(err);
+  } finally {
+    client.release();
+  }
+});
+
 export default router;
