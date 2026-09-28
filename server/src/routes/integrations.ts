@@ -1,10 +1,31 @@
 import { Router } from "express";
 import { connectors } from "../lib/connector-registry.js";
-import { verifyState } from "../lib/state-token.js";
+import { signState, verifyState } from "../lib/state-token.js";
 import { saveConnection } from "../lib/connection-store.js";
 import { createPending } from "../lib/pending-connections.js";
+import { normalizeShopDomain } from "../lib/shop-domain.js";
 
 const router = Router();
+
+router.get("/shopify/install", async (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL;
+  const shop = normalizeShopDomain(typeof req.query.shop === "string" ? req.query.shop : "");
+  if (!shop) {
+    const params = new URLSearchParams({
+      connection: "error",
+      message: "That doesn't look like a Shopify store. Check the link and try again.",
+    });
+    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+    return;
+  }
+
+  const connector = connectors.shopify;
+  if (connector.authType !== "oauth") {
+    throw new Error("shopify connector must support OAuth");
+  }
+  const state = await signState({ platform: "shopify", shopDomain: shop });
+  res.redirect(connector.getAuthUrl(shop, state));
+});
 
 router.get("/:platform/callback", async (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL;

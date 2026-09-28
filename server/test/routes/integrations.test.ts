@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../src/index.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
-import { signState } from "../../src/lib/state-token.js";
+import { signState, verifyState } from "../../src/lib/state-token.js";
 
 function computeTestHmac(query: Record<string, string>, secret: string): string {
   const { hmac, signature, ...rest } = query;
@@ -169,5 +169,45 @@ describe("GET /api/integrations/:platform/callback", () => {
     expect((await testPool.query("select client_id, team_member_id from pending_connections")).rows).toEqual([
       { client_id: "abc-fashion", team_member_id: "11111111-1111-1111-1111-111111111111" },
     ]);
+  });
+});
+
+describe("GET /api/integrations/shopify/install", () => {
+  beforeEach(() => {
+    process.env.SHOPIFY_API_KEY = "test-api-key";
+    process.env.SHOPIFY_API_SECRET = "test-api-secret";
+    process.env.PUBLIC_API_URL = "https://d2c.probild.in";
+    process.env.STATE_SIGNING_SECRET = "test-state-secret-0123456789abcdef";
+    process.env.FRONTEND_URL = "https://d2c.probild.in";
+  });
+
+  it("redirects to Shopify's authorize screen for a valid store name, with no auth required", async () => {
+    const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "abc-fashion" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+    expect(res.headers.location).toContain("client_id=test-api-key");
+    expect(res.headers.location).toContain("state=");
+  });
+
+  it("accepts a pasted admin URL the same way the domain field does", async () => {
+    const res = await request(app)
+      .get("/api/integrations/shopify/install")
+      .query({ shop: "https://admin.shopify.com/store/abc-fashion/orders" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+  });
+
+  it("redirects to a friendly error for an unrecognizable store, not a raw 400", async () => {
+    const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "not a store" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/manage-clients");
+    expect(res.headers.location).toContain("connection=error");
+  });
+
+  it("signs a state with no clientId or teamMemberId", async () => {
+    const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "abc-fashion" });
+    const state = new URL(res.headers.location).searchParams.get("state")!;
+    const payload = await verifyState(state);
+    expect(payload).toEqual({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com", clientId: undefined, teamMemberId: undefined });
   });
 });
