@@ -48,7 +48,7 @@ describe("shopifyConnector.handleCallback", () => {
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
     const hmac = computeTestHmac(query, "test-api-secret");
     const result = await shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" });
-    expect(result).toEqual({ externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
+    expect(result).toEqual({ type: "connected", externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
   });
 
   it("throws if the token exchange fails", async () => {
@@ -147,6 +147,75 @@ describe("shopifyConnector.sync", () => {
     const lineItems = await testPool.query("select * from shopify_order_line_items where order_id = $1", [orders.rows[0].id]);
     expect(lineItems.rowCount).toBe(1);
     expect(lineItems.rows[0]).toMatchObject({ product_name: "Cotton Kurta", quantity: 2, price: 750 });
+  });
+
+  it("captures the first fulfillment's tracking number and company", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            orders: [
+              {
+                id: 1002,
+                created_at: "2026-08-15T10:00:00Z",
+                total_price: "999.00",
+                financial_status: "paid",
+                fulfillment_status: "fulfilled",
+                cancelled_at: null,
+                customer: { id: 9002, first_name: "Amit", last_name: "Rao" },
+                shipping_address: { city: "Pune", province: "Maharashtra" },
+                payment_gateway_names: ["shopify_payments"],
+                line_items: [{ id: 502, title: "Linen Shirt", quantity: 1, price: "999.00" }],
+                fulfillments: [
+                  { tracking_company: "Delhivery Surface", tracking_number: "AWB123" },
+                  { tracking_company: "Bluedart", tracking_number: "SHOULD_NOT_BE_USED" },
+                ],
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
+
+    const orders = await testPool.query("select tracking_number, tracking_company from shopify_orders where shopify_order_id = '1002'");
+    expect(orders.rows).toEqual([{ tracking_number: "AWB123", tracking_company: "Delhivery Surface" }]);
+  });
+
+  it("leaves tracking columns null when there are no fulfillments yet", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            orders: [
+              {
+                id: 1003,
+                created_at: "2026-08-15T10:00:00Z",
+                total_price: "500.00",
+                financial_status: "pending",
+                fulfillment_status: null,
+                cancelled_at: null,
+                customer: { id: 9003, first_name: "Neha", last_name: "Kapoor" },
+                shipping_address: { city: "Delhi", province: "Delhi" },
+                payment_gateway_names: ["shopify_payments"],
+                line_items: [{ id: 503, title: "Denim Jacket", quantity: 1, price: "500.00" }],
+                // no `fulfillments` key at all — must not throw
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
+
+    const orders = await testPool.query("select tracking_number, tracking_company from shopify_orders where shopify_order_id = '1003'");
+    expect(orders.rows).toEqual([{ tracking_number: null, tracking_company: null }]);
   });
 
   it("marks an unfulfilled, non-cancelled order as Dispatched", async () => {
@@ -312,6 +381,14 @@ describe("shopifyConnector.sync", () => {
     const conn = await testPool.query("select last_synced_at, status from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
     expect(conn.rows[0].last_synced_at).not.toBeNull();
     expect(conn.rows[0].status).toBe("connected");
+  });
+
+  it("does not resurrect a connection that was disconnected", async () => {
+    await testPool.query("update platform_connections set status = 'disconnected' where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ orders: [] }), { status: 200 })));
+    await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
+    const conn = await testPool.query("select status from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    expect(conn.rows[0].status).toBe("disconnected");
   });
 });
 

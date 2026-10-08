@@ -1,10 +1,44 @@
 import { Router } from "express";
-import pool from "../db.js";
 import { connectors } from "../lib/connector-registry.js";
-import { verifyState } from "../lib/state-token.js";
-import { encryptToken } from "../lib/crypto.js";
+import { signState, verifyState } from "../lib/state-token.js";
+import { saveConnection } from "../lib/connection-store.js";
+import { createPending } from "../lib/pending-connections.js";
+import { normalizeShopDomain } from "../lib/shop-domain.js";
 
 const router = Router();
+
+router.get("/shopify/install", async (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL;
+  const shop = normalizeShopDomain(typeof req.query.shop === "string" ? req.query.shop : "");
+  if (!shop) {
+    const params = new URLSearchParams({
+      connection: "error",
+      message: "That doesn't look like a Shopify store. Check the link and try again.",
+    });
+    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+    return;
+  }
+
+  const connector = connectors.shopify;
+  if (connector.authType !== "oauth") {
+    const params = new URLSearchParams({
+      connection: "error",
+      message: "Shopify connections are temporarily unavailable. Please try again later.",
+    });
+    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+    return;
+  }
+  try {
+    const state = await signState({ platform: "shopify", shopDomain: shop });
+    res.redirect(connector.getAuthUrl(shop, state));
+  } catch {
+    const params = new URLSearchParams({
+      connection: "error",
+      message: "Shopify connections are temporarily unavailable. Please try again later.",
+    });
+    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+  }
+});
 
 router.get("/:platform/callback", async (req, res) => {
   const frontendUrl = process.env.FRONTEND_URL;
@@ -39,30 +73,52 @@ router.get("/:platform/callback", async (req, res) => {
     redirectError("Unknown platform");
     return;
   }
+  if (connector.authType !== "oauth") {
+    redirectError("This platform does not use OAuth");
+    return;
+  }
 
   try {
-    const { externalAccountId, accessToken, refreshToken, expiresAt } = await connector.handleCallback(query, {
-      clientId: statePayload.clientId,
+    const result = await connector.handleCallback(query, { clientId: statePayload.clientId });
+
+    if (result.type === "connected") {
+      if (statePayload.clientId && statePayload.teamMemberId) {
+        await saveConnection({
+          clientId: statePayload.clientId,
+          platform,
+          externalAccountId: result.externalAccountId,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          expiresAt: result.expiresAt,
+          connectedBy: statePayload.teamMemberId,
+        });
+        const params = new URLSearchParams({ connection: "success" });
+        res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+        return;
+      }
+
+      // No client known yet — only the install-link route (Task 2) can produce a state
+      // like this. Store the result and let a logged-in user claim it for a client.
+      const claimPendingId = await createPending(platform, null, null, {
+        accessToken: result.accessToken,
+        expiresAt: result.expiresAt,
+        shop: result.externalAccountId,
+      });
+      const claimParams = new URLSearchParams({ pending: claimPendingId });
+      res.redirect(`${frontendUrl}/#/connect/claim?${claimParams.toString()}`);
+      return;
+    }
+
+    // type === "pending": the client and team member are already known from the state
+    // token (this is Meta's multi-account case, not Shopify's install-link claim, which
+    // has neither — plan 5 creates its own pending rows directly, not through this route).
+    const pendingId = await createPending(platform, statePayload.clientId ?? null, statePayload.teamMemberId ?? null, {
+      accessToken: result.accessToken,
+      expiresAt: result.expiresAt,
+      candidates: result.candidates,
     });
-    await pool.query(
-      `insert into platform_connections
-         (client_id, platform, status, access_token, refresh_token, token_expires_at, external_account_id, connected_by)
-       values ($1, $2, 'connected', $3, $4, $5, $6, $7)
-       on conflict (client_id, platform, external_account_id)
-       do update set status = 'connected', access_token = excluded.access_token,
-         refresh_token = excluded.refresh_token, token_expires_at = excluded.token_expires_at`,
-      [
-        statePayload.clientId,
-        platform,
-        encryptToken(accessToken),
-        refreshToken ? encryptToken(refreshToken) : null,
-        expiresAt ?? null,
-        externalAccountId,
-        statePayload.teamMemberId,
-      ],
-    );
-    const params = new URLSearchParams({ connection: "success" });
-    res.redirect(`${frontendUrl}/#/manage-clients?${params.toString()}`);
+    const params = new URLSearchParams({ pending: pendingId });
+    res.redirect(`${frontendUrl}/#/connect/pick-accounts?${params.toString()}`);
   } catch {
     redirectError("Failed to connect — please try again");
   }

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import request from "supertest";
 import app from "../../src/index.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
-import { signState } from "../../src/lib/state-token.js";
+import { signState, verifyState } from "../../src/lib/state-token.js";
 
 function computeTestHmac(query: Record<string, string>, secret: string): string {
   const { hmac, signature, ...rest } = query;
@@ -131,5 +131,124 @@ describe("GET /api/integrations/:platform/callback", () => {
     expect(res.headers.location).toContain("connection=error");
     const conn = await testPool.query("select * from platform_connections");
     expect(conn.rowCount).toBe(0);
+  });
+
+  it("redirects to the pick-accounts page when Meta's callback returns type 'pending'", async () => {
+    process.env.META_APP_ID = "test-app-id";
+    process.env.META_APP_SECRET = "test-app-secret";
+    process.env.META_LOGIN_CONFIG_ID = "test-config-id";
+    // Note: the brief's team_members insert is omitted here — this file's beforeEach
+    // (above) already inserts that same row, and repeating it violates team_members_pkey.
+    // A subscriptions row is added here (not in the brief) because metaConnector.handleCallback
+    // calls assertUnderMetaAccountLimit, which requires one for the client.
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, extra_meta_accounts) values
+       ('abc-fashion', 'small', 'active', 0)`,
+    );
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/oauth/access_token")) return new Response(JSON.stringify({ access_token: "meta-token" }), { status: 200 });
+        return new Response(
+          JSON.stringify({ data: [{ id: "act_111", name: "A" }, { id: "act_222", name: "B" }] }),
+          { status: 200 },
+        );
+      }),
+    );
+    const state = await signState({
+      clientId: "abc-fashion",
+      platform: "meta",
+      teamMemberId: "11111111-1111-1111-1111-111111111111",
+    });
+    const res = await request(app).get("/api/integrations/meta/callback").query({ code: "auth-code", state });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/connect/pick-accounts");
+    expect(res.headers.location).toContain("pending=");
+    expect((await testPool.query("select 1 from platform_connections")).rowCount).toBe(0);
+    expect((await testPool.query("select client_id, team_member_id from pending_connections")).rows).toEqual([
+      { client_id: "abc-fashion", team_member_id: "11111111-1111-1111-1111-111111111111" },
+    ]);
+  });
+
+  it("stores a claim-pending connection when the callback's state has no clientId (the install-link case)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ access_token: "shpat_install_token" }), { status: 200 })),
+    );
+    const state = await signState({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com" });
+    const query = { shop: "abc-fashion.myshopify.com", code: "auth-code", state };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    const res = await request(app).get("/api/integrations/shopify/callback").query({ ...query, hmac });
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/connect/claim");
+    expect(res.headers.location).toContain("pending=");
+    expect((await testPool.query("select 1 from platform_connections")).rowCount).toBe(0);
+    const pendingRow = await testPool.query("select client_id, team_member_id from pending_connections");
+    expect(pendingRow.rows).toEqual([{ client_id: null, team_member_id: null }]);
+  });
+});
+
+describe("GET /api/integrations/shopify/install", () => {
+  beforeEach(() => {
+    process.env.SHOPIFY_API_KEY = "test-api-key";
+    process.env.SHOPIFY_API_SECRET = "test-api-secret";
+    process.env.PUBLIC_API_URL = "https://d2c.probild.in";
+    process.env.STATE_SIGNING_SECRET = "test-state-secret-0123456789abcdef";
+    process.env.FRONTEND_URL = "https://d2c.probild.in";
+  });
+
+  it("redirects to Shopify's authorize screen for a valid store name, with no auth required", async () => {
+    const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "abc-fashion" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+    expect(res.headers.location).toContain("client_id=test-api-key");
+    expect(res.headers.location).toContain("state=");
+  });
+
+  it("accepts a pasted admin URL the same way the domain field does", async () => {
+    const res = await request(app)
+      .get("/api/integrations/shopify/install")
+      .query({ shop: "https://admin.shopify.com/store/abc-fashion/orders" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://abc-fashion.myshopify.com/admin/oauth/authorize");
+  });
+
+  it("redirects to a friendly error for an unrecognizable store, not a raw 400", async () => {
+    const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "not a store" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/manage-clients");
+    expect(res.headers.location).toContain("connection=error");
+  });
+
+  it("signs a state with no clientId or teamMemberId", async () => {
+    const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "abc-fashion" });
+    const state = new URL(res.headers.location).searchParams.get("state")!;
+    const payload = await verifyState(state);
+    expect(payload).toEqual({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com", clientId: undefined, teamMemberId: undefined });
+  });
+
+  describe("when the Shopify connector is misconfigured", () => {
+    const originalApiKey = process.env.SHOPIFY_API_KEY;
+
+    beforeEach(() => {
+      delete process.env.SHOPIFY_API_KEY;
+    });
+
+    afterEach(() => {
+      if (originalApiKey === undefined) {
+        delete process.env.SHOPIFY_API_KEY;
+      } else {
+        process.env.SHOPIFY_API_KEY = originalApiKey;
+      }
+    });
+
+    it("redirects to a friendly error instead of crashing when SHOPIFY_API_KEY is unset", async () => {
+      const res = await request(app).get("/api/integrations/shopify/install").query({ shop: "abc-fashion" });
+      expect(res.status).toBe(302);
+      expect(res.headers.location).toContain("https://d2c.probild.in/#/manage-clients");
+      expect(res.headers.location).toContain("connection=error");
+    });
   });
 });

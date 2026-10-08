@@ -34,4 +34,12 @@ describe("state-token", () => {
     const payload = await verifyState(token);
     expect(payload.shopDomain).toBe("abc-fashion.myshopify.com");
   });
+
+  it("round-trips a state with no clientId or teamMemberId (the install-link case)", async () => {
+    const token = await signState({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com" });
+    const payload = await verifyState(token);
+    expect(payload).toMatchObject({ platform: "shopify", shopDomain: "abc-fashion.myshopify.com" });
+    expect(payload.clientId).toBeUndefined();
+    expect(payload.teamMemberId).toBeUndefined();
+  });
 });

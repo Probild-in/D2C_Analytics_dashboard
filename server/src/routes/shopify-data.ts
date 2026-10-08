@@ -1,7 +1,7 @@
 import { Router } from "express";
 import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { assertClientAccess, getAccessibleClientIds } from "../lib/access.js";
+import { assertClientAccess, resolveClientScope } from "../lib/access.js";
 
 const router = Router({ mergeParams: true });
 
@@ -10,17 +10,7 @@ router.get("/sales", requireAuth, async (req, res, next) => {
     const clientId = req.params.id;
     const days = Math.max(1, Math.min(730, Number(req.query.days) || 90));
 
-    // "all" aggregates every client the caller can see (agency-wide dashboard view)
-    // instead of a single client — everything else about the query is identical.
-    let clientIds: string[];
-    if (clientId === "all") {
-      const accessible = await getAccessibleClientIds(pool, req.auth!.userId);
-      clientIds =
-        accessible === "all" ? (await pool.query("select id from clients")).rows.map((r) => r.id) : accessible;
-    } else {
-      await assertClientAccess(pool, req.auth!.userId, clientId);
-      clientIds = [clientId];
-    }
+    const clientIds = await resolveClientScope(pool, req.auth!.userId, clientId);
 
     const result = await pool.query(
       `with days as (
@@ -33,7 +23,6 @@ router.get("/sales", requireAuth, async (req, res, next) => {
            coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
            coalesce(sum(amount), 0) as gross_sales,
            count(*) filter (where status = 'Cancelled') as cancelled_orders,
-           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders,
            count(*) filter (where payment_method = 'COD') as cod_orders,
            count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
            count(distinct client_id || ':' || shopify_customer_id) filter (
@@ -63,6 +52,44 @@ router.get("/sales", requireAuth, async (req, res, next) => {
          ) combined
          where metric_date >= current_date - ($2::int - 1)
          group by metric_date
+       ),
+       shopify_rto_by_client_day as (
+         select client_id, order_date::date as day,
+           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders
+         from shopify_orders
+         where client_id = any($1::text[]) and order_date >= current_date - ($2::int - 1)
+         group by client_id, order_date::date
+       ),
+       shipment_rto_by_client_day as (
+         select client_id, ordered_at::date as day,
+           count(*) as rto_orders
+         from shipments
+         where client_id = any($1::text[])
+           and status in ('RTO Initiated', 'RTO Delivered')
+           and ordered_at >= current_date - ($2::int - 1)
+         group by client_id, ordered_at::date
+       ),
+       client_has_shipments as (
+         select distinct client_id from shipments where client_id = any($1::text[]) and ordered_at is not null
+       ),
+       scoped_clients as (
+         select unnest($1::text[]) as client_id
+       ),
+       rto_by_day as (
+         select
+           d.day,
+           sum(
+             case when chs.client_id is not null
+               then coalesce(srd.rto_orders, 0)
+               else coalesce(shrd.rto_orders, 0)
+             end
+           ) as rto_orders
+         from scoped_clients sc
+         cross join days d
+         left join client_has_shipments chs on chs.client_id = sc.client_id
+         left join shipment_rto_by_client_day srd on srd.client_id = sc.client_id and srd.day = d.day
+         left join shopify_rto_by_client_day shrd on shrd.client_id = sc.client_id and shrd.day = d.day
+         group by d.day
        )
        select
          days.day,
@@ -75,10 +102,11 @@ router.get("/sales", requireAuth, async (req, res, next) => {
          coalesce(orders_by_day.cod_orders, 0)::int as cod_orders,
          coalesce(orders_by_day.prepaid_orders, 0)::int as prepaid_orders,
          coalesce(orders_by_day.cancelled_orders, 0)::int as cancelled_orders,
-         coalesce(orders_by_day.rto_orders, 0)::int as rto_orders
+         coalesce(rto_by_day.rto_orders, 0)::int as rto_orders
        from days
        left join orders_by_day on orders_by_day.day = days.day
        left join ad_spend_by_day on ad_spend_by_day.day = days.day
+       left join rto_by_day on rto_by_day.day = days.day
        order by days.day`,
       [clientIds, days],
     );

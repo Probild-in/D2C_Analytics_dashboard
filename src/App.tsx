@@ -17,6 +17,8 @@ const BlendedMarketing = lazy(() => import("@/pages/blended-marketing"));
 const Tasks = lazy(() => import("@/pages/tasks"));
 const ManageClients = lazy(() => import("@/pages/manage-clients"));
 const Login = lazy(() => import("@/pages/login"));
+const ConnectPickAccounts = lazy(() => import("@/pages/connect-pick-accounts"));
+const ConnectClaim = lazy(() => import("@/pages/connect-claim"));
 
 function RouteFallback() {
   return (
@@ -35,6 +37,8 @@ export default function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route element={<RequireAuth />}>
+                <Route path="/connect/pick-accounts" element={<ConnectPickAccounts />} />
+                <Route path="/connect/claim" element={<ConnectClaim />} />
                 <Route element={<AppShell />}>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/clients" element={<AllClients />} />

@@ -1,4 +1,4 @@
-import type { Connector } from "./types.js";
+import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
 
@@ -66,6 +66,14 @@ function getRedirectUri(): string {
   return `${publicApiUrl}/api/integrations/meta/callback`;
 }
 
+function getLoginConfigId(): string {
+  const configId = process.env.META_LOGIN_CONFIG_ID;
+  if (!configId) {
+    throw new Error("META_LOGIN_CONFIG_ID environment variable must be set");
+  }
+  return configId;
+}
+
 function getCredentials(): { appId: string; appSecret: string } {
   const appId = process.env.META_APP_ID;
   const appSecret = process.env.META_APP_SECRET;
@@ -75,7 +83,7 @@ function getCredentials(): { appId: string; appSecret: string } {
   return { appId, appSecret };
 }
 
-async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
+export async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
   const result = await pool.query(
     `select
        coalesce(p.included_meta_accounts, 0) + coalesce(s.extra_meta_accounts, 0) as limit,
@@ -95,13 +103,16 @@ async function assertUnderMetaAccountLimit(clientId: string): Promise<void> {
   }
 }
 
-export const metaConnector: Connector = {
+export const metaConnector: OAuthConnector = {
   platform: "meta",
+  authType: "oauth",
 
   getAuthUrl(_clientId: string, state: string): string {
     const { appId } = getCredentials();
     const url = new URL(`https://www.facebook.com/${META_API_VERSION}/dialog/oauth`);
     url.searchParams.set("client_id", appId);
+    url.searchParams.set("config_id", getLoginConfigId());
+    url.searchParams.set("response_type", "code");
     url.searchParams.set("redirect_uri", getRedirectUri());
     url.searchParams.set("scope", META_SCOPES);
     url.searchParams.set("state", state);
@@ -129,7 +140,7 @@ export const metaConnector: Connector = {
     const tokenBody = (await tokenRes.json()) as { access_token: string; expires_in?: number };
 
     const adAccountsRes = await fetch(
-      `https://graph.facebook.com/${META_API_VERSION}/me/adaccounts?fields=id,name&access_token=${tokenBody.access_token}`,
+      `https://graph.facebook.com/${META_API_VERSION}/me/adaccounts?fields=id,name&limit=100&access_token=${tokenBody.access_token}`,
     );
     if (!adAccountsRes.ok) {
       throw new Error(`Meta ad accounts fetch failed: ${adAccountsRes.status}`);
@@ -139,10 +150,25 @@ export const metaConnector: Connector = {
       throw new Error("No Meta ad account is accessible with this login — the user must have at least one ad account");
     }
 
+    const expiresAt = tokenBody.expires_in ? new Date(Date.now() + tokenBody.expires_in * 1000) : undefined;
+
+    if (adAccountsBody.data.length === 1) {
+      return {
+        type: "connected",
+        externalAccountId: adAccountsBody.data[0].id,
+        accessToken: tokenBody.access_token,
+        expiresAt,
+      };
+    }
+
+    // More than one ad account was granted — the user picks which one on the frontend's
+    // pick-accounts page (server/src/routes/pending-connections.js, Task 5). The account
+    // limit is already checked above, before we get here, same as the single-account path.
     return {
-      externalAccountId: adAccountsBody.data[0].id,
+      type: "pending",
       accessToken: tokenBody.access_token,
-      expiresAt: tokenBody.expires_in ? new Date(Date.now() + tokenBody.expires_in * 1000) : undefined,
+      expiresAt,
+      candidates: adAccountsBody.data.map((account) => ({ id: account.id, label: account.name })),
     };
   },
 
@@ -249,7 +275,7 @@ export const metaConnector: Connector = {
       }
     }
 
-    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);
+    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1 and status <> 'disconnected'", [connectionId]);
     return { recordsSynced };
   },
 

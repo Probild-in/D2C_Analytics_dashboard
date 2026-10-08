@@ -11,13 +11,14 @@ import { useApp } from "@/store/app-context";
 import { usePeriodData, deriveMetrics } from "@/hooks/use-period-data";
 import { percentDelta } from "@/lib/date-range";
 import { formatCurrencyCompact, formatNumber, formatPercent, cn } from "@/lib/utils";
-import { getCourierBreakdown } from "@/data/mock";
 import { useClientResource } from "@/hooks/use-client-resource";
-import type { OrderStatus, GeoRow, Order } from "@/data/types";
+import type { OrderStatus, GeoRow, Order, CourierSummary, CourierStat as CourierStatData } from "@/data/types";
 import { Truck as TruckIcon } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const EMPTY_ORDERS: Order[] = [];
 const EMPTY_GEO: GeoRow[] = [];
+const EMPTY_SUMMARY: CourierSummary = { connected: false, statusCounts: {}, couriers: [] };
 
 const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
@@ -34,8 +35,7 @@ const STATUS_FLOW: { status: OrderStatus; color: string }[] = [
 
 export default function Operations() {
   const { client, isAllClients } = useApp();
-  const cid = isAllClients ? "abc-fashion" : client?.id ?? "abc-fashion";
-  const { current, currentSum, previousSum } = usePeriodData();
+  const { days, current, currentSum, previousSum } = usePeriodData();
   const metrics = deriveMetrics(currentSum);
   const prevMetrics = deriveMetrics(previousSum);
 
@@ -43,11 +43,21 @@ export default function Operations() {
     !isAllClients && client ? `/api/clients/${client.id}/orders?limit=200` : null,
     EMPTY_ORDERS,
   );
-  const statusCounts = React.useMemo(() => {
+  const orderStatusCounts = React.useMemo(() => {
     const counts: Record<string, number> = {};
     for (const o of orders) counts[o.status] = (counts[o.status] ?? 0) + 1;
     return counts;
   }, [orders]);
+
+  const summaryPath = isAllClients
+    ? `/api/clients/all/couriers/summary?days=${days}`
+    : client
+      ? `/api/clients/${client.id}/couriers/summary?days=${days}`
+      : null;
+  const { data: summary, loading: summaryLoading } = useClientResource<CourierSummary>(summaryPath, EMPTY_SUMMARY);
+  // Shipment statuses are the source of truth once a courier is connected; until then the
+  // funnel falls back to the coarse statuses that Shopify orders carry.
+  const statusCounts: Record<string, number> = summary.connected ? summary.statusCounts : orderStatusCounts;
   const maxCount = Math.max(...Object.values(statusCounts), 1);
 
   const { data: statesRaw } = useClientResource<GeoRow[]>(
@@ -55,9 +65,9 @@ export default function Operations() {
     EMPTY_GEO,
   );
   const states = statesRaw.slice(0, 8);
-  const couriers = React.useMemo(() => getCourierBreakdown(cid), [cid]);
+  const couriers = summary.couriers;
   const [selectedState, setSelectedState] = React.useState<GeoRow | null>(null);
-  const [selectedCourier, setSelectedCourier] = React.useState<(typeof couriers)[number] | null>(null);
+  const [selectedCourier, setSelectedCourier] = React.useState<CourierStatData | null>(null);
 
   const rtoValue = Math.round(currentSum.rtoOrders * metrics.aov * 0.65);
   const ndrOrders = statusCounts["NDR"] ?? 0;
@@ -194,11 +204,25 @@ export default function Operations() {
                         {formatPercent(c.rtoPercent)}
                       </span>
                     </td>
-                    <td className="px-4 py-2 tabular-nums text-text-secondary">{c.avgDeliveryDays}d</td>
+                    <td className="px-4 py-2 tabular-nums text-text-secondary">{c.avgDeliveryDays === null ? "—" : `${c.avgDeliveryDays}d`}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            {couriers.length === 0 && !summaryLoading && (
+              <p className="px-4 py-6 text-center text-[12px] text-text-tertiary">
+                {summary.connected ? (
+                  "No shipments in this period."
+                ) : (
+                  <>
+                    Connect a delivery partner to see courier performance.{" "}
+                    <Link to="/manage-clients" className="text-brand hover:underline">
+                      Manage integrations
+                    </Link>
+                  </>
+                )}
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -213,7 +237,7 @@ function CourierDetailDialog({
   courier,
   onOpenChange,
 }: {
-  courier: ReturnType<typeof getCourierBreakdown>[number] | null;
+  courier: CourierStatData | null;
   onOpenChange: (open: boolean) => void;
 }) {
   return (
@@ -234,7 +258,7 @@ function CourierDetailDialog({
               <CourierStat label="Delivered" value={formatNumber(courier.delivered)} />
               <CourierStat label="RTO %" value={formatPercent(courier.rtoPercent)} tone={courier.rtoPercent > 25 ? "negative" : undefined} />
               <CourierStat label="NDR %" value={formatPercent(courier.ndrPercent)} tone={courier.ndrPercent > 8 ? "warning" : undefined} />
-              <CourierStat label="Avg delivery time" value={`${courier.avgDeliveryDays}d`} />
+              <CourierStat label="Avg delivery time" value={courier.avgDeliveryDays === null ? "—" : `${courier.avgDeliveryDays}d`} />
             </div>
           </>
         )}

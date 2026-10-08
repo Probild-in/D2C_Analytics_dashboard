@@ -20,7 +20,7 @@ router.post("/:platform/sync", requireAuth, async (req, res, next) => {
     }
 
     const connResult = await pool.query(
-      "select id, last_synced_at from platform_connections where client_id = $1 and platform = $2",
+      "select id, last_synced_at from platform_connections where client_id = $1 and platform = $2 and status <> 'disconnected'",
       [clientId, platform],
     );
     if (connResult.rowCount === 0) {

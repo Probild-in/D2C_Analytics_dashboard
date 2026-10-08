@@ -26,3 +26,14 @@ export async function assertClientAccess(db: pg.Pool, userId: string, clientId: 
     throw new HttpError(404, "not_found", "Client not found");
   }
 }
+
+// "all" aggregates every client the caller can see (the agency-wide dashboard view);
+// anything else asserts access to that single client. Returns the client ids to query.
+export async function resolveClientScope(db: pg.Pool, userId: string, clientId: string): Promise<string[]> {
+  if (clientId === "all") {
+    const accessible = await getAccessibleClientIds(db, userId);
+    return accessible === "all" ? (await db.query<{ id: string }>("select id from clients")).rows.map((r) => r.id) : accessible;
+  }
+  await assertClientAccess(db, userId, clientId);
+  return [clientId];
+}

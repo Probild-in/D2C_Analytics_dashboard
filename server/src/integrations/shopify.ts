@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { Connector } from "./types.js";
+import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
 
@@ -17,6 +17,7 @@ interface ShopifyOrder {
   shipping_address: { city: string; province: string } | null;
   payment_gateway_names: string[];
   line_items: { id: number; title: string; quantity: number; price: string }[];
+  fulfillments?: { tracking_company: string | null; tracking_number: string | null }[];
 }
 
 // Shopify's core Orders API only exposes financial_status/fulfillment_status/cancelled_at —
@@ -24,6 +25,14 @@ interface ShopifyOrder {
 // which is explicitly out of scope. This maps what Shopify actually tells us onto the
 // closest fit in the existing OrderStatus enum, rather than fabricating granularity we
 // don't have.
+// Only the first fulfillment's tracking info is captured. A multi-fulfillment order (rare
+// for this dashboard's D2C use case) only records the first courier's tracking number —
+// accepted gap, not a bug.
+function firstFulfillmentTracking(order: ShopifyOrder): { company: string | null; number: string | null } {
+  const first = order.fulfillments?.[0];
+  return { company: first?.tracking_company ?? null, number: first?.tracking_number ?? null };
+}
+
 function mapOrderStatus(order: ShopifyOrder): string {
   if (order.cancelled_at) return "Cancelled";
   if (order.fulfillment_status === "fulfilled") return "Delivered";
@@ -79,8 +88,9 @@ function verifyCallbackHmac(query: Record<string, string>, secret: string): bool
   return computedBuf.length === providedBuf.length && crypto.timingSafeEqual(computedBuf, providedBuf);
 }
 
-export const shopifyConnector: Connector = {
+export const shopifyConnector: OAuthConnector = {
   platform: "shopify",
+  authType: "oauth",
 
   getAuthUrl(shopDomain: string, state: string): string {
     const { apiKey } = getCredentials();
@@ -114,7 +124,7 @@ export const shopifyConnector: Connector = {
       throw new Error(`Shopify token exchange failed: ${res.status}`);
     }
     const body = (await res.json()) as { access_token: string };
-    return { externalAccountId: shop, accessToken: body.access_token };
+    return { type: "connected", externalAccountId: shop, accessToken: body.access_token };
   },
 
   async sync(connectionId: string) {
@@ -150,14 +160,16 @@ export const shopifyConnector: Connector = {
         const status = mapOrderStatus(order);
         const paymentMethod = mapPaymentMethod(order.payment_gateway_names);
         const customerName = order.customer ? `${order.customer.first_name} ${order.customer.last_name}`.trim() : "Guest";
+        const { company: trackingCompany, number: trackingNumber } = firstFulfillmentTracking(order);
 
         const orderResult = await pool.query(
           `insert into shopify_orders
-             (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+             (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
            on conflict (connection_id, shopify_order_id)
            do update set customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
-             payment_method = excluded.payment_method, city = excluded.city, state = excluded.state
+             payment_method = excluded.payment_method, city = excluded.city, state = excluded.state,
+             tracking_number = excluded.tracking_number, tracking_company = excluded.tracking_company
            returning id`,
           [
             conn.client_id,
@@ -171,6 +183,8 @@ export const shopifyConnector: Connector = {
             order.shipping_address?.city ?? null,
             order.shipping_address?.province ?? null,
             order.customer ? String(order.customer.id) : null,
+            trackingNumber,
+            trackingCompany,
           ],
         );
         const orderId = orderResult.rows[0].id;
@@ -188,7 +202,7 @@ export const shopifyConnector: Connector = {
       }
     }
 
-    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1", [connectionId]);
+    await pool.query("update platform_connections set last_synced_at = now(), status = 'connected' where id = $1 and status <> 'disconnected'", [connectionId]);
     return { recordsSynced };
   },
 
