@@ -5,6 +5,7 @@ import { encryptToken } from "../src/lib/crypto.js";
 import { runScheduledSyncs, startScheduler, hashPlatformToLockKey } from "../src/scheduler.js";
 import pool from "../src/db.js";
 import { connectors } from "../src/lib/connector-registry.js";
+import { logger } from "../src/lib/logger.js";
 
 beforeEach(async () => {
   await resetTestDb();
@@ -131,7 +132,7 @@ describe("runScheduledSyncs", () => {
       }),
     );
 
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const loggerErrorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     // Mock the real pool used by both the scheduler and the connector so that,
     // specifically for the failing connection's status='error' recovery write,
@@ -176,13 +177,13 @@ describe("runScheduledSyncs", () => {
     const failingLogs = await testPool.query("select * from sync_logs where connection_id = $1", [failingConnectionId]);
     expect(failingLogs.rowCount).toBe(0);
 
-    // The recovery failure itself was still surfaced to the server's console.
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining(`Failed to record sync failure for connection ${failingConnectionId}`),
+    // The recovery failure itself was still surfaced via the logger.
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.any(Error),
+      expect.stringContaining(`Failed to record sync failure for connection ${failingConnectionId}`),
     );
 
-    consoleErrorSpy.mockRestore();
+    loggerErrorSpy.mockRestore();
   });
 
   it("skips the sync entirely when another process already holds the platform's advisory lock", async () => {

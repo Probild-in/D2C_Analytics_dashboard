@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { HttpError } from "./lib/http-error.js";
+import { logger } from "./lib/logger.js";
+import pool from "./db.js";
 import clientsRouter from "./routes/clients.js";
 import connectionsRouter from "./routes/connections.js";
 import syncRouter from "./routes/sync.js";
@@ -18,14 +20,14 @@ import pendingConnectionsRouter from "./routes/pending-connections.js";
 import { startScheduler } from "./scheduler.js";
 
 process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled promise rejection:", reason);
+  logger.error(reason, "Unhandled promise rejection:");
   if (process.env.NODE_ENV === "production") {
     process.exitCode = 1;
   }
 });
 
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught exception:", err);
+  logger.error(err, "Uncaught exception:");
   if (process.env.NODE_ENV === "production") {
     process.exitCode = 1;
   }
@@ -57,8 +59,14 @@ app.use("/api/integrations", integrationsRouter);
 app.use("/api/team-members", teamMembersRouter);
 app.use("/api/connections/pending", pendingConnectionsRouter);
 
-app.get("/health", (_req, res) => {
-  res.status(200).json({ status: "ok" });
+app.get("/health", async (_req, res) => {
+  try {
+    await pool.query("select 1");
+    res.status(200).json({ status: "ok" });
+  } catch (err) {
+    logger.error(err, "Health check failed");
+    res.status(503).json({ status: "error" });
+  }
 });
 
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -66,7 +74,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
     res.status(err.status).json(err.toBody());
     return;
   }
-  console.error(err);
+  logger.error(err, "Unhandled route error");
   res.status(500).json({ error: { code: "internal_error", message: "Something went wrong" } });
 });
 
@@ -74,6 +82,6 @@ export default app;
 
 if (process.env.NODE_ENV !== "test") {
   const port = process.env.PORT ?? 4000;
-  app.listen(port, () => console.log(`server listening on ${port}`));
+  app.listen(port, () => logger.info(`server listening on ${port}`));
   startScheduler();
 }

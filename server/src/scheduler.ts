@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import cron from "node-cron";
 import pool from "./db.js";
 import { connectors } from "./lib/connector-registry.js";
+import { logger } from "./lib/logger.js";
 
 // Postgres advisory locks take a bigint key. Hash the platform name down to a stable
 // 32-bit int (advisory locks accept a single bigint or two ints — one int is enough
@@ -43,7 +44,7 @@ export async function runScheduledSyncs(platform: string) {
         await connector.sync(row.id);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err);
-        console.error(`Sync failed for connection ${row.id}:`, err);
+        logger.error(err, `Sync failed for connection ${row.id}:`);
         try {
           await pool.query("update platform_connections set status = 'error' where id = $1 and status <> 'disconnected'", [row.id]);
           await pool.query(
@@ -51,7 +52,7 @@ export async function runScheduledSyncs(platform: string) {
             [row.id, startedAt, errorMessage],
           );
         } catch (recoveryErr) {
-          console.error(`Failed to record sync failure for connection ${row.id}:`, recoveryErr);
+          logger.error(recoveryErr, `Failed to record sync failure for connection ${row.id}:`);
         }
       }
     }
