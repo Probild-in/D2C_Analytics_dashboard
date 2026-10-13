@@ -16,6 +16,20 @@ import teamMembersRouter from "./routes/team-members.js";
 import pendingConnectionsRouter from "./routes/pending-connections.js";
 import { startScheduler } from "./scheduler.js";
 
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled promise rejection:", reason);
+  if (process.env.NODE_ENV === "production") {
+    process.exitCode = 1;
+  }
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+  if (process.env.NODE_ENV === "production") {
+    process.exitCode = 1;
+  }
+});
+
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
 app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
