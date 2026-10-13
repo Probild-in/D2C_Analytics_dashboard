@@ -119,7 +119,8 @@ router.get("/:platform/callback", async (req, res) => {
     });
     const params = new URLSearchParams({ pending: pendingId });
     res.redirect(`${frontendUrl}/#/connect/pick-accounts?${params.toString()}`);
-  } catch {
+  } catch (err) {
+    console.error("OAuth callback failed:", err);
     redirectError("Failed to connect — please try again");
   }
 });
