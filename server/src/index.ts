@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { HttpError } from "./lib/http-error.js";
 import clientsRouter from "./routes/clients.js";
 import connectionsRouter from "./routes/connections.js";
@@ -30,7 +31,12 @@ process.on("uncaughtException", (err) => {
   }
 });
 
+if (process.env.NODE_ENV === "production" && !process.env.CORS_ORIGIN?.trim()) {
+  throw new Error("CORS_ORIGIN must be set when NODE_ENV=production — refusing to start with CORS open to any origin.");
+}
+
 const app = express();
+app.use(helmet({ contentSecurityPolicy: false }));
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
 app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
 app.use(express.json());
