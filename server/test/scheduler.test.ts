@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import cron from "node-cron";
 import { testPool, resetTestDb } from "./helpers/test-db.js";
 import { encryptToken } from "../src/lib/crypto.js";
-import { runScheduledSyncs, startScheduler } from "../src/scheduler.js";
+import { runScheduledSyncs, startScheduler, hashPlatformToLockKey } from "../src/scheduler.js";
 import pool from "../src/db.js";
 import { connectors } from "../src/lib/connector-registry.js";
 
@@ -183,6 +183,39 @@ describe("runScheduledSyncs", () => {
     );
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it("skips the sync entirely when another process already holds the platform's advisory lock", async () => {
+    const id = "cccccccc-3333-3333-3333-333333333333";
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, access_token, external_account_id) values
+       ($1, 'abc-fashion', 'shopify', 'connected', $2, 'abc-fashion.myshopify.com')`,
+      [id, encryptToken("shpat_real_token")],
+    );
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    // Simulate a second process holding the lock by acquiring it directly on a second
+    // connection before calling runScheduledSyncs. testPool and the app's own `pool`
+    // (imported above) resolve to the same real database in tests — see
+    // test/setup.ts, which points DATABASE_URL at TEST_DATABASE_URL — so a lock taken
+    // via testPool genuinely blocks runScheduledSyncs's own pool.connect() lock attempt.
+    const lockClient = await testPool.connect();
+    try {
+      const lockKey = hashPlatformToLockKey("shopify"); // exported alongside runScheduledSyncs
+      await lockClient.query("select pg_advisory_lock($1)", [lockKey]);
+
+      await runScheduledSyncs("shopify");
+
+      // fetch was never called — sync() never ran because the lock wasn't acquired.
+      expect(fetchSpy).not.toHaveBeenCalled();
+      const row = await testPool.query("select status, last_synced_at from platform_connections where id = $1", [id]);
+      expect(row.rows[0].status).toBe("connected");
+      expect(row.rows[0].last_synced_at).toBeNull();
+    } finally {
+      await lockClient.query("select pg_advisory_unlock_all()");
+      lockClient.release();
+    }
   });
 });
 
