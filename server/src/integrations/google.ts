@@ -203,7 +203,7 @@ export const googleConnector: OAuthConnector = {
       }),
     });
     if (!tokenRes.ok) {
-      throw new Error(`Google token exchange failed: ${tokenRes.status}`);
+      throw new Error(`Google token exchange failed: ${tokenRes.status} ${await tokenRes.text()}`);
     }
     const tokenBody = (await tokenRes.json()) as { access_token: string; refresh_token?: string; expires_in?: number };
     if (!tokenBody.refresh_token) {
@@ -217,7 +217,7 @@ export const googleConnector: OAuthConnector = {
       },
     });
     if (!customersRes.ok) {
-      throw new Error(`Google listAccessibleCustomers failed: ${customersRes.status}`);
+      throw new Error(`Google listAccessibleCustomers failed: ${customersRes.status} ${await customersRes.text()}`);
     }
     const customersBody = (await customersRes.json()) as { resourceNames: string[] };
     if (customersBody.resourceNames.length === 0) {
