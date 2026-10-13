@@ -67,6 +67,27 @@ describe("googleConnector.handleCallback", () => {
     expect(result.expiresAt).toBeInstanceOf(Date);
   });
 
+  it("succeeds even when GOOGLE_ADS_DEVELOPER_TOKEN is unset, sending an empty developer-token header rather than blocking the connect attempt", async () => {
+    delete process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
+    let capturedDeveloperTokenHeader: string | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("oauth2.googleapis.com/token")) {
+          return new Response(JSON.stringify({ access_token: "ya29.real-token", refresh_token: "1//real-refresh-token", expires_in: 3599 }), { status: 200 });
+        }
+        if (url.includes("listAccessibleCustomers")) {
+          capturedDeveloperTokenHeader = (init?.headers as Record<string, string>)["developer-token"];
+          return new Response(JSON.stringify({ resourceNames: ["customers/1234567890"] }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+    const result = await googleConnector.handleCallback({ code: "auth-code-123" }, { clientId: "abc-fashion" });
+    expect(result.type).toBe("connected");
+    expect(capturedDeveloperTokenHeader).toBe("");
+  });
+
   it("throws if the token exchange fails", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response("invalid_grant", { status: 400 })));
     await expect(googleConnector.handleCallback({ code: "bad-code" }, { clientId: "abc-fashion" })).rejects.toThrow();

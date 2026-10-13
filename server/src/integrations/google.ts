@@ -22,12 +22,13 @@ function getOAuthCredentials(): { clientId: string; clientSecret: string } {
   return { clientId, clientSecret };
 }
 
+// Google sunset the developer-token requirement on 2026-09-09 — API access is now tied
+// to the Google Cloud project that owns the OAuth client, not this header. Google's own
+// servers accept the header optionally and ignore it, so this must not throw when it's
+// unset: an empty string is sent (harmless) rather than blocking every Google Ads connect
+// attempt on a credential Google itself no longer requires.
 function getDeveloperToken(): string {
-  const token = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
-  if (!token) {
-    throw new Error("GOOGLE_ADS_DEVELOPER_TOKEN environment variable must be set");
-  }
-  return token;
+  return process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? "";
 }
 
 async function assertUnderGoogleAccountLimit(clientId: string): Promise<void> {
