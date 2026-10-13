@@ -10,6 +10,6 @@ describe("logger", () => {
 
   it("does not throw when logging a plain message and an error object", () => {
     expect(() => logger.info("test message")).not.toThrow();
-    expect(() => logger.error("test error", new Error("boom"))).not.toThrow();
+    expect(() => logger.error(new Error("boom"), "test error")).not.toThrow();
   });
 });

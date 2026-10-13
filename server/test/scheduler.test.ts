@@ -96,13 +96,11 @@ describe("runScheduledSyncs", () => {
       await testPool.query("update platform_connections set status = 'disconnected' where id = $1", [connectionId]);
       throw new Error("boom");
     });
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     try {
       await runScheduledSyncs("shopify");
     } finally {
       syncSpy.mockRestore();
-      consoleErrorSpy.mockRestore();
     }
 
     const conn = await testPool.query("select status from platform_connections where id = $1", [id]);

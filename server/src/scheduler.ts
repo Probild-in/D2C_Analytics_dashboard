@@ -70,7 +70,7 @@ export function startScheduler() {
   cron.schedule(
     "0 * * * *",
     () => {
-      runScheduledSyncs("shopify").catch((err) => console.error("Shopify scheduled sync failed:", err));
+      runScheduledSyncs("shopify").catch((err) => logger.error(err, "Shopify scheduled sync failed:"));
     },
     { noOverlap: true },
   );
@@ -82,7 +82,7 @@ export function startScheduler() {
   cron.schedule(
     "0 */6 * * *",
     () => {
-      runScheduledSyncs("meta").catch((err) => console.error("Meta scheduled sync failed:", err));
+      runScheduledSyncs("meta").catch((err) => logger.error(err, "Meta scheduled sync failed:"));
     },
     { noOverlap: true },
   );
@@ -92,7 +92,7 @@ export function startScheduler() {
   cron.schedule(
     "0 */6 * * *",
     () => {
-      runScheduledSyncs("google").catch((err) => console.error("Google scheduled sync failed:", err));
+      runScheduledSyncs("google").catch((err) => logger.error(err, "Google scheduled sync failed:"));
     },
     { noOverlap: true },
   );
@@ -102,7 +102,7 @@ export function startScheduler() {
   cron.schedule(
     "15 * * * *",
     () => {
-      runScheduledSyncs("courier_shiprocket").catch((err) => console.error("Shiprocket scheduled sync failed:", err));
+      runScheduledSyncs("courier_shiprocket").catch((err) => logger.error(err, "Shiprocket scheduled sync failed:"));
     },
     { noOverlap: true },
   );
@@ -112,7 +112,7 @@ export function startScheduler() {
   cron.schedule(
     "30 * * * *",
     () => {
-      runScheduledSyncs("courier_delhivery").catch((err) => console.error("Delhivery scheduled sync failed:", err));
+      runScheduledSyncs("courier_delhivery").catch((err) => logger.error(err, "Delhivery scheduled sync failed:"));
     },
     { noOverlap: true },
   );
