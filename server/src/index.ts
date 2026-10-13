@@ -22,14 +22,14 @@ import { startScheduler } from "./scheduler.js";
 process.on("unhandledRejection", (reason) => {
   logger.error(reason, "Unhandled promise rejection:");
   if (process.env.NODE_ENV === "production") {
-    process.exitCode = 1;
+    setTimeout(() => process.exit(1), 1000).unref();
   }
 });
 
 process.on("uncaughtException", (err) => {
   logger.error(err, "Uncaught exception:");
   if (process.env.NODE_ENV === "production") {
-    process.exitCode = 1;
+    setTimeout(() => process.exit(1), 1000).unref();
   }
 });
 

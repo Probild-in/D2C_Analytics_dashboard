@@ -131,7 +131,7 @@ export function startScheduler() {
   cron.schedule(
     "0 3 * * *",
     () => {
-      sweepExpiredPendingConnections().catch((err) => logger.error("Pending-connections sweep failed:", err));
+      sweepExpiredPendingConnections().catch((err) => logger.error(err, "Pending-connections sweep failed:"));
     },
     { noOverlap: true },
   );
