@@ -22,13 +22,19 @@ function getOAuthCredentials(): { clientId: string; clientSecret: string } {
   return { clientId, clientSecret };
 }
 
-// Google sunset the developer-token requirement on 2026-09-09 — API access is now tied
-// to the Google Cloud project that owns the OAuth client, not this header. Google's own
-// servers accept the header optionally and ignore it, so this must not throw when it's
-// unset: an empty string is sent (harmless) rather than blocking every Google Ads connect
-// attempt on a credential Google itself no longer requires.
+// Google sunset developer-token APPROVAL as an access gate on 2026-09-09 — API access is
+// now tied to the Google Cloud project that owns the OAuth client, not this token's
+// approval status. BUT the header itself must still be present and non-empty: confirmed
+// directly against the real API, an empty value produces
+// "DEVELOPER_TOKEN_PARAMETER_MISSING", not a silent pass-through. Get any real token from
+// a Google Ads manager account's API Center (its access level no longer matters, only its
+// presence does) and set GOOGLE_ADS_DEVELOPER_TOKEN.
 function getDeveloperToken(): string {
-  return process.env.GOOGLE_ADS_DEVELOPER_TOKEN ?? "";
+  const token = process.env.GOOGLE_ADS_DEVELOPER_TOKEN;
+  if (!token) {
+    throw new Error("GOOGLE_ADS_DEVELOPER_TOKEN environment variable must be set — get one from a Google Ads manager account's API Center (any value works, Google no longer gates access on its approval level, only its presence)");
+  }
+  return token;
 }
 
 async function assertUnderGoogleAccountLimit(clientId: string): Promise<void> {
