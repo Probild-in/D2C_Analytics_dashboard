@@ -64,6 +64,13 @@ export async function runScheduledSyncs(platform: string) {
   }
 }
 
+export async function sweepExpiredPendingConnections() {
+  const result = await pool.query("delete from pending_connections where expires_at < now()");
+  if (result.rowCount && result.rowCount > 0) {
+    logger.info(`Swept ${result.rowCount} expired pending_connections row(s)`);
+  }
+}
+
 export function startScheduler() {
   // Shopify order data is time-sensitive — hourly. noOverlap prevents a slow run
   // (e.g. a large historical backlog during onboarding) from double-firing.
@@ -113,6 +120,18 @@ export function startScheduler() {
     "30 * * * *",
     () => {
       runScheduledSyncs("courier_delhivery").catch((err) => logger.error(err, "Delhivery scheduled sync failed:"));
+    },
+    { noOverlap: true },
+  );
+
+  // Pending connections expire after 30 minutes (see pending-connections.ts); sweeping
+  // once a day is more than frequent enough to keep the table from growing unbounded —
+  // expired rows are already excluded from every read path (readPending/lockPendingForUpdate
+  // both filter on expires_at), so this is pure cleanup, not a correctness requirement.
+  cron.schedule(
+    "0 3 * * *",
+    () => {
+      sweepExpiredPendingConnections().catch((err) => logger.error("Pending-connections sweep failed:", err));
     },
     { noOverlap: true },
   );

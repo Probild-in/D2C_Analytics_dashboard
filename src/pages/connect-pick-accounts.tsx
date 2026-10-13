@@ -66,7 +66,7 @@ export default function ConnectPickAccounts() {
       <div className="flex min-h-screen items-center justify-center bg-bg p-4">
         <Card className="max-w-sm">
           <CardContent className="p-5 text-center">
-            <p className="text-[13px] text-negative">{loadError}</p>
+            <p role="alert" className="text-[13px] text-negative">{loadError}</p>
           </CardContent>
         </Card>
       </div>

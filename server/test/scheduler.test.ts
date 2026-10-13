@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import cron from "node-cron";
 import { testPool, resetTestDb } from "./helpers/test-db.js";
 import { encryptToken } from "../src/lib/crypto.js";
-import { runScheduledSyncs, startScheduler, hashPlatformToLockKey } from "../src/scheduler.js";
+import { runScheduledSyncs, startScheduler, hashPlatformToLockKey, sweepExpiredPendingConnections } from "../src/scheduler.js";
 import pool from "../src/db.js";
 import { connectors } from "../src/lib/connector-registry.js";
 import { logger } from "../src/lib/logger.js";
@@ -215,6 +215,24 @@ describe("runScheduledSyncs", () => {
       await lockClient.query("select pg_advisory_unlock_all()");
       lockClient.release();
     }
+  });
+});
+
+describe("sweepExpiredPendingConnections", () => {
+  it("deletes expired pending_connections rows on the daily sweep", async () => {
+    await testPool.query(
+      "insert into pending_connections (id, platform, payload, expires_at) values (gen_random_uuid(), 'shopify', 'x', now() - interval '1 hour')",
+    );
+    const { id: freshId } = (
+      await testPool.query(
+        "insert into pending_connections (id, platform, payload, expires_at) values (gen_random_uuid(), 'shopify', 'x', now() + interval '1 hour') returning id",
+      )
+    ).rows[0];
+
+    await sweepExpiredPendingConnections();
+
+    const remaining = await testPool.query("select id from pending_connections");
+    expect(remaining.rows.map((r) => r.id)).toEqual([freshId]);
   });
 });
 
