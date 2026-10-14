@@ -66,12 +66,15 @@ function getRedirectUri(): string {
   return `${publicApiUrl}/api/integrations/meta/callback`;
 }
 
-function getLoginConfigId(): string {
-  const configId = process.env.META_LOGIN_CONFIG_ID;
-  if (!configId) {
-    throw new Error("META_LOGIN_CONFIG_ID environment variable must be set");
-  }
-  return configId;
+// Optional: a Facebook Login for Business "Configuration" bundles its own permission
+// set and overrides the `scope` param entirely when present. Most Marketing API
+// integrations don't need one — the classic scope-based dialog (used when this is
+// unset) works identically for logging in an app Admin/Developer/Tester in
+// Development Mode, which covers this app's own connects. Only set
+// META_LOGIN_CONFIG_ID if a Configuration was deliberately created to bundle a
+// specific permission set for a public-facing login flow.
+function getLoginConfigId(): string | undefined {
+  return process.env.META_LOGIN_CONFIG_ID || undefined;
 }
 
 function getCredentials(): { appId: string; appSecret: string } {
@@ -111,10 +114,16 @@ export const metaConnector: OAuthConnector = {
     const { appId } = getCredentials();
     const url = new URL(`https://www.facebook.com/${META_API_VERSION}/dialog/oauth`);
     url.searchParams.set("client_id", appId);
-    url.searchParams.set("config_id", getLoginConfigId());
+    const configId = getLoginConfigId();
+    if (configId) {
+      // A Configuration dictates its own permission set — Meta ignores `scope` whenever
+      // `config_id` is present, so the two are mutually exclusive, not combined.
+      url.searchParams.set("config_id", configId);
+    } else {
+      url.searchParams.set("scope", META_SCOPES);
+    }
     url.searchParams.set("response_type", "code");
     url.searchParams.set("redirect_uri", getRedirectUri());
-    url.searchParams.set("scope", META_SCOPES);
     url.searchParams.set("state", state);
     return url.toString();
   },

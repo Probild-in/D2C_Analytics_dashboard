@@ -29,7 +29,7 @@ Set these in your hosting provider's environment settings. Never paste them into
 | `PORT` | Server port | ✅ | Defaults to 4000. Most hosts inject this. |
 | `SHOPIFY_API_KEY` / `SHOPIFY_API_SECRET` | Shopify OAuth | ⏳ | partners.shopify.com → Apps → Create app → Client credentials. Add redirect URL `{PUBLIC_API_URL}/api/integrations/shopify/callback`. |
 | `META_APP_ID` / `META_APP_SECRET` | Meta Ads OAuth | ⏳ | developers.facebook.com → your app → Settings → Basic. Walkthrough given earlier in this chat. |
-| `META_LOGIN_CONFIG_ID` | Meta Login for Business | ⏳ | In your Meta app: Facebook Login for Business → Configurations → Create Configuration. Copy its ID. |
+| `META_LOGIN_CONFIG_ID` | Meta Login for Business | ✅ (optional) | No longer required — the connector falls back to the classic scope-based OAuth dialog (`ads_read`) when unset, which works immediately for any Admin/Developer/Tester on the app. Only set this if you've deliberately created a Configuration (Facebook Login for Business → Configurations) for a public-facing login flow. |
 | `GOOGLE_ADS_CLIENT_ID` / `GOOGLE_ADS_CLIENT_SECRET` | Google Ads OAuth | ⏳ | console.cloud.google.com → APIs & Services → Credentials → OAuth client ID (Web application) |
 | `GOOGLE_ADS_DEVELOPER_TOKEN` | Google Ads API | ⏳ | Google Ads manager account → Tools → API Center. Requires Google's access approval, which can take days to weeks. |
 | Payment provider keys | Billing | ⏳ | See section C, item 1. Depends on the provider you choose. |
