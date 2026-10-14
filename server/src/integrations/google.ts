@@ -62,7 +62,9 @@ interface GoogleCampaignRow {
 
 interface GoogleMetricsRow {
   campaign: { id: string; name: string };
-  metrics: { impressions: string; clicks: string; costMicros: string; conversions: string };
+  // conversionsValue is already a plain currency amount, unlike costMicros — Google Ads
+  // only expresses *cost* in micros, not conversion value.
+  metrics: { impressions: string; clicks: string; costMicros: string; conversions: string; conversionsValue?: string };
 }
 
 interface GoogleAdRow {
@@ -75,7 +77,7 @@ interface GoogleAdRow {
     status: string;
   };
   campaign: { id: string };
-  metrics: { impressions: string; clicks: string; costMicros: string; conversions: string };
+  metrics: { impressions: string; clicks: string; costMicros: string; conversions: string; conversionsValue?: string };
 }
 
 // Google's status vocabulary (ENABLED/PAUSED/REMOVED/...) maps onto this dashboard's
@@ -283,14 +285,14 @@ export const googleConnector: OAuthConnector = {
         accessToken,
         refreshToken,
         customerId,
-        `SELECT campaign.id, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions FROM campaign WHERE campaign.id = ${row.campaign.id} AND segments.date DURING TODAY`,
+        `SELECT campaign.id, campaign.name, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value FROM campaign WHERE campaign.id = ${row.campaign.id} AND segments.date DURING TODAY`,
       );
       for (const m of metricsRows) {
         await pool.query(
-          `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions)
-           values ($1, $2, $3, $4, current_date, $5, $6, $7, $8)
+          `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions, revenue)
+           values ($1, $2, $3, $4, current_date, $5, $6, $7, $8, $9)
            on conflict (connection_id, campaign_id, metric_date)
-           do update set spend = excluded.spend, impressions = excluded.impressions, clicks = excluded.clicks, conversions = excluded.conversions`,
+           do update set spend = excluded.spend, impressions = excluded.impressions, clicks = excluded.clicks, conversions = excluded.conversions, revenue = excluded.revenue`,
           [
             conn.client_id,
             connectionId,
@@ -300,6 +302,7 @@ export const googleConnector: OAuthConnector = {
             Math.round(parseFloat(m.metrics.impressions)),
             Math.round(parseFloat(m.metrics.clicks)),
             Math.round(parseFloat(m.metrics.conversions)),
+            m.metrics.conversionsValue ? Math.round(parseFloat(m.metrics.conversionsValue)) : 0,
           ],
         );
       }
@@ -309,17 +312,17 @@ export const googleConnector: OAuthConnector = {
         accessToken,
         refreshToken,
         customerId,
-        `SELECT ad_group_ad.ad.id, ad_group_ad.ad.name, ad_group_ad.ad.responsive_search_ad.headlines, ad_group_ad.ad.responsive_search_ad.descriptions, ad_group_ad.status, campaign.id, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions FROM ad_group_ad WHERE campaign.id = ${row.campaign.id} AND segments.date DURING TODAY`,
+        `SELECT ad_group_ad.ad.id, ad_group_ad.ad.name, ad_group_ad.ad.responsive_search_ad.headlines, ad_group_ad.ad.responsive_search_ad.descriptions, ad_group_ad.status, campaign.id, metrics.impressions, metrics.clicks, metrics.cost_micros, metrics.conversions, metrics.conversions_value FROM ad_group_ad WHERE campaign.id = ${row.campaign.id} AND segments.date DURING TODAY`,
       );
       for (const adRow of adRows) {
         const rsa = adRow.adGroupAd.ad.responsiveSearchAd;
         await pool.query(
           `insert into campaign_creatives
-             (campaign_id, external_creative_id, name, format, headline, primary_text, cta, thumbnail_url, status, spend, impressions, clicks, results)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+             (campaign_id, external_creative_id, name, format, headline, primary_text, cta, thumbnail_url, status, spend, impressions, clicks, results, revenue)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
            on conflict (campaign_id, external_creative_id)
            do update set name = excluded.name, status = excluded.status, spend = excluded.spend,
-             impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results`,
+             impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results, revenue = excluded.revenue`,
           [
             campaignRowId,
             adRow.adGroupAd.ad.id,
@@ -334,6 +337,7 @@ export const googleConnector: OAuthConnector = {
             Math.round(parseFloat(adRow.metrics.impressions)),
             Math.round(parseFloat(adRow.metrics.clicks)),
             Math.round(parseFloat(adRow.metrics.conversions)),
+            adRow.metrics.conversionsValue ? Math.round(parseFloat(adRow.metrics.conversionsValue)) : 0,
           ],
         );
       }

@@ -200,6 +200,7 @@ describe("metaConnector.sync", () => {
                   impressions: "10000",
                   clicks: "250",
                   actions: [{ action_type: "omni_purchase", value: "12" }],
+                  action_values: [{ action_type: "omni_purchase", value: "2499" }],
                 },
               ],
             }),
@@ -232,7 +233,17 @@ describe("metaConnector.sync", () => {
         }
         if (url.includes("ad_1/insights?")) {
           return new Response(
-            JSON.stringify({ data: [{ spend: "120.00", impressions: "3000", clicks: "80", actions: [{ action_type: "omni_purchase", value: "4" }] }] }),
+            JSON.stringify({
+              data: [
+                {
+                  spend: "120.00",
+                  impressions: "3000",
+                  clicks: "80",
+                  actions: [{ action_type: "omni_purchase", value: "4" }],
+                  action_values: [{ action_type: "omni_purchase", value: "899" }],
+                },
+              ],
+            }),
             { status: 200 },
           );
         }
@@ -249,7 +260,7 @@ describe("metaConnector.sync", () => {
 
     const metrics = await testPool.query("select * from meta_campaign_metrics where connection_id = $1", ["55555555-5555-5555-5555-555555555555"]);
     expect(metrics.rowCount).toBe(1);
-    expect(metrics.rows[0]).toMatchObject({ campaign_id: "camp_1", spend: 500, impressions: 10000, clicks: 250, results: 12 });
+    expect(metrics.rows[0]).toMatchObject({ campaign_id: "camp_1", spend: 500, impressions: 10000, clicks: 250, results: 12, revenue: 2499 });
 
     const creatives = await testPool.query(
       "select * from campaign_creatives where campaign_id = $1",
@@ -268,6 +279,7 @@ describe("metaConnector.sync", () => {
       impressions: 3000,
       clicks: 80,
       results: 4,
+      revenue: 899,
     });
   });
 

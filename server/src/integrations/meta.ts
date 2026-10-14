@@ -18,6 +18,9 @@ interface MetaInsightRow {
   impressions: string;
   clicks: string;
   actions?: { action_type: string; value: string }[];
+  // Parallel structure to `actions`, but with the monetary value each action type drove —
+  // `actions` only has the *count* of purchases, this has the revenue behind them.
+  action_values?: { action_type: string; value: string }[];
 }
 
 interface MetaAd {
@@ -61,6 +64,14 @@ function mapCampaignStatus(status: string): string {
 // about purchases for the "results" metric this dashboard shows.
 function extractPurchases(actions: { action_type: string; value: string }[] | undefined): number {
   const purchase = actions?.find((a) => a.action_type === "omni_purchase" || a.action_type === "purchase");
+  return purchase ? Math.round(parseFloat(purchase.value)) : 0;
+}
+
+// Same lookup as extractPurchases, but against action_values — the revenue those
+// purchases drove, needed to compute ROAS (revenue / spend). Previously not fetched at
+// all, which is why ROAS was hardcoded to 0 in server/src/routes/campaigns.ts.
+function extractPurchaseValue(actionValues: { action_type: string; value: string }[] | undefined): number {
+  const purchase = actionValues?.find((a) => a.action_type === "omni_purchase" || a.action_type === "purchase");
   return purchase ? Math.round(parseFloat(purchase.value)) : 0;
 }
 
@@ -221,7 +232,7 @@ export const metaConnector: OAuthConnector = {
       recordsSynced++;
 
       const insightsRes = await fetch(
-        `https://graph.facebook.com/${META_API_VERSION}/${campaign.id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,actions&access_token=${accessToken}`,
+        `https://graph.facebook.com/${META_API_VERSION}/${campaign.id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,actions,action_values&access_token=${accessToken}`,
       );
       if (!insightsRes.ok) {
         throw new Error(`Meta insights fetch failed for campaign ${campaign.id}: ${insightsRes.status}`);
@@ -229,10 +240,10 @@ export const metaConnector: OAuthConnector = {
       const insightsBody = (await insightsRes.json()) as { data: MetaInsightRow[] };
       for (const row of insightsBody.data) {
         await pool.query(
-          `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results)
-           values ($1, $2, $3, $4, current_date, $5, $6, $7, $8)
+          `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results, revenue)
+           values ($1, $2, $3, $4, current_date, $5, $6, $7, $8, $9)
            on conflict (connection_id, campaign_id, metric_date)
-           do update set spend = excluded.spend, impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results`,
+           do update set spend = excluded.spend, impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results, revenue = excluded.revenue`,
           [
             conn.client_id,
             connectionId,
@@ -242,6 +253,7 @@ export const metaConnector: OAuthConnector = {
             Math.round(parseFloat(row.impressions)),
             Math.round(parseFloat(row.clicks)),
             extractPurchases(row.actions),
+            extractPurchaseValue(row.action_values),
           ],
         );
       }
@@ -261,7 +273,7 @@ export const metaConnector: OAuthConnector = {
         if (!ad.creative) continue;
 
         const adInsightsRes = await fetch(
-          `https://graph.facebook.com/${META_API_VERSION}/${ad.id}/insights?fields=spend,impressions,clicks,actions&access_token=${accessToken}`,
+          `https://graph.facebook.com/${META_API_VERSION}/${ad.id}/insights?fields=spend,impressions,clicks,actions,action_values&access_token=${accessToken}`,
         );
         if (!adInsightsRes.ok) {
           throw new Error(`Meta ad insights fetch failed for ad ${ad.id}: ${adInsightsRes.status}`);
@@ -271,11 +283,11 @@ export const metaConnector: OAuthConnector = {
 
         await pool.query(
           `insert into campaign_creatives
-             (campaign_id, external_creative_id, name, format, headline, primary_text, cta, thumbnail_url, status, spend, impressions, clicks, results, launched_date)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+             (campaign_id, external_creative_id, name, format, headline, primary_text, cta, thumbnail_url, status, spend, impressions, clicks, results, revenue, launched_date)
+           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
            on conflict (campaign_id, external_creative_id)
            do update set name = excluded.name, status = excluded.status, spend = excluded.spend,
-             impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results`,
+             impressions = excluded.impressions, clicks = excluded.clicks, results = excluded.results, revenue = excluded.revenue`,
           [
             campaignRowId,
             ad.creative.id,
@@ -292,6 +304,7 @@ export const metaConnector: OAuthConnector = {
             adMetrics ? Math.round(parseFloat(adMetrics.impressions)) : 0,
             adMetrics ? Math.round(parseFloat(adMetrics.clicks)) : 0,
             adMetrics ? extractPurchases(adMetrics.actions) : 0,
+            adMetrics ? extractPurchaseValue(adMetrics.action_values) : 0,
             ad.created_time.slice(0, 10),
           ],
         );

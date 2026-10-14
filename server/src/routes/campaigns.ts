@@ -27,7 +27,8 @@ router.get("/", requireAuth, async (req, res, next) => {
          coalesce(sum(m.spend), 0)::int as spend,
          coalesce(sum(m.impressions), 0)::int as impressions,
          coalesce(sum(m.clicks), 0)::int as clicks,
-         coalesce(sum(m.${resultsColumn}), 0)::int as results
+         coalesce(sum(m.${resultsColumn}), 0)::int as results,
+         coalesce(sum(m.revenue), 0)::int as revenue
        from campaigns c
        join platform_connections pc on pc.id = c.connection_id
        left join ${metricsTable} m on m.campaign_id = c.external_campaign_id and m.connection_id = c.connection_id
@@ -52,7 +53,7 @@ router.get("/", requireAuth, async (req, res, next) => {
         ctr: r.impressions > 0 ? (r.clicks / r.impressions) * 100 : 0,
         cpc: r.clicks > 0 ? r.spend / r.clicks : 0,
         cpm: r.impressions > 0 ? (r.spend / r.impressions) * 1000 : 0,
-        roas: 0,
+        roas: r.spend > 0 ? r.revenue / r.spend : 0,
       })),
     );
   } catch (err) {
@@ -91,7 +92,7 @@ router.get("/:campaignId/creatives", requireAuth, async (req, res, next) => {
         ctr: r.impressions > 0 ? (r.clicks / r.impressions) * 100 : 0,
         cpc: r.clicks > 0 ? r.spend / r.clicks : 0,
         results: r.results,
-        roas: 0,
+        roas: r.spend > 0 ? r.revenue / r.spend : 0,
         hookRate: r.hook_rate !== null ? Number(r.hook_rate) : null,
         holdRate: r.hold_rate !== null ? Number(r.hold_rate) : null,
         // Local-getter extraction, not .toISOString() — `launched_date` is a Postgres
