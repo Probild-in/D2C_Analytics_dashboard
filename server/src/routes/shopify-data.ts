@@ -2,6 +2,7 @@ import { Router } from "express";
 import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { assertClientAccess, resolveClientScope } from "../lib/access.js";
+import { IST_DAY_START, IST_TODAY_DATE, istDay } from "../lib/sql-dates.js";
 
 const router = Router({ mergeParams: true });
 
@@ -14,11 +15,11 @@ router.get("/sales", requireAuth, async (req, res, next) => {
 
     const result = await pool.query(
       `with days as (
-         select generate_series(current_date - ($2::int - 1), current_date, interval '1 day')::date as day
+         select generate_series(${IST_TODAY_DATE} - ($2::int - 1), ${IST_TODAY_DATE}, interval '1 day')::date as day
        ),
        orders_by_day as (
          select
-           order_date::date as day,
+           ${istDay("order_date")} as day,
            count(*) as orders,
            coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
            coalesce(sum(amount), 0) as gross_sales,
@@ -27,21 +28,21 @@ router.get("/sales", requireAuth, async (req, res, next) => {
            count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
            count(distinct client_id || ':' || shopify_customer_id) filter (
              where shopify_customer_id is not null
-             and order_date::date = (
-               select min(o2.order_date)::date from shopify_orders o2
+             and ${istDay("order_date")} = (
+               select ${istDay("min(o2.order_date)")} from shopify_orders o2
                where o2.client_id = shopify_orders.client_id and o2.shopify_customer_id = shopify_orders.shopify_customer_id
              )
            ) as new_customers,
            count(distinct client_id || ':' || shopify_customer_id) filter (
              where shopify_customer_id is not null
-             and order_date::date <> (
-               select min(o2.order_date)::date from shopify_orders o2
+             and ${istDay("order_date")} <> (
+               select ${istDay("min(o2.order_date)")} from shopify_orders o2
                where o2.client_id = shopify_orders.client_id and o2.shopify_customer_id = shopify_orders.shopify_customer_id
              )
            ) as returning_customers
          from shopify_orders
-         where client_id = any($1::text[]) and order_date >= current_date - ($2::int - 1)
-         group by order_date::date
+         where client_id = any($1::text[]) and order_date >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
+         group by ${istDay("order_date")}
        ),
        ad_spend_by_day as (
          select metric_date as day, sum(spend) as spend
@@ -50,24 +51,24 @@ router.get("/sales", requireAuth, async (req, res, next) => {
            union all
            select metric_date, spend from google_campaign_metrics where client_id = any($1::text[])
          ) combined
-         where metric_date >= current_date - ($2::int - 1)
+         where metric_date >= ${IST_TODAY_DATE} - ($2::int - 1)
          group by metric_date
        ),
        shopify_rto_by_client_day as (
-         select client_id, order_date::date as day,
+         select client_id, ${istDay("order_date")} as day,
            count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders
          from shopify_orders
-         where client_id = any($1::text[]) and order_date >= current_date - ($2::int - 1)
-         group by client_id, order_date::date
+         where client_id = any($1::text[]) and order_date >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
+         group by client_id, ${istDay("order_date")}
        ),
        shipment_rto_by_client_day as (
-         select client_id, ordered_at::date as day,
+         select client_id, ${istDay("ordered_at")} as day,
            count(*) as rto_orders
          from shipments
          where client_id = any($1::text[])
            and status in ('RTO Initiated', 'RTO Delivered')
-           and ordered_at >= current_date - ($2::int - 1)
-         group by client_id, ordered_at::date
+           and ordered_at >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
+         group by client_id, ${istDay("ordered_at")}
        ),
        client_has_shipments as (
          select distinct client_id from shipments where client_id = any($1::text[]) and ordered_at is not null

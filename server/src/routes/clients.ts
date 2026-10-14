@@ -3,6 +3,7 @@ import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { getAccessibleClientIds, assertClientAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
+import { IST_DAY_START, IST_TODAY_DATE } from "../lib/sql-dates.js";
 
 const router = Router();
 
@@ -17,7 +18,7 @@ const SELECT_CLIENTS = `
         else 0
       end as rto_percent
     from shopify_orders so
-    where so.client_id = c.id and so.order_date >= current_date - interval '6 days'
+    where so.client_id = c.id and so.order_date >= ${IST_DAY_START} - interval '6 days'
   ) rto on true
 `;
 
@@ -110,7 +111,7 @@ router.get("/summary", requireAuth, async (req, res, next) => {
            coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
            count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders
          from shopify_orders
-         where client_id = any($2::text[]) and order_date >= current_date - ($1::int - 1)
+         where client_id = any($2::text[]) and order_date >= ${IST_DAY_START} - interval '1 day' * ($1::int - 1)
          group by client_id
        ),
        ad_spend_by_client as (
@@ -120,7 +121,7 @@ router.get("/summary", requireAuth, async (req, res, next) => {
            union all
            select client_id, spend, metric_date from google_campaign_metrics where client_id = any($2::text[])
          ) combined
-         where metric_date >= current_date - ($1::int - 1)
+         where metric_date >= ${IST_TODAY_DATE} - ($1::int - 1)
          group by client_id
        )
        select
