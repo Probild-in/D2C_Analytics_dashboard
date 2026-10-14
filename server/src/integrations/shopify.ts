@@ -2,11 +2,20 @@ import crypto from "node:crypto";
 import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
+import { logger } from "../lib/logger.js";
 
 const SHOPIFY_SCOPES = "read_orders,read_products,read_customers";
 const SHOP_DOMAIN_RE = /^[a-z0-9-]+\.myshopify\.com$/;
 
-interface ShopifyOrder {
+// Real-time order sync: Shopify pushes these the instant they happen, instead of
+// waiting for the hourly poll (scheduler.ts keeps that poll running too, as a fallback
+// for any delivery these webhooks miss — e.g. if this server was briefly down).
+// The full Order resource (same shape for all three topics) covers every field
+// mapOrderStatus/mapPaymentMethod need, so one handler (upsertShopifyOrder) serves both
+// the poller and the webhook route.
+export const SHOPIFY_WEBHOOK_TOPICS = ["orders/create", "orders/updated", "orders/cancelled"] as const;
+
+export interface ShopifyOrder {
   id: number;
   created_at: string;
   total_price: string;
@@ -59,6 +68,109 @@ function getCredentials(): { apiKey: string; apiSecret: string } {
     throw new Error("SHOPIFY_API_KEY and SHOPIFY_API_SECRET environment variables must be set");
   }
   return { apiKey, apiSecret };
+}
+
+function getWebhookAddress(): string {
+  const apiUrl = process.env.PUBLIC_API_URL;
+  if (!apiUrl) {
+    throw new Error("PUBLIC_API_URL environment variable must be set");
+  }
+  return `${apiUrl}/api/webhooks/shopify/orders`;
+}
+
+// Verifies a webhook delivery genuinely came from Shopify: HMAC-SHA256 over the raw
+// (unparsed) request body, base64-encoded, keyed with our app's API secret — a
+// different scheme from the OAuth callback's query-string HMAC above (verifyCallbackHmac),
+// per Shopify's own docs for each. Comparison is timing-safe and length-checked first
+// since timingSafeEqual throws on mismatched buffer lengths rather than returning false.
+export function verifyShopifyWebhookHmac(rawBody: Buffer, hmacHeader: string | undefined, secret: string): boolean {
+  if (!hmacHeader) return false;
+  const computed = crypto.createHmac("sha256", secret).update(rawBody).digest("base64");
+  const computedBuf = Buffer.from(computed, "utf8");
+  const providedBuf = Buffer.from(hmacHeader, "utf8");
+  return computedBuf.length === providedBuf.length && crypto.timingSafeEqual(computedBuf, providedBuf);
+}
+
+// Subscribes this shop to real-time order webhooks, called right after a successful
+// OAuth connect. Lists existing webhooks first and only creates the ones missing at our
+// address — re-running this on every reconnect must not create duplicate subscriptions
+// (Shopify doesn't dedupe for you; a duplicate means every order gets pushed twice).
+// Failure here is non-fatal: it's logged and swallowed so a Shopify API hiccup doesn't
+// block the connect itself — the hourly poll still covers this store either way.
+export async function registerWebhooks(shop: string, accessToken: string): Promise<void> {
+  try {
+    const address = getWebhookAddress();
+    const listRes = await fetch(`https://${shop}/admin/api/2024-10/webhooks.json?address=${encodeURIComponent(address)}`, {
+      headers: { "X-Shopify-Access-Token": accessToken },
+    });
+    if (!listRes.ok) {
+      throw new Error(`Shopify webhooks list failed: ${listRes.status} ${await listRes.text()}`);
+    }
+    const { webhooks } = (await listRes.json()) as { webhooks: { topic: string }[] };
+    const existingTopics = new Set(webhooks.map((w) => w.topic));
+
+    for (const topic of SHOPIFY_WEBHOOK_TOPICS) {
+      if (existingTopics.has(topic)) continue;
+      const createRes = await fetch(`https://${shop}/admin/api/2024-10/webhooks.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": accessToken },
+        body: JSON.stringify({ webhook: { topic, address, format: "json" } }),
+      });
+      if (!createRes.ok) {
+        throw new Error(`Shopify webhook create failed for topic ${topic}: ${createRes.status} ${await createRes.text()}`);
+      }
+    }
+  } catch (err) {
+    logger.error(err, `Failed to register Shopify webhooks for ${shop}`);
+  }
+}
+
+// Shared by the hourly poll (sync, below) and the real-time webhook route — both see the
+// same full Order resource shape, so both upsert it identically.
+export async function upsertShopifyOrder(clientId: string, connectionId: string, order: ShopifyOrder): Promise<string> {
+  const status = mapOrderStatus(order);
+  const paymentMethod = mapPaymentMethod(order.payment_gateway_names);
+  const customerName = order.customer ? `${order.customer.first_name} ${order.customer.last_name}`.trim() : "Guest";
+  const { company: trackingCompany, number: trackingNumber } = firstFulfillmentTracking(order);
+
+  const orderResult = await pool.query(
+    `insert into shopify_orders
+       (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+     on conflict (connection_id, shopify_order_id)
+     do update set customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
+       payment_method = excluded.payment_method, city = excluded.city, state = excluded.state,
+       tracking_number = excluded.tracking_number, tracking_company = excluded.tracking_company
+     returning id`,
+    [
+      clientId,
+      connectionId,
+      String(order.id),
+      customerName,
+      order.created_at,
+      Math.round(parseFloat(order.total_price)),
+      status,
+      paymentMethod,
+      order.shipping_address?.city ?? null,
+      order.shipping_address?.province ?? null,
+      order.customer ? String(order.customer.id) : null,
+      trackingNumber,
+      trackingCompany,
+    ],
+  );
+  const orderId = orderResult.rows[0].id;
+
+  for (const item of order.line_items) {
+    await pool.query(
+      `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price)
+       values ($1, $2, $3, $4, $5)
+       on conflict (order_id, shopify_line_item_id)
+       do update set product_name = excluded.product_name, quantity = excluded.quantity, price = excluded.price`,
+      [orderId, String(item.id), item.title, item.quantity, Math.round(parseFloat(item.price))],
+    );
+  }
+
+  return orderId;
 }
 
 // Shopify's REST Admin API paginates via a `Link` response header rather than page
@@ -124,6 +236,7 @@ export const shopifyConnector: OAuthConnector = {
       throw new Error(`Shopify token exchange failed: ${res.status}`);
     }
     const body = (await res.json()) as { access_token: string };
+    await registerWebhooks(shop, body.access_token);
     return { type: "connected", externalAccountId: shop, accessToken: body.access_token };
   },
 
@@ -157,47 +270,7 @@ export const shopifyConnector: OAuthConnector = {
       nextUrl = parseNextLink(res.headers.get("link"));
 
       for (const order of body.orders) {
-        const status = mapOrderStatus(order);
-        const paymentMethod = mapPaymentMethod(order.payment_gateway_names);
-        const customerName = order.customer ? `${order.customer.first_name} ${order.customer.last_name}`.trim() : "Guest";
-        const { company: trackingCompany, number: trackingNumber } = firstFulfillmentTracking(order);
-
-        const orderResult = await pool.query(
-          `insert into shopify_orders
-             (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company)
-           values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-           on conflict (connection_id, shopify_order_id)
-           do update set customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
-             payment_method = excluded.payment_method, city = excluded.city, state = excluded.state,
-             tracking_number = excluded.tracking_number, tracking_company = excluded.tracking_company
-           returning id`,
-          [
-            conn.client_id,
-            connectionId,
-            String(order.id),
-            customerName,
-            order.created_at,
-            Math.round(parseFloat(order.total_price)),
-            status,
-            paymentMethod,
-            order.shipping_address?.city ?? null,
-            order.shipping_address?.province ?? null,
-            order.customer ? String(order.customer.id) : null,
-            trackingNumber,
-            trackingCompany,
-          ],
-        );
-        const orderId = orderResult.rows[0].id;
-
-        for (const item of order.line_items) {
-          await pool.query(
-            `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price)
-             values ($1, $2, $3, $4, $5)
-             on conflict (order_id, shopify_line_item_id)
-             do update set product_name = excluded.product_name, quantity = excluded.quantity, price = excluded.price`,
-            [orderId, String(item.id), item.title, item.quantity, Math.round(parseFloat(item.price))],
-          );
-        }
+        await upsertShopifyOrder(conn.client_id, connectionId, order);
         recordsSynced++;
       }
     }

@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { shopifyConnector } from "../../src/integrations/shopify.js";
+import { shopifyConnector, verifyShopifyWebhookHmac } from "../../src/integrations/shopify.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
 import { encryptToken } from "../../src/lib/crypto.js";
 
@@ -37,12 +37,64 @@ describe("shopifyConnector.getAuthUrl", () => {
 });
 
 describe("shopifyConnector.handleCallback", () => {
-  it("exchanges the code for an access token", async () => {
+  it("exchanges the code for an access token, and registers the real-time order webhooks", async () => {
+    const createdTopics: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url === "https://test-shop.myshopify.com/admin/oauth/access_token") {
+          return new Response(JSON.stringify({ access_token: "shpat_real_token", scope: "read_orders,read_products,read_customers" }), { status: 200 });
+        }
+        if (url.startsWith("https://test-shop.myshopify.com/admin/api/2024-10/webhooks.json?address=")) {
+          expect(url).toContain(encodeURIComponent("https://d2c.probild.in/api/webhooks/shopify/orders"));
+          return new Response(JSON.stringify({ webhooks: [] }), { status: 200 });
+        }
+        if (url === "https://test-shop.myshopify.com/admin/api/2024-10/webhooks.json" && init?.method === "POST") {
+          createdTopics.push((JSON.parse(init.body as string) as { webhook: { topic: string } }).webhook.topic);
+          return new Response(JSON.stringify({ webhook: { id: 1 } }), { status: 201 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+    const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    const result = await shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" });
+    expect(result).toEqual({ type: "connected", externalAccountId: "test-shop.myshopify.com", accessToken: "shpat_real_token" });
+    expect(createdTopics.sort()).toEqual(["orders/cancelled", "orders/create", "orders/updated"]);
+  });
+
+  it("does not register a webhook topic that's already subscribed at our address", async () => {
+    const createdTopics: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url === "https://test-shop.myshopify.com/admin/oauth/access_token") {
+          return new Response(JSON.stringify({ access_token: "shpat_real_token" }), { status: 200 });
+        }
+        if (url.includes("/webhooks.json?address=")) {
+          return new Response(JSON.stringify({ webhooks: [{ topic: "orders/create" }] }), { status: 200 });
+        }
+        if (init?.method === "POST") {
+          createdTopics.push((JSON.parse(init.body as string) as { webhook: { topic: string } }).webhook.topic);
+          return new Response(JSON.stringify({ webhook: { id: 1 } }), { status: 201 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+    const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
+    const hmac = computeTestHmac(query, "test-api-secret");
+    await shopifyConnector.handleCallback({ ...query, hmac }, { clientId: "abc-fashion" });
+    expect(createdTopics.sort()).toEqual(["orders/cancelled", "orders/updated"]);
+  });
+
+  it("still connects successfully even if webhook registration fails entirely", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string) => {
-        expect(url).toBe("https://test-shop.myshopify.com/admin/oauth/access_token");
-        return new Response(JSON.stringify({ access_token: "shpat_real_token", scope: "read_orders,read_products,read_customers" }), { status: 200 });
+        if (url === "https://test-shop.myshopify.com/admin/oauth/access_token") {
+          return new Response(JSON.stringify({ access_token: "shpat_real_token" }), { status: 200 });
+        }
+        return new Response("server error", { status: 500 });
       }),
     );
     const query = { shop: "test-shop.myshopify.com", code: "auth-code-123" };
@@ -411,5 +463,33 @@ describe("shopifyConnector.disconnect", () => {
     await shopifyConnector.disconnect("55555555-5555-5555-5555-555555555555");
     const conn = await testPool.query("select status from platform_connections where id = $1", ["55555555-5555-5555-5555-555555555555"]);
     expect(conn.rows[0].status).toBe("disconnected");
+  });
+});
+
+describe("verifyShopifyWebhookHmac", () => {
+  const secret = "test-api-secret";
+  const body = Buffer.from(JSON.stringify({ id: 1001, total_price: "500.00" }));
+
+  function computeWebhookHmac(rawBody: Buffer, key: string): string {
+    return crypto.createHmac("sha256", key).update(rawBody).digest("base64");
+  }
+
+  it("accepts a correctly signed body", () => {
+    const hmac = computeWebhookHmac(body, secret);
+    expect(verifyShopifyWebhookHmac(body, hmac, secret)).toBe(true);
+  });
+
+  it("rejects a body signed with the wrong secret", () => {
+    const hmac = computeWebhookHmac(body, "wrong-secret");
+    expect(verifyShopifyWebhookHmac(body, hmac, secret)).toBe(false);
+  });
+
+  it("rejects a tampered body even if the header is a validly-formed signature of something else", () => {
+    const hmac = computeWebhookHmac(Buffer.from(JSON.stringify({ id: 9999 })), secret);
+    expect(verifyShopifyWebhookHmac(body, hmac, secret)).toBe(false);
+  });
+
+  it("rejects a missing header", () => {
+    expect(verifyShopifyWebhookHmac(body, undefined, secret)).toBe(false);
   });
 });
