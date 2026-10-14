@@ -14,15 +14,31 @@ afterEach(() => {
 });
 
 describe("metaConnector.getAuthUrl", () => {
-  it("builds a Facebook Login for Business dialog URL", () => {
+  it("builds a Facebook Login for Business dialog URL when META_LOGIN_CONFIG_ID is set", () => {
     const url = metaConnector.getAuthUrl("abc-fashion", "signed-state-token");
     const parsed = new URL(url);
     expect(parsed.origin).toBe("https://www.facebook.com");
     expect(parsed.pathname).toBe("/v21.0/dialog/oauth");
     expect(parsed.searchParams.get("client_id")).toBe("test-app-id");
     expect(parsed.searchParams.get("config_id")).toBe("test-config-id");
+    // A Configuration dictates its own permission set — Meta ignores `scope` whenever
+    // `config_id` is present, so this dialog must not also carry a `scope` param.
+    expect(parsed.searchParams.get("scope")).toBeNull();
     expect(parsed.searchParams.get("response_type")).toBe("code");
+    expect(parsed.searchParams.get("state")).toBe("signed-state-token");
+    expect(parsed.searchParams.get("redirect_uri")).toContain("/api/integrations/meta/callback");
+  });
+
+  it("falls back to the classic scope-based dialog when META_LOGIN_CONFIG_ID is unset", () => {
+    delete process.env.META_LOGIN_CONFIG_ID;
+    const url = metaConnector.getAuthUrl("abc-fashion", "signed-state-token");
+    const parsed = new URL(url);
+    expect(parsed.origin).toBe("https://www.facebook.com");
+    expect(parsed.pathname).toBe("/v21.0/dialog/oauth");
+    expect(parsed.searchParams.get("client_id")).toBe("test-app-id");
+    expect(parsed.searchParams.get("config_id")).toBeNull();
     expect(parsed.searchParams.get("scope")).toBe("ads_read");
+    expect(parsed.searchParams.get("response_type")).toBe("code");
     expect(parsed.searchParams.get("state")).toBe("signed-state-token");
     expect(parsed.searchParams.get("redirect_uri")).toContain("/api/integrations/meta/callback");
   });
