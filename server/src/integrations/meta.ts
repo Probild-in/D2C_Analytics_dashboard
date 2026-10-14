@@ -26,9 +26,15 @@ interface MetaAd {
   campaign_id: string;
   status: string;
   created_time: string;
-  creative: {
+  // Both the creative object itself and its object_type are genuinely absent on some
+  // real ads — confirmed live against a real ad account: Advantage+/dynamic-creative ads
+  // use asset_feed_spec instead of a single classic creative, so object_type isn't always
+  // set even when a creative object is present. Previously typed as always-present, which
+  // crashed the whole sync (NOT NULL violation on campaign_creatives.format) the first
+  // time a real account had one of these.
+  creative?: {
     id: string;
-    object_type: string;
+    object_type?: string;
     title?: string;
     body?: string;
     call_to_action_type?: string;
@@ -248,6 +254,12 @@ export const metaConnector: OAuthConnector = {
       }
       const adsBody = (await adsRes.json()) as { data: MetaAd[] };
       for (const ad of adsBody.data) {
+        // Some real ads (Advantage+/dynamic-creative ones, confirmed against a live
+        // account) have no single creative object at all — asset_feed_spec drives them
+        // instead. Nothing meaningful to show in campaign_creatives for those, so skip
+        // rather than guessing at placeholder values.
+        if (!ad.creative) continue;
+
         const adInsightsRes = await fetch(
           `https://graph.facebook.com/${META_API_VERSION}/${ad.id}/insights?fields=spend,impressions,clicks,actions&access_token=${accessToken}`,
         );
@@ -268,7 +280,9 @@ export const metaConnector: OAuthConnector = {
             campaignRowId,
             ad.creative.id,
             ad.name,
-            ad.creative.object_type,
+            // object_type is itself sometimes missing even when a creative object is
+            // present (confirmed live) — format is NOT NULL, so this needs a real fallback.
+            ad.creative.object_type ?? "UNKNOWN",
             ad.creative.title ?? null,
             ad.creative.body ?? null,
             ad.creative.call_to_action_type ?? null,
