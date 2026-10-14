@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Data Deletion — D2C Analytics Dashboard</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --text: #1a1a1a;
+      --text-secondary: #525252;
+      --border: #e5e5e5;
+      --bg: #ffffff;
+      --accent: #c2410c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 56px 20px 80px;
+    }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    .updated { color: var(--text-secondary); font-size: 14px; margin: 0 0 40px; }
+    h2 {
+      font-size: 18px;
+      margin: 36px 0 12px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    h2:first-of-type { border-top: none; padding-top: 0; }
+    p, li { font-size: 15px; color: var(--text-secondary); }
+    ol, ul { padding-left: 20px; }
+    a { color: var(--accent); }
+    strong { color: var(--text); }
+    .contact {
+      margin-top: 40px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Data Deletion</h1>
+    <p class="updated">Last updated: October 2026</p>
+
+    <p>
+      This page explains how to remove a connected platform's data from the D2C Analytics
+      Dashboard ("the Dashboard"), operated by Probild.
+    </p>
+
+    <h2>Disconnecting a platform yourself</h2>
+    <p>
+      Any team member with access to a Client's settings can disconnect a connected platform
+      (Shopify, Meta Ads, Google Ads, Shiprocket, or Delhivery) directly from the Dashboard, under
+      <strong>Manage Clients → [Client] → Connected integrations → Disconnect</strong>. This
+      immediately revokes the Dashboard's stored access token for that platform and stops any
+      further syncing.
+    </p>
+
+    <h2>Requesting full data deletion</h2>
+    <p>
+      To request that previously synced data for a connected account be permanently deleted from
+      our database (rather than just disconnected), email
+      <a href="mailto:admin@probild.in">admin@probild.in</a> from an address associated with the
+      Client account, including:
+    </p>
+    <ol>
+      <li>The Client/store name as it appears in the Dashboard</li>
+      <li>Which platform's data should be deleted (Shopify, Meta Ads, Google Ads, Shiprocket, or Delhivery)</li>
+    </ol>
+    <p>We will confirm the request and complete the deletion within 30 days.</p>
+
+    <h2>What gets deleted</h2>
+    <p>
+      A deletion request removes the platform's stored access token and the order, campaign, or
+      shipment records synced from that platform for the named Client. It does not affect data
+      held directly by Shopify, Meta, Google, Shiprocket, or Delhivery themselves — those are
+      separate systems the Client controls independently.
+    </p>
+
+    <div class="contact">
+      <strong>Contact us</strong>
+      <p style="margin-bottom: 0;">
+        <a href="mailto:admin@probild.in">admin@probild.in</a> — see also our
+        <a href="/privacy-policy.html">Privacy Policy</a>.
+      </p>
+    </div>
+  </div>
+</body>
+</html>
