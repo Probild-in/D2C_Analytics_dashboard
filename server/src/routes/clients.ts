@@ -12,9 +12,28 @@ const SELECT_CLIENTS = `
   from clients c
   left join team_members tm on tm.id = c.owner_id
   left join lateral (
+    select exists (select 1 from shipments s where s.client_id = c.id) as flag
+  ) hs on true
+  left join lateral (
     select
       case when count(*) > 0
-        then (count(*) filter (where so.status in ('RTO Initiated', 'RTO Delivered'))::numeric / count(*)) * 100
+        then (
+          count(*) filter (
+            where case
+              -- Shopify has no native RTO concept (shopify.ts's mapOrderStatus never
+              -- produces 'RTO Initiated'/'RTO Delivered') — once a courier is connected,
+              -- shipments.status (joined via order_ref = shopify_order_id) is the real
+              -- source of truth; so.status is only a fallback for clients with no
+              -- courier connected yet. See server/src/lib/rto-status.ts.
+              when hs.flag then exists (
+                select 1 from shipments s2
+                where s2.client_id = c.id and s2.order_ref = so.shopify_order_id
+                  and s2.status in ('RTO Initiated', 'RTO Delivered')
+              )
+              else so.status in ('RTO Initiated', 'RTO Delivered')
+            end
+          )::numeric / count(*)
+        ) * 100
         else 0
       end as rto_percent
     from shopify_orders so
@@ -104,15 +123,33 @@ router.get("/summary", requireAuth, async (req, res, next) => {
     }
 
     const result = await pool.query(
-      `with orders_by_client as (
+      `with client_has_shipments as (
+         select distinct client_id from shipments where client_id = any($2::text[])
+       ),
+       orders_by_client as (
          select
-           client_id,
+           so.client_id,
            count(*) as orders,
-           coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
-           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders
-         from shopify_orders
-         where client_id = any($2::text[]) and order_date >= ${IST_DAY_START} - interval '1 day' * ($1::int - 1)
-         group by client_id
+           coalesce(sum(so.amount) filter (where so.status <> 'Cancelled'), 0) as net_sales,
+           -- Shopify has no native RTO concept (shopify.ts's mapOrderStatus never produces
+           -- 'RTO Initiated'/'RTO Delivered') — once a courier is connected, shipments.status
+           -- (joined via order_ref = shopify_order_id) is the real source of truth; so.status
+           -- is only a fallback for clients with no courier connected yet. See
+           -- server/src/lib/rto-status.ts.
+           count(*) filter (
+             where case
+               when chs.client_id is not null then exists (
+                 select 1 from shipments s
+                 where s.client_id = so.client_id and s.order_ref = so.shopify_order_id
+                   and s.status in ('RTO Initiated', 'RTO Delivered')
+               )
+               else so.status in ('RTO Initiated', 'RTO Delivered')
+             end
+           ) as rto_orders
+         from shopify_orders so
+         left join client_has_shipments chs on chs.client_id = so.client_id
+         where so.client_id = any($2::text[]) and so.order_date >= ${IST_DAY_START} - interval '1 day' * ($1::int - 1)
+         group by so.client_id
        ),
        ad_spend_by_client as (
          select client_id, sum(spend) as spend

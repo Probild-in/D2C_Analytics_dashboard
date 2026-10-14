@@ -346,6 +346,39 @@ describe("GET /api/clients/:id/products", () => {
       cancellationPercent: expect.closeTo(33.33, 1),
     });
   });
+
+  it("attributes RTO to a product via the linked courier shipment, not Shopify's own order status (which never says RTO)", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('77777777-7777-7777-7777-777777777779', 'abc-fashion', 'courier_delhivery', 'connected', 'ops@abc.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders (id, client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '501', 'Priya Shah', now(), 1000, 'Dispatched', 'COD'),
+       ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '502', 'Amit Rao', now(), 1000, 'Delivered', 'Prepaid')`,
+    );
+    await testPool.query(
+      `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price) values
+       ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'li-501', 'Linen Shirt', 1, 1000),
+       ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'li-502', 'Linen Shirt', 1, 1000)`,
+    );
+    // Order 501's shipment is genuinely RTO, but order 501's own Shopify status is just
+    // "Dispatched" — Shopify never learns about the RTO itself. order_ref matches
+    // shopify_order_id, same as the real delhivery.ts connector writes it.
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, ordered_at) values
+       ('abc-fashion', '77777777-7777-7777-7777-777777777779', 'AWB501', '501', 'Delhivery', 'RTO Initiated', now())`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/products")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const linenShirt = res.body.find((p: { name: string }) => p.name === "Linen Shirt");
+    expect(linenShirt).toMatchObject({ orders: 2, rtoPercent: 50 });
+  });
 });
 
 describe("GET /api/clients/:id/geography", () => {
@@ -380,6 +413,30 @@ describe("GET /api/clients/:id/geography", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body[0].name).toBe("Mumbai");
+  });
+
+  it("attributes RTO to a state via the linked courier shipment, not Shopify's own order status", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('77777777-7777-7777-7777-777777777779', 'abc-fashion', 'courier_delhivery', 'connected', 'ops@abc.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '601', 'Priya Shah', now(), 1000, 'Dispatched', 'COD', 'Mumbai', 'Maharashtra')`,
+    );
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, ordered_at) values
+       ('abc-fashion', '77777777-7777-7777-7777-777777777779', 'AWB601', '601', 'Delhivery', 'RTO Initiated', now())`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/geography?level=state")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const maharashtra = res.body.find((r: { name: string }) => r.name === "Maharashtra");
+    expect(maharashtra).toMatchObject({ orders: 1, rto: 1, rtoPercent: 100 });
   });
 });
 

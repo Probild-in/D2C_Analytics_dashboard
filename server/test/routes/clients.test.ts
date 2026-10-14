@@ -79,6 +79,41 @@ describe("GET /api/clients", () => {
     expect(abcFashion.status).toBe("critical");
     expect(xyzCosmetics.status).toBe("healthy");
   });
+
+  it("computes health status from the linked courier shipment once a client has one, not Shopify's own order status (which never says RTO)", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('55555555-5555-5555-5555-555555555555', 'abc-fashion', 'shopify', 'connected', 'abc-fashion.myshopify.com'),
+       ('66666666-6666-6666-6666-666666666669', 'abc-fashion', 'courier_delhivery', 'connected', 'ops@abc.com')`,
+    );
+    // Every order's own Shopify status is "Dispatched" — Shopify never learns about RTO —
+    // but the linked shipment for order "rto-1" genuinely is RTO.
+    for (let i = 0; i < 8; i++) {
+      await testPool.query(
+        `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+         ('abc-fashion', '55555555-5555-5555-5555-555555555555', $1, 'Priya Shah', now() - interval '1 day', 500, 'Dispatched', 'Prepaid')`,
+        [`ok-${i}`],
+      );
+    }
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', 'rto-1', 'Amit Rao', now() - interval '1 day', 500, 'Dispatched', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', 'rto-2', 'Neha Singh', now() - interval '1 day', 500, 'Dispatched', 'COD')`,
+    );
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, ordered_at) values
+       ('abc-fashion', '66666666-6666-6666-6666-666666666669', 'AWB-rto-1', 'rto-1', 'Delhivery', 'RTO Initiated', now()),
+       ('abc-fashion', '66666666-6666-6666-6666-666666666669', 'AWB-rto-2', 'rto-2', 'Delhivery', 'RTO Delivered', now())`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const abcFashion = res.body.find((c: { id: string }) => c.id === "abc-fashion");
+    // 2 of 10 orders RTO via their shipment -> 20% -> critical, same threshold as the
+    // Shopify-status fallback test above.
+    expect(abcFashion.status).toBe("critical");
+  });
 });
 
 describe("GET /api/clients/summary", () => {
@@ -134,6 +169,33 @@ describe("GET /api/clients/summary", () => {
     const res = await request(app).get("/api/clients/summary?days=1").set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body.map((r: { clientId: string }) => r.clientId)).toEqual(["abc-fashion"]);
+  });
+
+  it("counts rtoOrders from the linked courier shipment once a client has one, not Shopify's own order status", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666669', 'abc-fashion', 'courier_delhivery', 'connected', 'ops@abc.com')`,
+    );
+    // abc-fashion's seeded order '2' above is 'RTO Initiated' in Shopify's own status —
+    // unrealistic (Shopify never actually sets this), included here only to prove the
+    // shipment-based path overrides it once a shipment exists: its real (linked) shipment
+    // says Delivered, not RTO, and a separate order has no Shopify-visible RTO status at
+    // all but IS genuinely RTO per its shipment.
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '3', 'Neha Singh', now(), 500, 'Dispatched', 'COD')`,
+    );
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, ordered_at) values
+       ('abc-fashion', '66666666-6666-6666-6666-666666666669', 'AWB-2', '2', 'Delhivery', 'Delivered', now()),
+       ('abc-fashion', '66666666-6666-6666-6666-666666666669', 'AWB-3', '3', 'Delhivery', 'RTO Initiated', now())`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients/summary?days=1").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const abc = res.body.find((r: { clientId: string }) => r.clientId === "abc-fashion");
+    expect(abc).toMatchObject({ orders: 3, rtoOrders: 1 });
   });
 
   it("includes an order placed after IST midnight but before UTC midnight in days=1's total (UTC-boundary regression)", async () => {

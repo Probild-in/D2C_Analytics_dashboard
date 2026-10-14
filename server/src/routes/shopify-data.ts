@@ -3,6 +3,7 @@ import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { assertClientAccess, resolveClientScope } from "../lib/access.js";
 import { IST_DAY_START, IST_TODAY_DATE, istDay } from "../lib/sql-dates.js";
+import { ORDER_RTO_CTES_SINGLE_CLIENT } from "../lib/rto-status.js";
 
 const router = Router({ mergeParams: true });
 
@@ -175,15 +176,17 @@ router.get("/products", requireAuth, async (req, res, next) => {
     await assertClientAccess(pool, req.auth!.userId, clientId);
 
     const result = await pool.query(
-      `select
+      `with ${ORDER_RTO_CTES_SINGLE_CLIENT}
+       select
          li.product_name,
          sum(li.quantity)::int as orders,
          sum(li.quantity * li.price)::int as sales,
          sum(li.quantity * li.price) filter (where o.status <> 'Cancelled')::int as net_sales,
-         coalesce(sum(li.quantity) filter (where o.status = 'RTO Initiated' or o.status = 'RTO Delivered'), 0)::int as rto_quantity,
+         coalesce(sum(li.quantity) filter (where orr.is_rto), 0)::int as rto_quantity,
          coalesce(sum(li.quantity) filter (where o.status = 'Cancelled'), 0)::int as cancelled_quantity
        from shopify_order_line_items li
        join shopify_orders o on o.id = li.order_id
+       join order_rto orr on orr.order_id = o.id
        where o.client_id = $1
        group by li.product_name
        order by sales desc`,
@@ -216,17 +219,19 @@ router.get("/geography", requireAuth, async (req, res, next) => {
     const level = req.query.level === "city" ? "city" : "state";
 
     const result = await pool.query(
-      `select
-         ${level} as name,
+      `with ${ORDER_RTO_CTES_SINGLE_CLIENT}
+       select
+         o.${level} as name,
          count(*)::int as orders,
-         sum(amount)::int as sales,
-         count(*) filter (where status = 'Delivered')::int as delivered,
-         count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered')::int as rto,
-         count(*) filter (where status = 'Cancelled')::int as cancelled,
+         sum(o.amount)::int as sales,
+         count(*) filter (where o.status = 'Delivered')::int as delivered,
+         count(*) filter (where orr.is_rto)::int as rto,
+         count(*) filter (where o.status = 'Cancelled')::int as cancelled,
          count(*)::int as total
-       from shopify_orders
-       where client_id = $1 and ${level} is not null
-       group by ${level}
+       from shopify_orders o
+       join order_rto orr on orr.order_id = o.id
+       where o.client_id = $1 and o.${level} is not null
+       group by o.${level}
        order by sales desc`,
       [clientId],
     );
