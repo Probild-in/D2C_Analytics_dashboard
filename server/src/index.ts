@@ -14,11 +14,15 @@ import campaignsRouter from "./routes/campaigns.js";
 import tasksRouter from "./routes/tasks.js";
 import teamMembersRouter from "./routes/team-members.js";
 import pendingConnectionsRouter from "./routes/pending-connections.js";
+import shopifyWebhooksRouter from "./routes/shopify-webhooks.js";
 import { startScheduler } from "./scheduler.js";
 
 const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
 app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
+// Mounted ahead of express.json(): Shopify webhook HMAC verification needs the raw,
+// unparsed request body, and this router applies its own express.raw() for just this path.
+app.use("/api/webhooks/shopify", shopifyWebhooksRouter);
 app.use(express.json());
 app.use("/api/clients", clientsRouter);
 app.use("/api/clients/:id/connections", connectionsRouter);
