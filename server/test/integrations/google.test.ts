@@ -209,7 +209,7 @@ describe("googleConnector.sync (full)", () => {
                 results: [
                   {
                     campaign: { id: "111", name: "Search - Brand Terms" },
-                    metrics: { impressions: "8000", clicks: "200", costMicros: "400000000", conversions: "15" },
+                    metrics: { impressions: "8000", clicks: "200", costMicros: "400000000", conversions: "15", conversionsValue: "1200" },
                   },
                 ],
               },
@@ -235,7 +235,7 @@ describe("googleConnector.sync (full)", () => {
                       status: "ENABLED",
                     },
                     campaign: { id: "111" },
-                    metrics: { impressions: "3000", clicks: "90", costMicros: "150000000", conversions: "6" },
+                    metrics: { impressions: "3000", clicks: "90", costMicros: "150000000", conversions: "6", conversionsValue: "450" },
                   },
                 ],
               },
@@ -256,7 +256,7 @@ describe("googleConnector.sync (full)", () => {
 
     const metrics = await testPool.query("select * from google_campaign_metrics where connection_id = $1", ["55555555-5555-5555-5555-555555555555"]);
     expect(metrics.rowCount).toBe(1);
-    expect(metrics.rows[0]).toMatchObject({ campaign_id: "111", spend: 400, impressions: 8000, clicks: 200, conversions: 15 });
+    expect(metrics.rows[0]).toMatchObject({ campaign_id: "111", spend: 400, impressions: 8000, clicks: 200, conversions: 15, revenue: 1200 });
 
     const creatives = await testPool.query("select * from campaign_creatives where campaign_id = $1", [campaigns.rows[0].id]);
     expect(creatives.rowCount).toBe(1);
@@ -272,6 +272,7 @@ describe("googleConnector.sync (full)", () => {
       impressions: 3000,
       clicks: 90,
       results: 6,
+      revenue: 450,
     });
   });
 });
