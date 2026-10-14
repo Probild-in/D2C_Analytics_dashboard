@@ -271,6 +271,78 @@ describe("metaConnector.sync", () => {
     });
   });
 
+  it("skips an ad with no creative object at all, rather than crashing the whole sync (Advantage+/dynamic-creative ads have none)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/campaigns?")) {
+          return new Response(JSON.stringify({ data: [{ id: "camp_1", name: "Advantage+ Sale", status: "ACTIVE" }] }), { status: 200 });
+        }
+        if (url.includes("camp_1/insights?")) {
+          return new Response(JSON.stringify({ data: [] }), { status: 200 });
+        }
+        if (url.includes("/ads?")) {
+          return new Response(
+            JSON.stringify({
+              data: [{ id: "ad_1", name: "No Creative Ad", campaign_id: "camp_1", status: "ACTIVE", created_time: "2026-08-15T00:00:00+0000" }],
+            }),
+            { status: 200 },
+          );
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    const result = await metaConnector.sync("55555555-5555-5555-5555-555555555555");
+    expect(result.recordsSynced).toBe(1);
+
+    const campaigns = await testPool.query("select id from campaigns where connection_id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    const creatives = await testPool.query("select * from campaign_creatives where campaign_id = $1", [campaigns.rows[0].id]);
+    expect(creatives.rowCount).toBe(0);
+  });
+
+  it("falls back to a placeholder format when the creative object is present but object_type is missing", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/campaigns?")) {
+          return new Response(JSON.stringify({ data: [{ id: "camp_1", name: "Sale", status: "ACTIVE" }] }), { status: 200 });
+        }
+        if (url.includes("camp_1/insights?")) {
+          return new Response(JSON.stringify({ data: [] }), { status: 200 });
+        }
+        if (url.includes("/ads?")) {
+          return new Response(
+            JSON.stringify({
+              data: [
+                {
+                  id: "ad_1",
+                  name: "Typeless Creative Ad",
+                  campaign_id: "camp_1",
+                  status: "ACTIVE",
+                  created_time: "2026-08-15T00:00:00+0000",
+                  creative: { id: "creative_1" },
+                },
+              ],
+            }),
+            { status: 200 },
+          );
+        }
+        if (url.includes("ad_1/insights?")) {
+          return new Response(JSON.stringify({ data: [] }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    await metaConnector.sync("55555555-5555-5555-5555-555555555555");
+
+    const campaigns = await testPool.query("select id from campaigns where connection_id = $1", ["55555555-5555-5555-5555-555555555555"]);
+    const creatives = await testPool.query("select format from campaign_creatives where campaign_id = $1", [campaigns.rows[0].id]);
+    expect(creatives.rowCount).toBe(1);
+    expect(creatives.rows[0].format).toBe("UNKNOWN");
+  });
+
   it("updates last_synced_at and resets status to connected on the connection", async () => {
     await testPool.query("update platform_connections set status = 'error' where id = $1", ["55555555-5555-5555-5555-555555555555"]);
     vi.stubGlobal(

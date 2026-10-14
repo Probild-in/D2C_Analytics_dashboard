@@ -169,13 +169,16 @@ describe("GET /api/clients/:id/sales", () => {
        ('66666666-0000-0000-0000-000000000001', 'abc-fashion', 'meta', 'connected', 'act_123'),
        ('66666666-0000-0000-0000-000000000002', 'abc-fashion', 'google', 'connected', 'customers/456')`,
     );
+    // Seeded with the same IST-anchored "today" the query boundary uses (sql-dates.ts'
+    // IST_TODAY_DATE) rather than bare current_date, which is UTC-today under this pool's
+    // forced UTC session timezone — those two silently diverge for part of every day.
     await testPool.query(
       `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
-       ('abc-fashion', '66666666-0000-0000-0000-000000000001', 'camp-1', 'Meta Campaign', current_date, 3000, 10000, 200, 15)`,
+       ('abc-fashion', '66666666-0000-0000-0000-000000000001', 'camp-1', 'Meta Campaign', (now() at time zone 'Asia/Kolkata')::date, 3000, 10000, 200, 15)`,
     );
     await testPool.query(
       `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions) values
-       ('abc-fashion', '66666666-0000-0000-0000-000000000002', 'g-camp-1', 'Google Campaign', current_date, 2000, 8000, 150, 10)`,
+       ('abc-fashion', '66666666-0000-0000-0000-000000000002', 'g-camp-1', 'Google Campaign', (now() at time zone 'Asia/Kolkata')::date, 2000, 8000, 150, 10)`,
     );
     // A different client's spend must never leak into this client's total.
     await testPool.query(
@@ -188,7 +191,7 @@ describe("GET /api/clients/:id/sales", () => {
     );
     await testPool.query(
       `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
-       ('xyz-cosmetics', '66666666-0000-0000-0000-000000000003', 'camp-9', 'Other Client Campaign', current_date, 9999, 1, 1, 1)`,
+       ('xyz-cosmetics', '66666666-0000-0000-0000-000000000003', 'camp-9', 'Other Client Campaign', (now() at time zone 'Asia/Kolkata')::date, 9999, 1, 1, 1)`,
     );
 
     const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });

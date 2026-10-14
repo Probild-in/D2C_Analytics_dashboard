@@ -111,8 +111,11 @@ describe("GET /api/clients/summary", () => {
        ('xyz-cosmetics', '55555555-5555-5555-5555-555555555556', '1', 'Ravi Kumar', now(), 2000, 'Delivered', 'Prepaid')`,
     );
     await testPool.query(
+      // Seeded with the same IST-anchored "today" the query boundary uses (sql-dates.ts'
+      // IST_TODAY_DATE) rather than bare current_date, which is UTC-today under this pool's
+      // forced UTC session timezone — those two silently diverge for part of every day.
       `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
-       ('abc-fashion', '55555555-5555-5555-5555-555555555557', 'camp-1', 'Meta Campaign', current_date, 300, 1000, 20, 2)`,
+       ('abc-fashion', '55555555-5555-5555-5555-555555555557', 'camp-1', 'Meta Campaign', (now() at time zone 'Asia/Kolkata')::date, 300, 1000, 20, 2)`,
     );
   });
 
