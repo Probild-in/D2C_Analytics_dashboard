@@ -132,7 +132,7 @@ async function withTokenRefresh<T>(
     res = await makeRequest(freshToken);
   }
   if (!res.ok) {
-    throw new Error(`Google Ads API request failed: ${res.status}`);
+    throw new Error(`Google Ads API request failed: ${res.status} ${await res.text()}`);
   }
   return parseResponse(res);
 }
