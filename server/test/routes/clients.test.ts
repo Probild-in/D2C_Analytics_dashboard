@@ -132,6 +132,28 @@ describe("GET /api/clients/summary", () => {
     expect(res.status).toBe(200);
     expect(res.body.map((r: { clientId: string }) => r.clientId)).toEqual(["abc-fashion"]);
   });
+
+  it("includes an order placed after IST midnight but before UTC midnight in days=1's total (UTC-boundary regression)", async () => {
+    // Same root cause as the shopify-data.ts regression test: the DB session is
+    // pinned to UTC, so a bare `current_date` boundary drops an order placed
+    // between 00:00 and 05:29 IST from "today" even though it's today by the
+    // business's (and Shopify's) own clock.
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '301', 'Early IST Shopper',
+        (date_trunc('day', now() at time zone 'Asia/Kolkata') at time zone 'Asia/Kolkata') + interval '1 hour',
+        900, 'Delivered', 'Prepaid')`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app).get("/api/clients/summary?days=1").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    const abc = res.body.find((r: { clientId: string }) => r.clientId === "abc-fashion");
+    // Pre-existing seed data for abc-fashion already contributes 2 orders/1500 net
+    // sales "today" (see beforeEach); this order must be added on top, not dropped.
+    expect(abc).toMatchObject({ netSales: 2400, orders: 3 });
+  });
 });
 
 describe("POST /api/clients", () => {

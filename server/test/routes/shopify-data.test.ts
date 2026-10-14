@@ -87,6 +87,39 @@ describe("GET /api/clients/:id/sales", () => {
     expect(seededDay.netSales).toBe(1200);
   });
 
+  it("counts an order placed after IST midnight but before UTC midnight as today's order (the Shopify-vs-dashboard mismatch bug)", async () => {
+    // The dashboard runs with the DB session pinned to UTC (see db.ts). An order
+    // placed between 00:00 and 05:29 IST sits on *yesterday's* UTC calendar date,
+    // so a bare `current_date` boundary silently drops it from "today" even
+    // though Shopify's own (IST) clock — and this business — considers it today's
+    // order. This is exactly the mismatch reported live: Shopify showed 7 orders
+    // for today, the dashboard showed 5.
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, shopify_customer_id) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '301', 'Early IST Shopper',
+        (date_trunc('day', now() at time zone 'Asia/Kolkata') at time zone 'Asia/Kolkata') + interval '1 hour',
+        900, 'Delivered', 'Prepaid', '9050')`,
+    );
+
+    // Expected IST calendar date for "today", computed independently of the
+    // query under test by shifting the UTC instant by the fixed +5:30 offset
+    // and reading it back out with UTC getters.
+    const istNow = new Date(Date.now() + 5.5 * 60 * 60 * 1000);
+    const expectedDate = `${istNow.getUTCFullYear()}-${String(istNow.getUTCMonth() + 1).padStart(2, "0")}-${String(istNow.getUTCDate()).padStart(2, "0")}`;
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveLength(1);
+    expect(res.body[0].date).toBe(expectedDate);
+    expect(res.body[0].orders).toBe(1);
+    expect(res.body[0].netSales).toBe(900);
+  });
+
   it("404s for a client the user cannot access", async () => {
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access) values
