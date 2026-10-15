@@ -189,6 +189,10 @@ describe("metaConnector.sync", () => {
           );
         }
         if (url.includes("camp_1/insights?")) {
+          // date_preset=today is required — without it Meta returns spend/revenue for its
+          // own undocumented default window, and every sync on a new day would duplicate
+          // that same lump sum into a fresh metric_date row (confirmed live).
+          expect(url).toContain("date_preset=today");
           return new Response(
             JSON.stringify({
               data: [
@@ -232,6 +236,7 @@ describe("metaConnector.sync", () => {
           );
         }
         if (url.includes("ad_1/insights?")) {
+          expect(url).toContain("date_preset=today");
           return new Response(
             JSON.stringify({
               data: [

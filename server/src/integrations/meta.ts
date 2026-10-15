@@ -232,7 +232,15 @@ export const metaConnector: OAuthConnector = {
       recordsSynced++;
 
       const insightsRes = await fetch(
-        `https://graph.facebook.com/${META_API_VERSION}/${campaign.id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,actions,action_values&access_token=${accessToken}`,
+        // date_preset=today is required — without it Meta returns spend/revenue for its own
+        // undocumented default window (confirmed live: the same near-identical total showed
+        // up again under a NEW metric_date on the very next day's sync run), and this app
+        // stamps whatever comes back with metric_date = current_date regardless. Every sync
+        // run on a new day was duplicating the SAME lump sum into a fresh row, so any
+        // multi-day sum (Month to Date, "vs prev period", etc.) silently multiplied real
+        // spend and revenue by however many days had synced. Google's connector already
+        // scopes this correctly (its GAQL query has `AND segments.date DURING TODAY`).
+        `https://graph.facebook.com/${META_API_VERSION}/${campaign.id}/insights?fields=campaign_id,campaign_name,spend,impressions,clicks,actions,action_values&date_preset=today&access_token=${accessToken}`,
       );
       if (!insightsRes.ok) {
         throw new Error(`Meta insights fetch failed for campaign ${campaign.id}: ${insightsRes.status}`);
@@ -273,7 +281,7 @@ export const metaConnector: OAuthConnector = {
         if (!ad.creative) continue;
 
         const adInsightsRes = await fetch(
-          `https://graph.facebook.com/${META_API_VERSION}/${ad.id}/insights?fields=spend,impressions,clicks,actions,action_values&access_token=${accessToken}`,
+          `https://graph.facebook.com/${META_API_VERSION}/${ad.id}/insights?fields=spend,impressions,clicks,actions,action_values&date_preset=today&access_token=${accessToken}`,
         );
         if (!adInsightsRes.ok) {
           throw new Error(`Meta ad insights fetch failed for ad ${ad.id}: ${adInsightsRes.status}`);
