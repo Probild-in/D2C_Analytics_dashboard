@@ -134,20 +134,17 @@ describe("POST /api/signup/complete", () => {
     expect((await testPool.query("select count(*)::int as count from clients where name = 'New Brand Co'")).rows[0].count).toBe(1);
   });
 
-  it("deletes the orphaned Supabase user if a later provisioning step fails", async () => {
-    // Forces a DB failure after team_members succeeds by pre-inserting a team_members row
-    // that will collide with the transaction's own insert. This happens on the second
-    // provisioning statement (after team_members insert succeeds on the route's generated user id,
-    // it will fail when the new signup tries to insert the same team_member id again on the
-    // team_member_clients join - actually the conflict is on the team_members insert itself).
-    // Pre-insert a team_members row to force a PK error on the main route's attempt to insert
-    // the Supabase user, which proves the route correctly cleans up the orphaned Supabase user.
+  it("rolls back already-written rows and deletes the orphaned Supabase user if a later provisioning step fails", async () => {
+    // Force a failure at the `subscriptions` insert — the fourth statement in the
+    // transaction — by removing the plan row it needs (subscriptions.plan_id has a
+    // foreign-key constraint to plans(id)). By this point team_members, clients, and
+    // team_member_clients have already been written inside the same transaction, so this
+    // proves the ROLLBACK genuinely undoes real prior writes, not just a first-statement
+    // failure. Deleting this row is isolated to this test: resetTestDb's beforeEach drops
+    // and recreates the whole schema (reseeding plans) before every test.
+    await testPool.query("delete from plans where id = 'medium'");
+
     const supabaseUserId = "11111111-1111-1111-1111-111111111111";
-    await testPool.query(
-      `insert into team_members (id, name, email, role, all_client_access) values
-       ($1, 'Existing Member', 'existing@existing.com', 'owner', false)`,
-      [supabaseUserId],
-    );
     const deleteCalls: string[] = [];
     vi.stubGlobal(
       "fetch",
@@ -162,12 +159,15 @@ describe("POST /api/signup/complete", () => {
         throw new Error(`Unexpected fetch: ${url}`);
       }),
     );
-    const res = await request(app)
-      .post("/api/signup/complete")
-      .send(signedBody());
+
+    const res = await request(app).post("/api/signup/complete").send(signedBody());
+
     expect(res.status).toBe(500);
     expect(deleteCalls).toEqual([`https://test-project.supabase.co/auth/v1/admin/users/${supabaseUserId}`]);
-    // Assert that the pre-inserted row is unchanged (no additional rows with this ID were created)
-    expect((await testPool.query("select count(*) from team_members where id = $1", [supabaseUserId])).rows[0].count).toBe("1");
+    // All three rows that DID succeed before the subscriptions insert failed must be gone —
+    // this is the actual proof that ROLLBACK undid real, already-written data.
+    expect((await testPool.query("select * from clients where name = 'New Brand Co'")).rowCount).toBe(0);
+    expect((await testPool.query("select * from team_members where email = 'riya@newbrand.com'")).rowCount).toBe(0);
+    expect((await testPool.query("select * from team_member_clients where team_member_id = $1", [supabaseUserId])).rowCount).toBe(0);
   });
 });
