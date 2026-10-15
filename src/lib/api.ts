@@ -46,6 +46,53 @@ export async function apiFetch(path: string, init: Omit<RequestInit, "headers"> 
   return res;
 }
 
+// Live notification delivery. The browser's native EventSource can't send this app's
+// Bearer-token Authorization header, so this reads the SSE response body manually via
+// fetch + a stream reader instead, keeping the exact same auth mechanism as every other
+// request. Returns an unsubscribe function that aborts the underlying request.
+export function subscribeToNotificationStream(onMessage: (data: unknown) => void): () => void {
+  const controller = new AbortController();
+
+  (async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (!session) return;
+
+    let res: Response;
+    try {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/api/notifications/stream`, {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        signal: controller.signal,
+      });
+    } catch {
+      return; // connection failed or was aborted before it opened — nothing to clean up
+    }
+    const reader = res.body?.getReader();
+    if (!reader) return;
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read().catch(() => ({ done: true, value: undefined }));
+      if (done) return;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop() ?? "";
+      for (const event of events) {
+        const line = event.split("\n").find((l) => l.startsWith("data: "));
+        if (!line) continue; // heartbeat/comment lines have no "data: " prefix
+        try {
+          onMessage(JSON.parse(line.slice("data: ".length)));
+        } catch {
+          // malformed event — skip it rather than crash the whole stream
+        }
+      }
+    }
+  })();
+
+  return () => controller.abort();
+}
+
 // Same error-handling shape as apiFetch, but for the public, pre-login pages (pricing,
 // signup, contact-enterprise) — never attaches a session token, never requires one.
 export async function publicApiFetch(path: string, init: Omit<RequestInit, "headers"> = {}): Promise<Response> {

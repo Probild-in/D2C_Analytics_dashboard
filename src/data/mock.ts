@@ -1,5 +1,4 @@
 import type {
-  AppNotification,
   Campaign,
   Client,
   GeoRow,
@@ -362,35 +361,6 @@ export function getCampaigns(clientId: string, platform: "meta" | "google"): Cam
       cpc,
       cpm,
       roas: Math.round(roas * 100) / 100,
-    };
-  });
-}
-
-const NOTIF_SCRIPT: { kind: AppNotification["kind"]; title: string; description: string }[] = [
-  { kind: "campaign", title: "New campaign feedback", description: "added a note to Summer Sale — Prospecting campaign." },
-  { kind: "rto", title: "RTO alert", description: "Maharashtra RTO crossed 30% threshold this week." },
-  { kind: "task", title: "Task assigned to you", description: "You were assigned: \"Review Maharashtra RTO spike\"." },
-  { kind: "sales", title: "Sales dip detected", description: "Orders dropped 22% compared to the same day last week." },
-  { kind: "ads", title: "Ad spend anomaly", description: "Ad spend increased 18% while conversions stayed flat." },
-  { kind: "roas", title: "Blended ROAS below target", description: "Blended ROAS fell to 2.4x, below your 3.0x threshold." },
-  { kind: "task", title: "Task marked completed", description: "\"Approve new creative for Summer Sale\" was completed." },
-  { kind: "campaign", title: "Marketing team responded", description: "responded to your feedback on Retargeting — Cart Abandoners." },
-  { kind: "system", title: "Weekly summary ready", description: "Your weekly performance summary is ready to view." },
-];
-
-export function getNotifications(): AppNotification[] {
-  const rand = mulberry32(42);
-  const start = new Date("2026-08-21T09:00:00Z").getTime();
-  return NOTIF_SCRIPT.map((n, i) => {
-    const clientId = CLIENTS[Math.floor(rand() * CLIENTS.length)].id;
-    return {
-      id: `notif-${i}`,
-      clientId,
-      kind: n.kind,
-      title: n.title,
-      description: n.description,
-      timestamp: new Date(start - i * (40 + rand() * 90) * 60 * 1000).toISOString(),
-      read: i > 3,
     };
   });
 }

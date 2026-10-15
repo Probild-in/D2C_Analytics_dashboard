@@ -141,18 +141,6 @@ export interface CrmTask {
   tags: string[];
 }
 
-export type AlertKind = "rto" | "sales" | "ads" | "roas" | "task" | "campaign" | "system";
-
-export interface AppNotification {
-  id: string;
-  clientId: string;
-  kind: AlertKind;
-  title: string;
-  description: string;
-  timestamp: string;
-  read: boolean;
-}
-
 export interface TeamMember {
   id: string;
   name: string;

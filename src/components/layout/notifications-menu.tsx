@@ -1,6 +1,5 @@
 import * as React from "react";
-import { Bell, Megaphone, TrendingDown, Wallet, Gauge, ListChecks, Info } from "lucide-react";
-import { getNotifications, relativeTime, CLIENTS } from "@/data/mock";
+import { Bell, TrendingDown, Wallet, Gauge, ListChecks } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -8,23 +7,67 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { AlertKind } from "@/data/types";
+import { apiFetch, subscribeToNotificationStream } from "@/lib/api";
 
-const KIND_META: Record<AlertKind, { icon: React.ElementType; className: string }> = {
+type NotificationKind = "rto" | "sales" | "ads" | "roas" | "task";
+
+interface AppNotification {
+  id: string;
+  clientId: string;
+  clientName: string;
+  kind: NotificationKind;
+  title: string;
+  description: string;
+  createdAt: string;
+  read: boolean;
+}
+
+const KIND_META: Record<NotificationKind, { icon: React.ElementType; className: string }> = {
   rto: { icon: TrendingDown, className: "bg-negative-subtle text-negative" },
   sales: { icon: Gauge, className: "bg-warning-subtle text-warning" },
   ads: { icon: Wallet, className: "bg-info-subtle text-info" },
   roas: { icon: TrendingDown, className: "bg-negative-subtle text-negative" },
   task: { icon: ListChecks, className: "bg-brand-subtle text-brand" },
-  campaign: { icon: Megaphone, className: "bg-[oklch(0.94_0.03_170)] text-accent-violet dark:bg-[oklch(0.28_0.06_170)]" },
-  system: { icon: Info, className: "bg-bg-subtle text-text-secondary" },
 };
 
+function relativeTime(iso: string) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
 export function NotificationsMenu() {
-  const [notifications, setNotifications] = React.useState(getNotifications);
+  const [notifications, setNotifications] = React.useState<AppNotification[]>([]);
   const unread = notifications.filter((n) => !n.read).length;
 
-  const markAllRead = () => setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  React.useEffect(() => {
+    apiFetch("/api/notifications")
+      .then((res) => res.json())
+      .then(setNotifications)
+      .catch(() => {});
+
+    const unsubscribe = subscribeToNotificationStream((data) => {
+      const n = data as AppNotification;
+      setNotifications((prev) => [{ ...n, read: false }, ...prev]);
+    });
+    return unsubscribe;
+  }, []);
+
+  const markAllRead = () => {
+    const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    unreadIds.forEach((id) => apiFetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(() => {}));
+  };
+
+  const markRead = (id: string) => {
+    setNotifications((prev) => prev.map((x) => (x.id === id ? { ...x, read: true } : x)));
+    apiFetch(`/api/notifications/${id}/read`, { method: "POST" }).catch(() => {});
+  };
 
   return (
     <DropdownMenu>
@@ -46,14 +89,16 @@ export function NotificationsMenu() {
           </Button>
         </div>
         <div className="scrollbar-thin max-h-[420px] overflow-y-auto">
+          {notifications.length === 0 && (
+            <div className="px-3.5 py-6 text-center text-[12px] text-text-secondary">No notifications yet.</div>
+          )}
           {notifications.map((n) => {
             const meta = KIND_META[n.kind];
             const Icon = meta.icon;
-            const client = CLIENTS.find((c) => c.id === n.clientId);
             return (
               <button
                 key={n.id}
-                onClick={() => setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))}
+                onClick={() => markRead(n.id)}
                 className={cn(
                   "flex w-full items-start gap-2.5 border-b border-border-subtle px-3.5 py-2.5 text-left transition-colors last:border-0 hover:bg-surface-hover",
                   !n.read && "bg-brand-subtle/30",
@@ -68,18 +113,13 @@ export function NotificationsMenu() {
                     {!n.read && <span className="size-1.5 shrink-0 rounded-full bg-brand" />}
                   </span>
                   <span className="mt-0.5 block text-[12px] leading-snug text-text-secondary">
-                    {client && <span className="font-medium text-text-primary">{client.name}</span>} {n.description}
+                    <span className="font-medium text-text-primary">{n.clientName}</span> {n.description}
                   </span>
-                  <span className="mt-1 block text-[10.5px] text-text-tertiary">{relativeTime(n.timestamp)}</span>
+                  <span className="mt-1 block text-[10.5px] text-text-tertiary">{relativeTime(n.createdAt)}</span>
                 </span>
               </button>
             );
           })}
-        </div>
-        <div className="border-t border-border-subtle p-2 text-center">
-          <Button variant="ghost" size="sm" className="w-full text-[12px]">
-            View all notifications
-          </Button>
         </div>
       </DropdownMenuContent>
     </DropdownMenu>
