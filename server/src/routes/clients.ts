@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { getAccessibleClientIds, assertClientAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
 import { IST_DAY_START, IST_TODAY_DATE } from "../lib/sql-dates.js";
+import { slugify, pickLogoColor, generateUniqueClientId } from "../lib/slug.js";
 
 const router = Router();
 
@@ -45,43 +46,6 @@ function statusFromRtoPercent(rtoPercent: number): "healthy" | "attention" | "cr
   if (rtoPercent >= 15) return "critical";
   if (rtoPercent >= 8) return "attention";
   return "healthy";
-}
-
-const LOGO_COLORS = [
-  "bg-violet-500",
-  "bg-rose-500",
-  "bg-cyan-500",
-  "bg-orange-500",
-  "bg-emerald-500",
-  "bg-blue-500",
-  "bg-pink-500",
-  "bg-amber-500",
-];
-
-function pickLogoColor(seed: string): string {
-  let hash = 0;
-  for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  return LOGO_COLORS[hash % LOGO_COLORS.length];
-}
-
-function slugify(name: string): string {
-  const slug = name
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-  return slug || "client";
-}
-
-async function generateUniqueClientId(name: string): Promise<string> {
-  const base = slugify(name);
-  let candidate = base;
-  let suffix = 2;
-  while ((await pool.query("select 1 from clients where id = $1", [candidate])).rowCount! > 0) {
-    candidate = `${base}-${suffix}`;
-    suffix++;
-  }
-  return candidate;
 }
 
 router.get("/", requireAuth, async (req, res, next) => {
@@ -198,7 +162,7 @@ router.post("/", requireAuth, async (req, res, next) => {
       throw new HttpError(400, "invalid_category", "category is required");
     }
 
-    const id = await generateUniqueClientId(name);
+    const id = await generateUniqueClientId(pool, name);
     const logoColor = pickLogoColor(id);
     const logoInitial = name.trim().charAt(0).toUpperCase();
 
