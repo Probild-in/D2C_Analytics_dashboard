@@ -52,8 +52,9 @@ export async function apiFetch(path: string, init: Omit<RequestInit, "headers"> 
 // request. Returns an unsubscribe function that aborts the underlying request.
 export function subscribeToNotificationStream(onMessage: (data: unknown) => void): () => void {
   const controller = new AbortController();
+  let stopped = false;
 
-  (async () => {
+  async function connectOnce(): Promise<void> {
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -66,7 +67,7 @@ export function subscribeToNotificationStream(onMessage: (data: unknown) => void
         signal: controller.signal,
       });
     } catch {
-      return; // connection failed or was aborted before it opened — nothing to clean up
+      return; // connection failed to open — the outer loop will retry after a delay
     }
     const reader = res.body?.getReader();
     if (!reader) return;
@@ -88,9 +89,23 @@ export function subscribeToNotificationStream(onMessage: (data: unknown) => void
         }
       }
     }
+  }
+
+  (async () => {
+    // Reconnects after any disconnect (idle-proxy timeout, backend redeploy, laptop
+    // sleep/wake, transient network error) so "live" delivery actually stays live for
+    // the rest of the session, instead of silently dying until a full page reload.
+    while (!stopped) {
+      await connectOnce();
+      if (stopped) return;
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
   })();
 
-  return () => controller.abort();
+  return () => {
+    stopped = true;
+    controller.abort();
+  };
 }
 
 // Same error-handling shape as apiFetch, but for the public, pre-login pages (pricing,
