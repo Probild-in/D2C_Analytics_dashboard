@@ -13,6 +13,27 @@ const SYNC_WINDOW_DAYS = 30;
 
 const RECONNECT_MESSAGE = "Delhivery rejected the stored API token. Reconnect with a current token.";
 
+// Shared by the hourly poll (sync, below) and the real-time webhook route — both upsert a
+// shipment identically once they have one.
+export async function upsertDelhiveryShipment(
+  clientId: string,
+  connectionId: string,
+  shipment: { awb: string; orderRef: string | null; status: string | null; destinationState: string | null; orderedAt: Date | null },
+): Promise<void> {
+  const mapped = mapDelhiveryStatus(shipment.status);
+  if (!mapped && shipment.status) {
+    console.warn(`Delhivery: unrecognized status label treated as In Transit: ${shipment.status}`);
+  }
+  await pool.query(
+    `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, destination_state, ordered_at)
+     values ($1, $2, $3, $4, 'Delhivery', $5, $6, $7)
+     on conflict (client_id, awb)
+     do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
+       status = excluded.status, destination_state = excluded.destination_state, synced_at = now()`,
+    [clientId, connectionId, shipment.awb, shipment.orderRef, mapped ?? "In Transit", shipment.destinationState, shipment.orderedAt],
+  );
+}
+
 export const delhiveryConnector: CredentialsConnector = {
   platform: "courier_delhivery",
   authType: "credentials",
@@ -66,7 +87,6 @@ export const delhiveryConnector: CredentialsConnector = {
       [conn.client_id, connectionId, SYNC_WINDOW_DAYS, MAX_TRACKED_PER_SYNC],
     );
 
-    const unmapped = new Set<string>();
     let recordsSynced = 0;
 
     for (const { tracking_number: awb, shopify_order_id: orderRef, order_date: orderedAt } of candidates.rows) {
@@ -79,22 +99,14 @@ export const delhiveryConnector: CredentialsConnector = {
       }
       if (!tracked) continue; // AWB not (yet) recognized by Delhivery — try again next sync
 
-      const mapped = mapDelhiveryStatus(tracked.status);
-      if (!mapped && tracked.status) unmapped.add(tracked.status);
-
-      await pool.query(
-        `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, destination_state, ordered_at)
-         values ($1, $2, $3, $4, 'Delhivery', $5, $6, $7)
-         on conflict (client_id, awb)
-         do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
-           status = excluded.status, destination_state = excluded.destination_state, synced_at = now()`,
-        [conn.client_id, connectionId, tracked.awb, orderRef, mapped ?? "In Transit", tracked.destinationState, orderedAt],
-      );
+      await upsertDelhiveryShipment(conn.client_id, connectionId, {
+        awb: tracked.awb,
+        orderRef,
+        status: tracked.status,
+        destinationState: tracked.destinationState,
+        orderedAt,
+      });
       recordsSynced++;
-    }
-
-    if (unmapped.size > 0) {
-      console.warn(`Delhivery: unrecognized status labels treated as In Transit: ${[...unmapped].join(", ")}`);
     }
 
     await pool.query(

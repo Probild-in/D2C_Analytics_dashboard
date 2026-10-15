@@ -46,22 +46,27 @@ export function startScheduler() {
     { noOverlap: true },
   );
 
-  // Meta's Insights API updates less frequently than Shopify's order stream and is far
-  // more rate-limit-sensitive (this connector's sync makes 3 API calls per campaign, plus
-  // 1 per ad) — 6-hourly keeps well clear of Meta's per-app rate limits even for a client
-  // with dozens of active campaigns.
+  // Neither Meta nor Google Ads has a webhook/push mechanism for spend/performance data —
+  // both are poll-only reporting APIs, so this is as close to real-time as either platform
+  // allows. 15 minutes was chosen deliberately over something tighter: Google Ads' API quota
+  // on this app's access tier is a shared daily budget across every connected client's
+  // account (not per-client), and this connector makes ~2 calls per campaign per run (one
+  // for metrics, one for ads) — at 5-minute intervals, an agency with even a modest total
+  // campaign count across all its clients would exhaust the daily quota partway through the
+  // day and Google Ads sync would start failing for everyone until the next day's reset.
+  // 15 minutes (96 runs/day) keeps a comfortable safety margin as more clients connect.
   cron.schedule(
-    "0 */6 * * *",
+    "*/15 * * * *",
     () => {
       runScheduledSyncs("meta").catch((err) => console.error("Meta scheduled sync failed:", err));
     },
     { noOverlap: true },
   );
 
-  // Same 6-hourly cadence as Meta — Google Ads' own reporting also lags, and its API has
-  // per-developer-token rate limits this schedule stays well clear of.
+  // Same cadence and reasoning as Meta, offset by 3 minutes so the two don't hit the
+  // database in the same instant every 15 minutes.
   cron.schedule(
-    "0 */6 * * *",
+    "3,18,33,48 * * * *",
     () => {
       runScheduledSyncs("google").catch((err) => console.error("Google scheduled sync failed:", err));
     },
