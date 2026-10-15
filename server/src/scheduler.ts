@@ -3,6 +3,7 @@ import cron from "node-cron";
 import pool from "./db.js";
 import { connectors } from "./lib/connector-registry.js";
 import { logger } from "./lib/logger.js";
+import { runDailyNotificationChecks } from "./lib/notification-checks.js";
 
 // Postgres advisory locks take a bigint key. Hash the platform name down to a stable
 // 32-bit int (advisory locks accept a single bigint or two ints — one int is enough
@@ -137,6 +138,17 @@ export function startScheduler() {
     "0 3 * * *",
     () => {
       sweepExpiredPendingConnections().catch((err) => logger.error(err, "Pending-connections sweep failed:"));
+    },
+    { noOverlap: true },
+  );
+
+  // Runs once daily, shortly after IST midnight, checking *yesterday's* now-complete
+  // data — not a live/frequent poll. See notification-checks.ts and this plan's spec
+  // for why checking partial same-day data would produce false positives.
+  cron.schedule(
+    "15 0 * * *",
+    () => {
+      runDailyNotificationChecks(pool).catch((err) => logger.error(err, "Daily notification checks failed:"));
     },
     { noOverlap: true },
   );

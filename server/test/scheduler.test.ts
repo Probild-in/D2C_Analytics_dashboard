@@ -259,4 +259,11 @@ describe("startScheduler", () => {
     expect(scheduleSpy).toHaveBeenCalledWith("30 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
     scheduleSpy.mockRestore();
   });
+
+  it("registers the daily notification checks job once per day, after IST midnight", () => {
+    const scheduleSpy = vi.spyOn(cron, "schedule");
+    startScheduler();
+    expect(scheduleSpy).toHaveBeenCalledWith("15 0 * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    scheduleSpy.mockRestore();
+  });
 });
