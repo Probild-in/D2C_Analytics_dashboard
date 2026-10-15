@@ -44,4 +44,30 @@ describe("GET /api/team-members", () => {
     expect(aditya).toMatchObject({ name: "Aditya Rao", email: "aditya@agency.com", role: "Manager" });
     expect(aditya.clients).toEqual(["abc-fashion"]);
   });
+
+  it("shows a self-serve owner only their own row, never the agency roster or other tenants' clients", async () => {
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access, account_type) values
+       ('33333333-3333-3333-3333-333333333333', 'Self Serve Owner', 'owner@selfserve.com', 'owner', false, 'self_serve_owner')`,
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('self-serve-brand', 'Self Serve Brand', 'Fashion', 'bg-sky-500', 'S'),
+       ('unrelated-brand', 'Unrelated Brand', 'Beauty', 'bg-amber-500', 'U')`,
+    );
+    await testPool.query(
+      `insert into team_member_clients (team_member_id, client_id) values
+       ('33333333-3333-3333-3333-333333333333', 'self-serve-brand')`,
+    );
+
+    const token = signTestJwt({ sub: "33333333-3333-3333-3333-333333333333", email: "owner@selfserve.com" });
+    const res = await request(app).get("/api/team-members").set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([
+      { id: "33333333-3333-3333-3333-333333333333", name: "Self Serve Owner", email: "owner@selfserve.com", role: "Owner", clients: ["self-serve-brand"] },
+    ]);
+    const allClientIds = res.body.flatMap((m: { clients: string[] }) => m.clients);
+    expect(allClientIds).not.toContain("unrelated-brand");
+    expect(allClientIds).not.toContain("abc-fashion");
+  });
 });

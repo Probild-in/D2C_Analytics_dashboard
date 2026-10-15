@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
-import { getAccessibleClientIds } from "../../src/lib/access.js";
+import { getAccessibleClientIds, isStaffMember } from "../../src/lib/access.js";
 
 describe("getAccessibleClientIds", () => {
   beforeEach(async () => {
@@ -34,5 +34,28 @@ describe("getAccessibleClientIds", () => {
   it("returns an empty array for an unknown user", async () => {
     const result = await getAccessibleClientIds(testPool, "33333333-3333-3333-3333-333333333333");
     expect(result).toEqual([]);
+  });
+});
+
+describe("isStaffMember", () => {
+  beforeEach(async () => {
+    await resetTestDb();
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access, account_type) values
+       ('11111111-1111-1111-1111-111111111111', 'Riya Kapoor', 'riya@agency.com', 'owner', true, 'staff'),
+       ('33333333-3333-3333-3333-333333333333', 'Self Serve', 'owner@selfserve.com', 'owner', false, 'self_serve_owner')`,
+    );
+  });
+
+  it("is true for staff", async () => {
+    expect(await isStaffMember(testPool, "11111111-1111-1111-1111-111111111111")).toBe(true);
+  });
+
+  it("is false for a self-serve owner", async () => {
+    expect(await isStaffMember(testPool, "33333333-3333-3333-3333-333333333333")).toBe(false);
+  });
+
+  it("is false (deny-by-default) for a user with no team_members row", async () => {
+    expect(await isStaffMember(testPool, "99999999-9999-9999-9999-999999999999")).toBe(false);
   });
 });

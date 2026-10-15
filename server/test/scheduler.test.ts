@@ -2,9 +2,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import cron from "node-cron";
 import { testPool, resetTestDb } from "./helpers/test-db.js";
 import { encryptToken } from "../src/lib/crypto.js";
-import { runScheduledSyncs, startScheduler } from "../src/scheduler.js";
+import { runScheduledSyncs, startScheduler, hashPlatformToLockKey, sweepExpiredPendingConnections } from "../src/scheduler.js";
 import pool from "../src/db.js";
 import { connectors } from "../src/lib/connector-registry.js";
+import { logger } from "../src/lib/logger.js";
 
 beforeEach(async () => {
   await resetTestDb();
@@ -95,13 +96,11 @@ describe("runScheduledSyncs", () => {
       await testPool.query("update platform_connections set status = 'disconnected' where id = $1", [connectionId]);
       throw new Error("boom");
     });
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     try {
       await runScheduledSyncs("shopify");
     } finally {
       syncSpy.mockRestore();
-      consoleErrorSpy.mockRestore();
     }
 
     const conn = await testPool.query("select status from platform_connections where id = $1", [id]);
@@ -131,7 +130,7 @@ describe("runScheduledSyncs", () => {
       }),
     );
 
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const loggerErrorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     // Mock the real pool used by both the scheduler and the connector so that,
     // specifically for the failing connection's status='error' recovery write,
@@ -176,13 +175,64 @@ describe("runScheduledSyncs", () => {
     const failingLogs = await testPool.query("select * from sync_logs where connection_id = $1", [failingConnectionId]);
     expect(failingLogs.rowCount).toBe(0);
 
-    // The recovery failure itself was still surfaced to the server's console.
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.stringContaining(`Failed to record sync failure for connection ${failingConnectionId}`),
+    // The recovery failure itself was still surfaced via the logger.
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
       expect.any(Error),
+      expect.stringContaining(`Failed to record sync failure for connection ${failingConnectionId}`),
     );
 
-    consoleErrorSpy.mockRestore();
+    loggerErrorSpy.mockRestore();
+  });
+
+  it("skips the sync entirely when another process already holds the platform's advisory lock", async () => {
+    const id = "cccccccc-3333-3333-3333-333333333333";
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, access_token, external_account_id) values
+       ($1, 'abc-fashion', 'shopify', 'connected', $2, 'abc-fashion.myshopify.com')`,
+      [id, encryptToken("shpat_real_token")],
+    );
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+
+    // Simulate a second process holding the lock by acquiring it directly on a second
+    // connection before calling runScheduledSyncs. testPool and the app's own `pool`
+    // (imported above) resolve to the same real database in tests — see
+    // test/setup.ts, which points DATABASE_URL at TEST_DATABASE_URL — so a lock taken
+    // via testPool genuinely blocks runScheduledSyncs's own pool.connect() lock attempt.
+    const lockClient = await testPool.connect();
+    try {
+      const lockKey = hashPlatformToLockKey("shopify"); // exported alongside runScheduledSyncs
+      await lockClient.query("select pg_advisory_lock($1)", [lockKey]);
+
+      await runScheduledSyncs("shopify");
+
+      // fetch was never called — sync() never ran because the lock wasn't acquired.
+      expect(fetchSpy).not.toHaveBeenCalled();
+      const row = await testPool.query("select status, last_synced_at from platform_connections where id = $1", [id]);
+      expect(row.rows[0].status).toBe("connected");
+      expect(row.rows[0].last_synced_at).toBeNull();
+    } finally {
+      await lockClient.query("select pg_advisory_unlock_all()");
+      lockClient.release();
+    }
+  });
+});
+
+describe("sweepExpiredPendingConnections", () => {
+  it("deletes expired pending_connections rows on the daily sweep", async () => {
+    await testPool.query(
+      "insert into pending_connections (id, platform, payload, expires_at) values (gen_random_uuid(), 'shopify', 'x', now() - interval '1 hour')",
+    );
+    const { id: freshId } = (
+      await testPool.query(
+        "insert into pending_connections (id, platform, payload, expires_at) values (gen_random_uuid(), 'shopify', 'x', now() + interval '1 hour') returning id",
+      )
+    ).rows[0];
+
+    await sweepExpiredPendingConnections();
+
+    const remaining = await testPool.query("select id from pending_connections");
+    expect(remaining.rows.map((r) => r.id)).toEqual([freshId]);
   });
 });
 

@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import type { OAuthConnector } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
+import { logger } from "../lib/logger.js";
 
 const SHOPIFY_SCOPES = "read_orders,read_products,read_customers";
 const SHOP_DOMAIN_RE = /^[a-z0-9-]+\.myshopify\.com$/;
@@ -120,7 +121,7 @@ export async function registerWebhooks(shop: string, accessToken: string): Promi
       }
     }
   } catch (err) {
-    console.error(`Failed to register Shopify webhooks for ${shop}:`, err);
+    logger.error(err, `Failed to register Shopify webhooks for ${shop}`);
   }
 }
 

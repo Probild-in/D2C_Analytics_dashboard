@@ -30,3 +30,8 @@ artifact-dist
 
 # SDD scratch workspace (ledgers, briefs, review packages) — not part of the record
 .superpowers/
+
+# graphify's dated snapshot folders (e.g. graphify-out/2026-09-27/) recur every time the
+# graph is rebuilt and are redundant with graphify-out/graph.json — only the top-level
+# graphify-out files are tracked, not these per-run snapshots.
+graphify-out/20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]/

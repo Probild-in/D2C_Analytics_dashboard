@@ -1,9 +1,9 @@
 import { Router } from "express";
 import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { assertClientAccess } from "../lib/access.js";
+import { assertClientAccess, isStaffMember } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
-import { stubPaymentGateway } from "../integrations/payment-gateway.js";
+import { razorpayGateway } from "../integrations/payment-gateway.js";
 
 const router = Router({ mergeParams: true });
 
@@ -59,6 +59,9 @@ router.post("/", requireAuth, async (req, res, next) => {
   try {
     const clientId = req.params.id;
     await assertClientAccess(pool, req.auth!.userId, clientId);
+    if (!(await isStaffMember(pool, req.auth!.userId))) {
+      throw new HttpError(403, "staff_only", "Only agency staff can assign a plan directly.");
+    }
 
     const { planId } = req.body as { planId?: string };
     const plan = await pool.query("select * from plans where id = $1", [planId]);
@@ -68,17 +71,27 @@ router.post("/", requireAuth, async (req, res, next) => {
 
     // Check if subscription already exists for this client
     const existingSubResult = await pool.query(
-      "select plan_id from subscriptions where client_id = $1",
+      "select plan_id, gateway_subscription_id from subscriptions where client_id = $1",
       [clientId],
     );
     const existingPlanId = (existingSubResult.rowCount ?? 0) > 0 ? existingSubResult.rows[0].plan_id : null;
+    const existingGatewaySubscriptionId =
+      (existingSubResult.rowCount ?? 0) > 0 ? existingSubResult.rows[0].gateway_subscription_id : null;
 
-    const { gatewayCustomerId } = await stubPaymentGateway.createSubscription(clientId, planId!);
+    // Only create a Razorpay subscription for a genuinely new paid-plan assignment.
+    // A no-op repost of the current plan must not create a fresh, never-used Razorpay
+    // subscription shell, and "enterprise" has no Razorpay Plan configured at all (the
+    // gateway would throw and 500 the request).
+    let gatewayCustomerId: string | null = existingGatewaySubscriptionId;
+    const needsNewGatewaySubscription = planId !== "enterprise" && (existingPlanId === null || existingPlanId !== planId);
+    if (needsNewGatewaySubscription) {
+      ({ gatewayCustomerId } = await razorpayGateway.createSubscription(clientId, planId!));
+    }
 
     const subResult = await pool.query(
-      `insert into subscriptions (client_id, plan_id, status, gateway_customer_id)
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id)
        values ($1, $2, 'active', $3)
-       on conflict (client_id) do update set plan_id = excluded.plan_id, status = 'active'
+       on conflict (client_id) do update set plan_id = excluded.plan_id, status = 'active', gateway_subscription_id = excluded.gateway_subscription_id
        returning *`,
       [clientId, planId, gatewayCustomerId],
     );

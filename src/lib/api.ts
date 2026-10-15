@@ -45,3 +45,25 @@ export async function apiFetch(path: string, init: Omit<RequestInit, "headers"> 
   }
   return res;
 }
+
+// Same error-handling shape as apiFetch, but for the public, pre-login pages (pricing,
+// signup, contact-enterprise) — never attaches a session token, never requires one.
+export async function publicApiFetch(path: string, init: Omit<RequestInit, "headers"> = {}): Promise<Response> {
+  let res: Response;
+  try {
+    res = await fetch(`${import.meta.env.VITE_API_URL}${path}`, {
+      ...init,
+      headers: init.body ? { "Content-Type": "application/json" } : {},
+    });
+  } catch {
+    throw new ApiError("Couldn't reach the server. Check your connection and try again.");
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    const message = typeof body?.error?.message === "string" ? body.error.message : null;
+    const code = typeof body?.error?.code === "string" ? body.error.code : null;
+    throw new ApiError(message ?? `Request failed (${res.status}). Please try again.`, res.status, code);
+  }
+  return res;
+}

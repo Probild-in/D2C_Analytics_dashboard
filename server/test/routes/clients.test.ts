@@ -303,6 +303,21 @@ describe("POST /api/clients", () => {
       .send({ name: "New Brand" });
     expect(res.status).toBe(400);
   });
+
+  it("403s a self-serve owner trying to create an additional brand", async () => {
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access, account_type) values
+       ('33333333-3333-3333-3333-333333333333', 'Self Serve', 'owner@selfserve.com', 'owner', false, 'self_serve_owner')`,
+    );
+    const token = signTestJwt({ sub: "33333333-3333-3333-3333-333333333333", email: "owner@selfserve.com" });
+    const res = await request(app)
+      .post("/api/clients")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ name: "Second Brand", category: "Fashion" });
+    expect(res.status).toBe(403);
+    expect(res.body.error.code).toBe("staff_only");
+    expect((await testPool.query("select * from clients where name = 'Second Brand'")).rowCount).toBe(0);
+  });
 });
 
 describe("PATCH /api/clients/:id", () => {

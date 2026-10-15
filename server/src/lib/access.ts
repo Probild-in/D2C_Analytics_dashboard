@@ -37,3 +37,11 @@ export async function resolveClientScope(db: pg.Pool, userId: string, clientId: 
   await assertClientAccess(db, userId, clientId);
   return [clientId];
 }
+
+// Self-serve customers (account_type = 'self_serve_owner') must never be treated as
+// agency staff by routes that assume every authenticated caller works for the agency.
+// Deny-by-default: a user row that somehow doesn't exist is NOT staff.
+export async function isStaffMember(db: pg.Pool, userId: string): Promise<boolean> {
+  const result = await db.query<{ account_type: string }>("select account_type from team_members where id = $1", [userId]);
+  return result.rows[0]?.account_type === "staff";
+}
