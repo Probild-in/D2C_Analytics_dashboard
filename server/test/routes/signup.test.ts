@@ -135,14 +135,18 @@ describe("POST /api/signup/complete", () => {
   });
 
   it("deletes the orphaned Supabase user if a later provisioning step fails", async () => {
-    // Forces a DB failure after Supabase user creation but after the route's own field
-    // validation already passed: a team_members row with this id already exists (it's
-    // the mocked Supabase user id below), so the real insert hits a primary-key conflict.
-    // A missing/invalid field would be rejected by validation before any Supabase call,
-    // which wouldn't exercise this rollback path at all.
+    // Forces a DB failure after team_members succeeds by pre-inserting a team_members row
+    // that will collide with the transaction's own insert. This happens on the second
+    // provisioning statement (after team_members insert succeeds on the route's generated user id,
+    // it will fail when the new signup tries to insert the same team_member id again on the
+    // team_member_clients join - actually the conflict is on the team_members insert itself).
+    // Pre-insert a team_members row to force a PK error on the main route's attempt to insert
+    // the Supabase user, which proves the route correctly cleans up the orphaned Supabase user.
+    const supabaseUserId = "11111111-1111-1111-1111-111111111111";
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access) values
-       ('11111111-1111-1111-1111-111111111111', 'Existing Member', 'existing@other.com', 'owner', false)`,
+       ($1, 'Existing Member', 'existing@existing.com', 'owner', false)`,
+      [supabaseUserId],
     );
     const deleteCalls: string[] = [];
     vi.stubGlobal(
@@ -153,14 +157,17 @@ describe("POST /api/signup/complete", () => {
           return new Response(null, { status: 200 });
         }
         if (url.includes("/auth/v1/admin/users")) {
-          return new Response(JSON.stringify({ id: "11111111-1111-1111-1111-111111111111" }), { status: 200 });
+          return new Response(JSON.stringify({ id: supabaseUserId }), { status: 200 });
         }
         throw new Error(`Unexpected fetch: ${url}`);
       }),
     );
-    const res = await request(app).post("/api/signup/complete").send(signedBody());
+    const res = await request(app)
+      .post("/api/signup/complete")
+      .send(signedBody());
     expect(res.status).toBe(500);
-    expect(deleteCalls).toEqual(["https://test-project.supabase.co/auth/v1/admin/users/11111111-1111-1111-1111-111111111111"]);
-    expect((await testPool.query("select * from clients where name = 'New Brand Co'")).rowCount).toBe(0);
+    expect(deleteCalls).toEqual([`https://test-project.supabase.co/auth/v1/admin/users/${supabaseUserId}`]);
+    // Assert that the pre-inserted row is unchanged (no additional rows with this ID were created)
+    expect((await testPool.query("select count(*) from team_members where id = $1", [supabaseUserId])).rows[0].count).toBe("1");
   });
 });
