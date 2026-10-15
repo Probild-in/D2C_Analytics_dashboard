@@ -24,33 +24,85 @@ describe("runDailyNotificationChecks", () => {
     );
   });
 
-  it("alerts RTO when yesterday's RTO rate is in the critical band (>=15%)", async () => {
-    const { start } = getIstDayBoundaries(1);
-    // 10 orders yesterday, 2 RTO'd (via shopify's own status, since no courier connected)
+  // Spreads `count` order_date values evenly across the RTO check's new trailing-7-day
+  // window (getIstDayBoundaries(7).start through getIstDayBoundaries(1).end), rather than
+  // all within a single day, so these fixtures actually exercise the new window shape
+  // instead of just happening to also fall inside it.
+  function spreadAcrossRtoWindow(count: number): Date[] {
+    const windowStart = getIstDayBoundaries(7).start;
+    const windowEnd = getIstDayBoundaries(1).end;
+    const windowMs = windowEnd.getTime() - windowStart.getTime();
+    return Array.from({ length: count }, (_, i) => new Date(windowStart.getTime() + Math.floor((i * windowMs) / count)));
+  }
+
+  it("alerts RTO when the trailing-7-day RTO rate is in the critical band (>=15%)", async () => {
+    const dates = spreadAcrossRtoWindow(10);
+    // 10 orders across the 7-day window, 2 RTO'd (via shopify's own status, since no courier connected)
     for (let i = 0; i < 10; i++) {
       await testPool.query(
         `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
          ($1, $2, $3, 'Test', $4, 1000, $5, 'COD')`,
-        ["abc-fashion", "33333333-3333-3333-3333-333333333333", `order-${i}`, new Date(start.getTime() + i * 60000), i < 2 ? "RTO Initiated" : "Delivered"],
+        ["abc-fashion", "33333333-3333-3333-3333-333333333333", `order-${i}`, dates[i], i < 2 ? "RTO Initiated" : "Delivered"],
       );
     }
     await runDailyNotificationChecks(testPool);
-    const notifs = await testPool.query("select kind, title from notifications where client_id = 'abc-fashion' and kind = 'rto'");
+    const notifs = await testPool.query("select kind, title, description from notifications where client_id = 'abc-fashion' and kind = 'rto'");
     expect(notifs.rowCount).toBe(1);
+    expect(notifs.rows[0].description).toMatch(/over the last 7 days/);
   });
 
-  it("does not alert RTO when yesterday's rate is healthy (<8%)", async () => {
-    const { start } = getIstDayBoundaries(1);
+  it("does not alert RTO when the trailing-7-day rate is healthy (<8%)", async () => {
+    const dates = spreadAcrossRtoWindow(10);
     for (let i = 0; i < 10; i++) {
       await testPool.query(
         `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
          ($1, $2, $3, 'Test', $4, 1000, 'Delivered', 'COD')`,
-        ["abc-fashion", "33333333-3333-3333-3333-333333333333", `order-${i}`, new Date(start.getTime() + i * 60000)],
+        ["abc-fashion", "33333333-3333-3333-3333-333333333333", `order-${i}`, dates[i]],
       );
     }
     await runDailyNotificationChecks(testPool);
     const notifs = await testPool.query("select * from notifications where client_id = 'abc-fashion' and kind = 'rto'");
     expect(notifs.rowCount).toBe(0);
+  });
+
+  it("alerts RTO at the attention band (8%-15%) for a trailing-7-day rate, not just the critical band", async () => {
+    const dates = spreadAcrossRtoWindow(10);
+    // 10 orders across the 7-day window, 1 RTO'd => 10%, inside the 8-15% attention band.
+    for (let i = 0; i < 10; i++) {
+      await testPool.query(
+        `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+         ($1, $2, $3, 'Test', $4, 1000, $5, 'COD')`,
+        ["abc-fashion", "33333333-3333-3333-3333-333333333333", `order-${i}`, dates[i], i < 1 ? "RTO Initiated" : "Delivered"],
+      );
+    }
+    await runDailyNotificationChecks(testPool);
+    const notifs = await testPool.query("select description from notifications where client_id = 'abc-fashion' and kind = 'rto'");
+    expect(notifs.rowCount).toBe(1);
+    expect(notifs.rows[0].description).toMatch(/attention threshold/);
+  });
+
+  it("alerts RTO for an order placed 5 days ago that a connected courier marked RTO — the real-world case a single-day window could never catch", async () => {
+    // Reuses the courier_shiprocket platform_connections + shipments fixture pattern from
+    // server/test/routes/courier-data.test.ts. shipments are looked up by order_ref only
+    // (no date requirement of their own), per ORDER_RTO_CTES_SINGLE_CLIENT in rto-status.ts.
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666666', 'abc-fashion', 'courier_shiprocket', 'connected', 'abc-fashion@ops.com')`,
+    );
+    const { start: fiveDaysAgo } = getIstDayBoundaries(5);
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ($1, $2, $3, 'Test', $4, 1000, 'Dispatched', 'COD')`,
+      ["abc-fashion", "33333333-3333-3333-3333-333333333333", "order-rto-5d-ago", fiveDaysAgo],
+    );
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status) values
+       ($1, $2, $3, $4, 'Shiprocket', 'RTO Initiated')`,
+      ["abc-fashion", "66666666-6666-6666-6666-666666666666", "AWB-RTO-5D", "order-rto-5d-ago"],
+    );
+    await runDailyNotificationChecks(testPool);
+    const notifs = await testPool.query("select kind from notifications where client_id = 'abc-fashion' and kind = 'rto'");
+    expect(notifs.rowCount).toBe(1);
   });
 
   it("does not crash and does not alert for a client with zero orders yesterday (RTO, sales, ads, roas all skip cleanly)", async () => {

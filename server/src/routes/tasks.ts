@@ -4,6 +4,7 @@ import { requireAuth } from "../middleware/auth.js";
 import { assertClientAccess, getAccessibleClientIds } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
 import { publishNotification } from "../lib/notification-bus.js";
+import { logger } from "../lib/logger.js";
 
 const router = Router({ mergeParams: true });
 
@@ -123,20 +124,26 @@ router.post("/", requireAuth, async (req, res, next) => {
       [clientId, title.trim(), description?.trim() ?? "", assigneeId, priority, dueDate, tags ?? [], req.auth!.userId],
     );
 
-    const clientName = (await pool.query<{ name: string }>("select name from clients where id = $1", [clientId])).rows[0].name;
-    const notif = await pool.query(
-      `insert into notifications (client_id, kind, title, description) values ($1, 'task', $2, $3) returning id, created_at`,
-      [clientId, `Task assigned to ${assignee.rows[0].name}`, `${assignee.rows[0].name} was assigned: "${title.trim()}".`],
-    );
-    publishNotification({
-      id: notif.rows[0].id,
-      clientId,
-      clientName,
-      kind: "task",
-      title: `Task assigned to ${assignee.rows[0].name}`,
-      description: `${assignee.rows[0].name} was assigned: "${title.trim()}".`,
-      createdAt: notif.rows[0].created_at.toISOString(),
-    });
+    try {
+      const clientName = (await pool.query<{ name: string }>("select name from clients where id = $1", [clientId])).rows[0].name;
+      const notif = await pool.query(
+        `insert into notifications (client_id, kind, title, description) values ($1, 'task', $2, $3) returning id, created_at`,
+        [clientId, `Task assigned to ${assignee.rows[0].name}`, `${assignee.rows[0].name} was assigned: "${title.trim()}".`],
+      );
+      publishNotification({
+        id: notif.rows[0].id,
+        clientId,
+        clientName,
+        kind: "task",
+        title: `Task assigned to ${assignee.rows[0].name}`,
+        description: `${assignee.rows[0].name} was assigned: "${title.trim()}".`,
+        createdAt: notif.rows[0].created_at.toISOString(),
+      });
+    } catch (err) {
+      // Best-effort: a notification failure must never turn an otherwise-successful
+      // task creation into a 500 (which a client would retry, creating a duplicate task).
+      logger.error(err, `Failed to create a task-assigned notification for client ${clientId}`);
+    }
 
     res.status(201).json(mapTaskRow({ ...inserted.rows[0], assignee_name: assignee.rows[0].name }));
   } catch (err) {
@@ -164,20 +171,26 @@ router.patch("/:taskId", requireAuth, async (req, res, next) => {
     }
 
     if (status === "Completed") {
-      const clientName = (await pool.query<{ name: string }>("select name from clients where id = $1", [clientId])).rows[0].name;
-      const notif = await pool.query(
-        `insert into notifications (client_id, kind, title, description) values ($1, 'task', 'Task completed', $2) returning id, created_at`,
-        [clientId, `"${updated.rows[0].title}" was marked completed.`],
-      );
-      publishNotification({
-        id: notif.rows[0].id,
-        clientId,
-        clientName,
-        kind: "task",
-        title: "Task completed",
-        description: `"${updated.rows[0].title}" was marked completed.`,
-        createdAt: notif.rows[0].created_at.toISOString(),
-      });
+      try {
+        const clientName = (await pool.query<{ name: string }>("select name from clients where id = $1", [clientId])).rows[0].name;
+        const notif = await pool.query(
+          `insert into notifications (client_id, kind, title, description) values ($1, 'task', 'Task completed', $2) returning id, created_at`,
+          [clientId, `"${updated.rows[0].title}" was marked completed.`],
+        );
+        publishNotification({
+          id: notif.rows[0].id,
+          clientId,
+          clientName,
+          kind: "task",
+          title: "Task completed",
+          description: `"${updated.rows[0].title}" was marked completed.`,
+          createdAt: notif.rows[0].created_at.toISOString(),
+        });
+      } catch (err) {
+        // Best-effort: a notification failure must never turn an otherwise-successful
+        // task update into a 500 (which a client would retry, creating a duplicate update).
+        logger.error(err, `Failed to create a task-completed notification for client ${clientId}`);
+      }
     }
 
     const assignee = await pool.query("select name from team_members where id = $1", [updated.rows[0].assignee_id]);

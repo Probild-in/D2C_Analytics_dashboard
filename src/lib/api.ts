@@ -50,7 +50,13 @@ export async function apiFetch(path: string, init: Omit<RequestInit, "headers"> 
 // Bearer-token Authorization header, so this reads the SSE response body manually via
 // fetch + a stream reader instead, keeping the exact same auth mechanism as every other
 // request. Returns an unsubscribe function that aborts the underlying request.
-export function subscribeToNotificationStream(onMessage: (data: unknown) => void): () => void {
+//
+// `onConnect` fires once per successful connection open — the very first one and every
+// reconnect after a drop — so the caller can re-fetch a snapshot (e.g. GET
+// /api/notifications) to backfill anything published while the stream was disconnected
+// (the daily notification-checks cron fires at 00:15 IST, precisely when an overnight tab
+// is most likely to have a sleeping laptop or a dropped connection).
+export function subscribeToNotificationStream(onMessage: (data: unknown) => void, onConnect: () => void): () => void {
   const controller = new AbortController();
   let stopped = false;
 
@@ -71,6 +77,7 @@ export function subscribeToNotificationStream(onMessage: (data: unknown) => void
     }
     const reader = res.body?.getReader();
     if (!reader) return;
+    onConnect();
     const decoder = new TextDecoder();
     let buffer = "";
     while (true) {

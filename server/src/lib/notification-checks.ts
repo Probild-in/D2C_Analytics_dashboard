@@ -63,7 +63,7 @@ async function insertAndPublish(
   });
 }
 
-async function checkRto(pool: pg.Pool, clientId: string, clientName: string, yesterday: { start: Date; end: Date }) {
+async function checkRto(pool: pg.Pool, clientId: string, clientName: string, range: { start: Date; end: Date }) {
   if (await alreadyAlertedRecently(pool, clientId, "rto")) return;
   const result = await pool.query<{ total: string; rto: string }>(
     `with ${ORDER_RTO_CTES_SINGLE_CLIENT}
@@ -71,16 +71,16 @@ async function checkRto(pool: pg.Pool, clientId: string, clientName: string, yes
      from order_rto
      join shopify_orders o on o.id = order_rto.order_id
      where o.order_date >= $2 and o.order_date < $3`,
-    [clientId, yesterday.start, yesterday.end],
+    [clientId, range.start, range.end],
   );
   const total = Number(result.rows[0]?.total ?? 0);
   const rto = Number(result.rows[0]?.rto ?? 0);
   if (total === 0) return;
   const rtoPercent = (rto / total) * 100;
   if (rtoPercent >= 15) {
-    await insertAndPublish(pool, clientId, clientName, "rto", "RTO alert", `RTO rate hit ${rtoPercent.toFixed(1)}% yesterday — critical threshold is 15%.`);
+    await insertAndPublish(pool, clientId, clientName, "rto", "RTO alert", `RTO rate hit ${rtoPercent.toFixed(1)}% over the last 7 days — critical threshold is 15%.`);
   } else if (rtoPercent >= 8) {
-    await insertAndPublish(pool, clientId, clientName, "rto", "RTO alert", `RTO rate hit ${rtoPercent.toFixed(1)}% yesterday — attention threshold is 8%.`);
+    await insertAndPublish(pool, clientId, clientName, "rto", "RTO alert", `RTO rate hit ${rtoPercent.toFixed(1)}% over the last 7 days — attention threshold is 8%.`);
   }
 }
 
@@ -184,10 +184,16 @@ async function checkBlendedRoas(pool: pg.Pool, clientId: string, clientName: str
 export async function runDailyNotificationChecks(pool: pg.Pool): Promise<void> {
   const yesterday = getIstDayBoundaries(1);
   const weekBefore = getIstDayBoundaries(8);
+  // RTO is a courier status reached days after the order date (never same-day — see
+  // rto-status.ts's own header comment) — a single day's orders essentially never show
+  // any RTO yet. Use the same trailing-7-day window the live dashboard already uses
+  // (server/src/routes/clients.ts's RTO query), anchored at yesterday instead of today
+  // since this job evaluates what's complete as of yesterday.
+  const rtoWindow = { start: getIstDayBoundaries(7).start, end: getIstDayBoundaries(1).end };
   const clients = await pool.query<{ id: string; name: string }>("select id, name from clients");
   for (const { id: clientId, name: clientName } of clients.rows) {
     try {
-      await checkRto(pool, clientId, clientName, yesterday);
+      await checkRto(pool, clientId, clientName, rtoWindow);
       await checkSalesDip(pool, clientId, clientName, yesterday, weekBefore);
       await checkAdSpendAnomaly(pool, clientId, clientName, yesterday);
       await checkBlendedRoas(pool, clientId, clientName, yesterday);

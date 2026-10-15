@@ -30,6 +30,12 @@ const KIND_META: Record<NotificationKind, { icon: React.ElementType; className: 
   task: { icon: ListChecks, className: "bg-brand-subtle text-brand" },
 };
 
+// Defensive fallback for a `kind` value this bundle doesn't know about yet (e.g. a future
+// migration adds a new kind while a user still has an older cached bundle loaded) — without
+// this, KIND_META[n.kind] is undefined and the very next line (meta.icon) throws, crashing
+// the entire notifications dropdown.
+const FALLBACK_KIND_META = { icon: Bell, className: "bg-bg-subtle text-text-secondary" };
+
 function relativeTime(iso: string) {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
@@ -46,15 +52,34 @@ export function NotificationsMenu() {
   const unread = notifications.filter((n) => !n.read).length;
 
   React.useEffect(() => {
-    apiFetch("/api/notifications")
-      .then((res) => res.json())
-      .then(setNotifications)
-      .catch(() => {});
+    const mergeFromServer = (fresh: AppNotification[]) => {
+      setNotifications((prev) => {
+        const byId = new Map(prev.map((n) => [n.id, n]));
+        for (const n of fresh) {
+          const existing = byId.get(n.id);
+          // Preserve locally-known "read" state (e.g. an optimistic mark-as-read that
+          // hasn't round-tripped yet) rather than letting a slightly-stale server
+          // snapshot un-read something the user already dismissed.
+          byId.set(n.id, existing?.read ? { ...n, read: true } : n);
+        }
+        return Array.from(byId.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      });
+    };
 
-    const unsubscribe = subscribeToNotificationStream((data) => {
-      const n = data as AppNotification;
-      setNotifications((prev) => [{ ...n, read: false }, ...prev]);
-    });
+    const refetch = () => {
+      apiFetch("/api/notifications")
+        .then((res) => res.json())
+        .then(mergeFromServer)
+        .catch(() => {});
+    };
+
+    const unsubscribe = subscribeToNotificationStream(
+      (data) => {
+        const n = data as AppNotification;
+        setNotifications((prev) => (prev.some((x) => x.id === n.id) ? prev : [{ ...n, read: false }, ...prev]));
+      },
+      refetch, // re-fetch on every successful connect/reconnect, including the first
+    );
     return unsubscribe;
   }, []);
 
@@ -93,7 +118,7 @@ export function NotificationsMenu() {
             <div className="px-3.5 py-6 text-center text-[12px] text-text-secondary">No notifications yet.</div>
           )}
           {notifications.map((n) => {
-            const meta = KIND_META[n.kind];
+            const meta = KIND_META[n.kind] ?? FALLBACK_KIND_META;
             const Icon = meta.icon;
             return (
               <button
