@@ -19,6 +19,17 @@ export function getIstDayBoundaries(daysAgo: number): { start: Date; end: Date }
   return { start, end };
 }
 
+// Converts a UTC instant to its IST calendar date as 'YYYY-MM-DD', using only UTC
+// getters (never the Node process's own local TZ, which is what made the previous
+// version of getAdSpend's ::date-cast query silently pick the wrong day whenever the
+// process wasn't running with TZ=Asia/Kolkata — see the fix-round-1 report for the
+// empirical reproduction). Binding this string (not a Date object) to a ::date-typed
+// column parameter is the only way to make the comparison environment-independent.
+function istDateString(instant: Date): string {
+  const ist = new Date(instant.getTime() + IST_OFFSET_MS);
+  return `${ist.getUTCFullYear()}-${String(ist.getUTCMonth() + 1).padStart(2, "0")}-${String(ist.getUTCDate()).padStart(2, "0")}`;
+}
+
 const DEDUP_WINDOW = "interval '20 hours'";
 
 async function alreadyAlertedRecently(pool: pg.Pool, clientId: string, kind: string): Promise<boolean> {
@@ -110,13 +121,15 @@ async function checkSalesDip(
 }
 
 async function getAdSpend(pool: pg.Pool, clientId: string, range: { start: Date; end: Date }): Promise<number> {
+  const startDate = istDateString(range.start);
+  const endDate = istDateString(range.end);
   const result = await pool.query<{ total: string }>(
     `select coalesce(
        (select sum(spend) from meta_campaign_metrics where client_id = $1 and metric_date >= $2::date and metric_date < $3::date), 0
      ) + coalesce(
        (select sum(spend) from google_campaign_metrics where client_id = $1 and metric_date >= $2::date and metric_date < $3::date), 0
      ) as total`,
-    [clientId, range.start, range.end],
+    [clientId, startDate, endDate],
   );
   return Number(result.rows[0].total);
 }

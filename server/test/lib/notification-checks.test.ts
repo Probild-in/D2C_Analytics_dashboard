@@ -109,6 +109,62 @@ describe("runDailyNotificationChecks", () => {
     expect(notifs.rowCount).toBe(1);
   });
 
+  // Mirrors notification-checks.ts's own istDateString helper, independently, so these
+  // fixture inserts land on the correct IST calendar date regardless of the test
+  // process's ambient TZ (the same class of bug this whole fix round is about).
+  function istDateStringForDaysAgo(daysAgo: number): string {
+    const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+    const { start } = getIstDayBoundaries(daysAgo);
+    const ist = new Date(start.getTime() + IST_OFFSET_MS);
+    return `${ist.getUTCFullYear()}-${String(ist.getUTCMonth() + 1).padStart(2, "0")}-${String(ist.getUTCDate()).padStart(2, "0")}`;
+  }
+
+  it("alerts an ad spend anomaly when yesterday's spend is >=25% above the trailing 7-day average", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('44444444-4444-4444-4444-444444444444', 'abc-fashion', 'meta', 'connected', 'abc-fashion-meta')`,
+    );
+    // Trailing 7 complete days before yesterday (daysAgo=2..8): spend 100/day => average 100.
+    for (let daysAgo = 2; daysAgo <= 8; daysAgo++) {
+      await testPool.query(
+        `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
+         ($1, $2, $3, 'Test Campaign', $4::date, $5, 0, 0, 0)`,
+        ["abc-fashion", "44444444-4444-4444-4444-444444444444", `trailing-${daysAgo}`, istDateStringForDaysAgo(daysAgo), 100],
+      );
+    }
+    // Yesterday's spend: 130 => 30% above the 100 trailing average, clears the 25% threshold.
+    await testPool.query(
+      `insert into meta_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, results) values
+       ($1, $2, 'yesterday-campaign', 'Test Campaign', $3::date, $4, 0, 0, 0)`,
+      ["abc-fashion", "44444444-4444-4444-4444-444444444444", istDateStringForDaysAgo(1), 130],
+    );
+    await runDailyNotificationChecks(testPool);
+    const notifs = await testPool.query("select kind from notifications where client_id = 'abc-fashion' and kind = 'ads'");
+    expect(notifs.rowCount).toBe(1);
+  });
+
+  it("alerts blended ROAS below target when yesterday's net sales / ad spend < 3.0", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('55555555-5555-5555-5555-555555555555', 'abc-fashion', 'google', 'connected', 'abc-fashion-google')`,
+    );
+    const yesterday = getIstDayBoundaries(1);
+    // Ad spend of 1000 and net sales of 2000 => ROAS 2.0x, below the 3.0x target.
+    await testPool.query(
+      `insert into google_campaign_metrics (client_id, connection_id, campaign_id, campaign_name, metric_date, spend, impressions, clicks, conversions) values
+       ($1, $2, 'yesterday-campaign', 'Test Campaign', $3::date, $4, 0, 0, 0)`,
+      ["abc-fashion", "55555555-5555-5555-5555-555555555555", istDateStringForDaysAgo(1), 1000],
+    );
+    await testPool.query(
+      `insert into shopify_orders (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ($1, $2, 'roas-order-1', 'Test', $3, 2000, 'Delivered', 'COD')`,
+      ["abc-fashion", "33333333-3333-3333-3333-333333333333", new Date(yesterday.start.getTime())],
+    );
+    await runDailyNotificationChecks(testPool);
+    const notifs = await testPool.query("select kind from notifications where client_id = 'abc-fashion' and kind = 'roas'");
+    expect(notifs.rowCount).toBe(1);
+  });
+
   it("re-alerts on a later day if the condition still holds, once the de-dup window has passed", async () => {
     const { start } = getIstDayBoundaries(1);
     for (let i = 0; i < 10; i++) {
