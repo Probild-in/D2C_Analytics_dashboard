@@ -3,7 +3,7 @@ import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { assertClientAccess } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
-import { stubPaymentGateway } from "../integrations/payment-gateway.js";
+import { razorpayGateway } from "../integrations/payment-gateway.js";
 
 const router = Router({ mergeParams: true });
 
@@ -73,10 +73,10 @@ router.post("/", requireAuth, async (req, res, next) => {
     );
     const existingPlanId = (existingSubResult.rowCount ?? 0) > 0 ? existingSubResult.rows[0].plan_id : null;
 
-    const { gatewayCustomerId } = await stubPaymentGateway.createSubscription(clientId, planId!);
+    const { gatewayCustomerId } = await razorpayGateway.createSubscription(clientId, planId!);
 
     const subResult = await pool.query(
-      `insert into subscriptions (client_id, plan_id, status, gateway_customer_id)
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id)
        values ($1, $2, 'active', $3)
        on conflict (client_id) do update set plan_id = excluded.plan_id, status = 'active'
        returning *`,

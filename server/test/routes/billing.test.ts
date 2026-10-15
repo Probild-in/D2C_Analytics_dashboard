@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import request from "supertest";
 import app from "../../src/index.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
@@ -92,9 +92,19 @@ describe("POST /api/clients/:id/subscription", () => {
       `insert into clients (id, name, category, logo_color, logo_initial) values
        ('abc-fashion', 'ABC Fashion', 'Fashion & Apparel', 'bg-violet-500', 'A')`,
     );
+    // Set up Razorpay credentials for the real gateway
+    process.env.RAZORPAY_KEY_ID = "rzp_test_key123";
+    process.env.RAZORPAY_KEY_SECRET = "test-key-secret";
+    process.env.RAZORPAY_PLAN_ID_MEDIUM = "plan_medium123";
+    // Stub fetch to return a subscription ID
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ id: "sub_abc123" }), { status: 200 })));
   });
 
-  it("creates a subscription and a pending invoice via the stub gateway", async () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("creates a subscription and a pending invoice via the real Razorpay gateway", async () => {
     const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
     const res = await request(app)
       .post("/api/clients/abc-fashion/subscription")
@@ -108,6 +118,11 @@ describe("POST /api/clients/:id/subscription", () => {
     expect(invoices.rowCount).toBe(1);
     expect(invoices.rows[0].status).toBe("pending");
     expect(invoices.rows[0].amount_inr).toBe(2999);
+
+    // Verify the subscription has a real Razorpay subscription ID
+    const subscriptions = await testPool.query("select gateway_subscription_id from subscriptions where client_id = $1", ["abc-fashion"]);
+    expect(subscriptions.rowCount).toBe(1);
+    expect(subscriptions.rows[0].gateway_subscription_id).toBe("sub_abc123");
   });
 
   it("returns 404 for a nonexistent client id", async () => {
@@ -137,6 +152,9 @@ describe("POST /api/clients/:id/subscription", () => {
       .set("Authorization", `Bearer ${token}`)
       .send({ planId: "medium" });
     expect(res1.status).toBe(201);
+
+    // Re-stub fetch for the second call
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ id: "sub_def456" }), { status: 200 })));
 
     // Second POST with same planId (retry or duplicate)
     const res2 = await request(app)
