@@ -16,8 +16,16 @@ export async function createSupabaseUser(email: string, password: string): Promi
     headers: { "Content-Type": "application/json", apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
     body: JSON.stringify({ email, password, email_confirm: true }),
   });
+  // GoTrue uses 422 for several validation failures (e.g. a weak password), not only a
+  // duplicate email — only treat it as "already registered" when the body says so.
   if (res.status === 422) {
-    throw new EmailAlreadyRegisteredError("This email is already registered. Log in instead.");
+    const body = (await res.json().catch(() => null)) as { error_code?: string; msg?: string; message?: string } | null;
+    const code = body?.error_code ?? "";
+    const text = (body?.msg ?? body?.message ?? "").toLowerCase();
+    if (code === "email_exists" || code === "user_already_exists" || text.includes("already been registered") || text.includes("already registered")) {
+      throw new EmailAlreadyRegisteredError("This email is already registered. Log in instead.");
+    }
+    throw new Error(`Supabase user creation failed: 422 ${JSON.stringify(body)}`);
   }
   if (!res.ok) {
     throw new Error(`Supabase user creation failed: ${res.status} ${await res.text()}`);

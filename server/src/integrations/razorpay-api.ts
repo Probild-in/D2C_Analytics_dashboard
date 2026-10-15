@@ -44,6 +44,39 @@ export async function createSubscription(planId: "small" | "medium" | "large"): 
   return { id: body.id };
 }
 
+export interface RazorpaySubscriptionDetails {
+  id: string;
+  plan_id: string;
+  status: string;
+  current_start?: number;
+  current_end?: number;
+}
+
+export async function getSubscription(subscriptionId: string): Promise<RazorpaySubscriptionDetails> {
+  const { keyId, keySecret } = getCredentials();
+  const res = await fetch(`https://api.razorpay.com/v1/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+    headers: { Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString("base64")}` },
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch Razorpay subscription ${subscriptionId}: ${res.status} ${await res.text()}`);
+  }
+  return (await res.json()) as RazorpaySubscriptionDetails;
+}
+
+// The inverse of getPlanId: given the Razorpay Plan id actually on a subscription,
+// find which of our self-serve plan ids maps to it. Used so /complete trusts what
+// Razorpay says the customer paid for, never what the client claims in the request body.
+export function getPlanIdFromRazorpayPlanId(razorpayPlanId: string): "small" | "medium" | "large" | null {
+  for (const planId of ["small", "medium", "large"] as const) {
+    try {
+      if (getPlanId(planId) === razorpayPlanId) return planId;
+    } catch {
+      // that plan's env var isn't configured in this environment — skip it
+    }
+  }
+  return null;
+}
+
 // Razorpay's documented formula for verifying a subscription payment: HMAC-SHA256 of
 // "<payment_id>|<subscription_id>" keyed with the API secret, hex-encoded, timing-safe
 // compared against the signature the client received from Razorpay's own Checkout.

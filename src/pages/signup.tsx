@@ -11,6 +11,12 @@ declare global {
   }
 }
 
+interface PendingPayment {
+  razorpaySubscriptionId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+}
+
 export default function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -23,13 +29,44 @@ export default function Signup() {
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [submitting, setSubmitting] = React.useState(false);
+  // Set once Razorpay Checkout reports a successful payment. While set, the customer has
+  // already been charged, so retries must go straight to /complete — never back through
+  // /api/signup + Checkout, which would create a new subscription and charge them again.
+  const [pendingPayment, setPendingPayment] = React.useState<PendingPayment | null>(null);
+
+  const completeSignup = async (payment: PendingPayment) => {
+    try {
+      await publicApiFetch("/api/signup/complete", {
+        method: "POST",
+        body: JSON.stringify({ ...payment, brandName, category, ownerName, email, password }),
+      });
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) {
+        setPendingPayment(null);
+        setError(`Payment succeeded, but automatic sign-in failed: ${signInError.message}. Please log in manually.`);
+        return;
+      }
+      setPendingPayment(null);
+      navigate("/");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong provisioning your account.");
+      // Deliberately do NOT clear pendingPayment here — the customer already paid, so
+      // the retry button below must stay available rather than forcing them through
+      // Razorpay Checkout (and a second charge) again.
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Defensive: the submit button is hidden while a payment is pending, but Enter in a
+    // field still submits the form — never start a second checkout for a paid signup.
+    if (pendingPayment) return;
     setError(null);
     setSubmitting(true);
     try {
-      const signupRes = await publicApiFetch("/api/signup", { method: "POST", body: JSON.stringify({ planId }) });
+      const signupRes = await publicApiFetch("/api/signup", { method: "POST", body: JSON.stringify({ planId, email }) });
       const { razorpaySubscriptionId, razorpayKeyId } = await signupRes.json();
 
       const razorpay = new window.Razorpay({
@@ -38,32 +75,13 @@ export default function Signup() {
         name: "D2C Analytics Dashboard",
         prefill: { email },
         handler: async (response: { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string }) => {
-          try {
-            await publicApiFetch("/api/signup/complete", {
-              method: "POST",
-              body: JSON.stringify({
-                razorpaySubscriptionId: response.razorpay_subscription_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-                planId,
-                brandName,
-                category,
-                ownerName,
-                email,
-                password,
-              }),
-            });
-            const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-            if (signInError) {
-              setError(`Payment succeeded, but automatic sign-in failed: ${signInError.message}. Please log in manually.`);
-              return;
-            }
-            navigate("/");
-          } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong provisioning your account.");
-          } finally {
-            setSubmitting(false);
-          }
+          const payment: PendingPayment = {
+            razorpaySubscriptionId: response.razorpay_subscription_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          };
+          setPendingPayment(payment);
+          await completeSignup(payment);
         },
         modal: { ondismiss: () => setSubmitting(false) },
       });
@@ -83,10 +101,30 @@ export default function Signup() {
         <Input placeholder="Your name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
         <Input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} />
-        {error && <p className="text-[12.5px] text-negative">{error}</p>}
-        <Button type="submit" className="w-full" disabled={submitting}>
-          {submitting ? "Processing…" : "Continue to payment"}
-        </Button>
+        {error && (
+          <div className="space-y-2">
+            <p className="text-[12.5px] text-negative">{error}</p>
+            {pendingPayment && (
+              <Button
+                type="button"
+                className="w-full"
+                disabled={submitting}
+                onClick={() => {
+                  setSubmitting(true);
+                  setError(null);
+                  completeSignup(pendingPayment);
+                }}
+              >
+                {submitting ? "Retrying…" : "Retry account setup"}
+              </Button>
+            )}
+          </div>
+        )}
+        {!pendingPayment && (
+          <Button type="submit" className="w-full" disabled={submitting}>
+            {submitting ? "Processing…" : "Continue to payment"}
+          </Button>
+        )}
       </form>
     </div>
   );

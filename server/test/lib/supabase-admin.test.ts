@@ -33,6 +33,29 @@ describe("createSupabaseUser", () => {
     await expect(createSupabaseUser("riya@newbrand.com", "a-real-password")).rejects.toThrow(EmailAlreadyRegisteredError);
   });
 
+  it("throws a generic Error (not EmailAlreadyRegisteredError) for an unrelated 422 such as a weak password", async () => {
+    process.env.SUPABASE_URL = "https://test-project.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ error_code: "weak_password", msg: "Password should be at least 8 characters" }), { status: 422 })),
+    );
+    const err = await createSupabaseUser("riya@newbrand.com", "short").catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err).not.toBeInstanceOf(EmailAlreadyRegisteredError);
+    expect((err as Error).message).toMatch(/Supabase user creation failed: 422 .*weak_password/);
+  });
+
+  it("recognizes GoTrue's email_exists error_code as a duplicate email", async () => {
+    process.env.SUPABASE_URL = "https://test-project.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(JSON.stringify({ code: 422, error_code: "email_exists", msg: "Email address already exists" }), { status: 422 })),
+    );
+    await expect(createSupabaseUser("riya@newbrand.com", "a-real-password")).rejects.toThrow(EmailAlreadyRegisteredError);
+  });
+
   it("throws a generic error for any other failure", async () => {
     process.env.SUPABASE_URL = "https://test-project.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";

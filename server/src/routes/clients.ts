@@ -1,7 +1,7 @@
 import { Router } from "express";
 import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
-import { getAccessibleClientIds, assertClientAccess } from "../lib/access.js";
+import { getAccessibleClientIds, assertClientAccess, isStaffMember } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
 import { IST_DAY_START, IST_TODAY_DATE } from "../lib/sql-dates.js";
 import { slugify, pickLogoColor, generateUniqueClientId } from "../lib/slug.js";
@@ -160,6 +160,9 @@ router.post("/", requireAuth, async (req, res, next) => {
     }
     if (!category || !category.trim()) {
       throw new HttpError(400, "invalid_category", "category is required");
+    }
+    if (!(await isStaffMember(pool, req.auth!.userId))) {
+      throw new HttpError(403, "staff_only", "Only agency staff can create additional brands.");
     }
 
     const id = await generateUniqueClientId(pool, name);

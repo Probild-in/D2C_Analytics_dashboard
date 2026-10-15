@@ -42,6 +42,22 @@ describe("POST /api/signup", () => {
     const res = await request(app).post("/api/signup").send({});
     expect(res.status).toBe(400);
   });
+
+  it("409s an already-registered email before creating any Razorpay subscription", async () => {
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access) values
+       ('33333333-3333-3333-3333-333333333333', 'Existing Owner', 'existing@brand.com', 'owner', false)`,
+    );
+    const fetchMock = vi.fn(async () => {
+      throw new Error("fetch must not be called — no Razorpay subscription should be created for a taken email");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    // Different case + surrounding whitespace: the check is case-insensitive.
+    const res = await request(app).post("/api/signup").send({ planId: "medium", email: "  Existing@Brand.com " });
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe("email_already_registered");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /api/signup/complete", () => {
@@ -65,8 +81,35 @@ describe("POST /api/signup/complete", () => {
     return { ...body, razorpaySignature };
   }
 
-  function stubFetchForSuccessfulSupabaseCreate(userId = "11111111-1111-1111-1111-111111111111") {
+  // Razorpay's real billing period for the stubbed subscription (unix seconds).
+  const CURRENT_START = 1760486400; // 2025-10-15T00:00:00Z
+  const CURRENT_END = 1763164800; // 2025-11-15T00:00:00Z
+
+  // GET https://api.razorpay.com/v1/subscriptions/{id} — the server-side verification
+  // /complete now does before trusting anything about the payment.
+  function razorpaySubscriptionResponse(url: string, overrides: Record<string, unknown> = {}) {
+    const subscriptionId = url.split("/v1/subscriptions/")[1];
+    return new Response(
+      JSON.stringify({
+        id: subscriptionId,
+        plan_id: "plan_medium123",
+        status: "active",
+        current_start: CURRENT_START,
+        current_end: CURRENT_END,
+        ...overrides,
+      }),
+      { status: 200 },
+    );
+  }
+
+  function stubFetchForSuccessfulSupabaseCreate(
+    userId = "11111111-1111-1111-1111-111111111111",
+    razorpayOverrides: Record<string, unknown> = {},
+  ) {
     return vi.fn(async (url: string) => {
+      if (url.includes("api.razorpay.com/v1/subscriptions/")) {
+        return razorpaySubscriptionResponse(url, razorpayOverrides);
+      }
       if (url.includes("/auth/v1/admin/users")) {
         return new Response(JSON.stringify({ id: userId }), { status: 200 });
       }
@@ -83,24 +126,34 @@ describe("POST /api/signup/complete", () => {
     expect(clients.rowCount).toBe(1);
     expect(clients.rows[0]).toMatchObject({ id: "new-brand-co", category: "Fashion & Apparel", owner_id: "11111111-1111-1111-1111-111111111111" });
 
-    const teamMembers = await testPool.query("select id, name, email, role, all_client_access from team_members where email = 'riya@newbrand.com'");
+    const teamMembers = await testPool.query(
+      "select id, name, email, role, all_client_access, account_type from team_members where email = 'riya@newbrand.com'",
+    );
     expect(teamMembers.rows[0]).toMatchObject({
       id: "11111111-1111-1111-1111-111111111111",
       name: "Riya Kapoor",
       role: "owner",
       all_client_access: false,
+      account_type: "self_serve_owner",
     });
 
     const scoping = await testPool.query("select client_id from team_member_clients where team_member_id = '11111111-1111-1111-1111-111111111111'");
     expect(scoping.rows).toEqual([{ client_id: "new-brand-co" }]);
 
-    const subs = await testPool.query("select plan_id, status, gateway_subscription_id from subscriptions where client_id = 'new-brand-co'");
+    const subs = await testPool.query(
+      "select plan_id, status, gateway_subscription_id, current_period_start, current_period_end from subscriptions where client_id = 'new-brand-co'",
+    );
     expect(subs.rows[0]).toMatchObject({ plan_id: "medium", status: "active", gateway_subscription_id: "sub_abc123" });
+    // The billing period comes from Razorpay's own response, not "now + 30 days".
+    expect(subs.rows[0].current_period_start.getTime()).toBe(CURRENT_START * 1000);
+    expect(subs.rows[0].current_period_end.getTime()).toBe(CURRENT_END * 1000);
 
     const invoices = await testPool.query(
-      "select amount_inr, status from invoices where subscription_id = (select id from subscriptions where client_id = 'new-brand-co')",
+      "select amount_inr, status, razorpay_payment_id, period_start, period_end from invoices where subscription_id = (select id from subscriptions where client_id = 'new-brand-co')",
     );
-    expect(invoices.rows[0]).toMatchObject({ amount_inr: 2999, status: "paid" });
+    expect(invoices.rows[0]).toMatchObject({ amount_inr: 2999, status: "paid", razorpay_payment_id: "pay_xyz789" });
+    expect(invoices.rows[0].period_start.getTime()).toBe(CURRENT_START * 1000);
+    expect(invoices.rows[0].period_end.getTime()).toBe(CURRENT_END * 1000);
   });
 
   it("rejects an invalid payment signature and creates nothing", async () => {
@@ -112,7 +165,12 @@ describe("POST /api/signup/complete", () => {
   it("rejects a duplicate email before touching the database", async () => {
     vi.stubGlobal(
       "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ msg: "A user with this email address has already been registered" }), { status: 422 })),
+      vi.fn(async (url: string) => {
+        if (url.includes("api.razorpay.com/v1/subscriptions/")) {
+          return razorpaySubscriptionResponse(url);
+        }
+        return new Response(JSON.stringify({ msg: "A user with this email address has already been registered" }), { status: 422 });
+      }),
     );
     const res = await request(app).post("/api/signup/complete").send(signedBody());
     expect(res.status).toBe(409);
@@ -123,14 +181,15 @@ describe("POST /api/signup/complete", () => {
     vi.stubGlobal("fetch", stubFetchForSuccessfulSupabaseCreate());
     await request(app).post("/api/signup/complete").send(signedBody());
 
-    // Second attempt: Supabase now correctly reports the email as taken, since the first
-    // request really did create it — this IS the idempotency guard, not a separate code path.
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response(JSON.stringify({ msg: "A user with this email address has already been registered" }), { status: 422 })),
-    );
+    // Second attempt: the subscription id is already backing a local subscription, so the
+    // replay guard rejects it before Razorpay or Supabase is even contacted (Supabase
+    // would also report the email as taken — that remains the backstop).
+    const secondFetch = vi.fn(async () => new Response(JSON.stringify({ msg: "A user with this email address has already been registered" }), { status: 422 }));
+    vi.stubGlobal("fetch", secondFetch);
     const second = await request(app).post("/api/signup/complete").send(signedBody());
     expect(second.status).toBe(409);
+    expect(second.body.error.code).toBe("payment_already_processed");
+    expect(secondFetch).not.toHaveBeenCalled();
     expect((await testPool.query("select count(*)::int as count from clients where name = 'New Brand Co'")).rows[0].count).toBe(1);
   });
 
@@ -153,6 +212,9 @@ describe("POST /api/signup/complete", () => {
           deleteCalls.push(url);
           return new Response(null, { status: 200 });
         }
+        if (url.includes("api.razorpay.com/v1/subscriptions/")) {
+          return razorpaySubscriptionResponse(url);
+        }
         if (url.includes("/auth/v1/admin/users")) {
           return new Response(JSON.stringify({ id: supabaseUserId }), { status: 200 });
         }
@@ -169,5 +231,58 @@ describe("POST /api/signup/complete", () => {
     expect((await testPool.query("select * from clients where name = 'New Brand Co'")).rowCount).toBe(0);
     expect((await testPool.query("select * from team_members where email = 'riya@newbrand.com'")).rowCount).toBe(0);
     expect((await testPool.query("select * from team_member_clients where team_member_id = $1", [supabaseUserId])).rowCount).toBe(0);
+  });
+
+  // NOTE: /complete's IP rate limiter (max 10/hour) is module-level and is NOT reset
+  // between tests in this file. This describe block makes exactly 10 /complete requests
+  // in total; adding another one here will start returning 429s.
+
+  it("rejects a replayed payment (same signed subscription/payment ids, different account details) with 409", async () => {
+    vi.stubGlobal("fetch", stubFetchForSuccessfulSupabaseCreate());
+    const first = await request(app).post("/api/signup/complete").send(signedBody());
+    expect(first.status).toBe(200);
+
+    // Same razorpaySubscriptionId/razorpayPaymentId/razorpaySignature (still a "valid"
+    // signature — it only binds payment id to subscription id), different account.
+    vi.stubGlobal("fetch", stubFetchForSuccessfulSupabaseCreate("22222222-2222-2222-2222-222222222222"));
+    const replay = await request(app)
+      .post("/api/signup/complete")
+      .send(signedBody({ email: "attacker@other.com", brandName: "Freeloader Brand" }));
+    expect(replay.status).toBe(409);
+    expect(replay.body.error.code).toBe("payment_already_processed");
+
+    const subs = await testPool.query("select id, client_id from subscriptions where gateway_subscription_id = 'sub_abc123'");
+    expect(subs.rowCount).toBe(1);
+    expect(subs.rows[0].client_id).toBe("new-brand-co");
+    expect((await testPool.query("select count(*)::int as count from clients")).rows[0].count).toBe(1);
+    expect((await testPool.query("select count(*)::int as count from invoices where subscription_id = $1", [subs.rows[0].id])).rows[0].count).toBe(1);
+    expect((await testPool.query("select * from team_members where email = 'attacker@other.com'")).rowCount).toBe(0);
+  });
+
+  it("uses the plan Razorpay says the subscription is for, ignoring the request body's planId", async () => {
+    // The subscription was really created for "small" (plan_small123); the body claims "large".
+    vi.stubGlobal("fetch", stubFetchForSuccessfulSupabaseCreate(undefined, { plan_id: "plan_small123" }));
+    const res = await request(app).post("/api/signup/complete").send(signedBody({ planId: "large" }));
+    expect(res.status).toBe(200);
+
+    const subs = await testPool.query("select id, plan_id from subscriptions where client_id = 'new-brand-co'");
+    expect(subs.rows[0].plan_id).toBe("small");
+    const invoices = await testPool.query("select amount_inr from invoices where subscription_id = $1", [subs.rows[0].id]);
+    expect(invoices.rows[0].amount_inr).toBe(1499);
+  });
+
+  it("rejects a subscription Razorpay hasn't confirmed payment for yet, and persists nothing", async () => {
+    const fetchMock = stubFetchForSuccessfulSupabaseCreate(undefined, { status: "created" });
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await request(app).post("/api/signup/complete").send(signedBody());
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe("payment_not_confirmed");
+
+    // No Supabase user was created either — only the Razorpay verification GET ran.
+    expect(fetchMock.mock.calls.map((c) => c[0])).toEqual(["https://api.razorpay.com/v1/subscriptions/sub_abc123"]);
+    expect((await testPool.query("select * from clients")).rowCount).toBe(0);
+    expect((await testPool.query("select * from team_members")).rowCount).toBe(0);
+    expect((await testPool.query("select * from subscriptions")).rowCount).toBe(0);
+    expect((await testPool.query("select * from invoices")).rowCount).toBe(0);
   });
 });

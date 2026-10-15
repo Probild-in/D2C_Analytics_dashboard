@@ -5,6 +5,8 @@ import {
   verifySubscriptionPaymentSignature,
   verifyWebhookSignature,
   getRazorpayKeyId,
+  getSubscription,
+  getPlanIdFromRazorpayPlanId,
 } from "../../src/integrations/razorpay-api.js";
 
 beforeEach(() => {
@@ -75,5 +77,48 @@ describe("verifyWebhookSignature", () => {
 describe("getRazorpayKeyId", () => {
   it("returns the configured key id", () => {
     expect(getRazorpayKeyId()).toBe("rzp_test_key123");
+  });
+});
+
+describe("getSubscription", () => {
+  it("GETs the subscription with Basic Auth and returns the parsed body", async () => {
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      expect(url).toBe("https://api.razorpay.com/v1/subscriptions/sub_abc123");
+      expect(init?.method ?? "GET").toBe("GET");
+      expect(init?.headers).toMatchObject({
+        Authorization: `Basic ${Buffer.from("rzp_test_key123:test-key-secret").toString("base64")}`,
+      });
+      return new Response(
+        JSON.stringify({ id: "sub_abc123", plan_id: "plan_medium123", status: "active", current_start: 1760486400, current_end: 1763164800 }),
+        { status: 200 },
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const result = await getSubscription("sub_abc123");
+    expect(result).toEqual({ id: "sub_abc123", plan_id: "plan_medium123", status: "active", current_start: 1760486400, current_end: 1763164800 });
+    expect(fetchMock).toHaveBeenCalledOnce();
+  });
+
+  it("throws with the status and body text on a non-2xx response", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("subscription not found", { status: 404 })));
+    await expect(getSubscription("sub_missing")).rejects.toThrow(/sub_missing: 404 subscription not found/);
+  });
+});
+
+describe("getPlanIdFromRazorpayPlanId", () => {
+  it("maps each configured Razorpay Plan id back to our plan id", () => {
+    expect(getPlanIdFromRazorpayPlanId("plan_small123")).toBe("small");
+    expect(getPlanIdFromRazorpayPlanId("plan_medium123")).toBe("medium");
+    expect(getPlanIdFromRazorpayPlanId("plan_large123")).toBe("large");
+  });
+
+  it("returns null for a Razorpay Plan id that matches none of them", () => {
+    expect(getPlanIdFromRazorpayPlanId("plan_someone_elses")).toBeNull();
+  });
+
+  it("skips plans whose env var isn't configured rather than throwing", () => {
+    delete process.env.RAZORPAY_PLAN_ID_SMALL;
+    expect(getPlanIdFromRazorpayPlanId("plan_large123")).toBe("large");
+    expect(getPlanIdFromRazorpayPlanId("plan_small123")).toBeNull();
   });
 });

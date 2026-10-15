@@ -45,6 +45,11 @@ if (process.env.NODE_ENV === "production" && !process.env.CORS_ORIGIN?.trim()) {
 }
 
 const app = express();
+// Production runs behind nginx. Without this, every request's req.ip resolves to
+// nginx's own loopback address, which collapses the IP-scoped rate limiters on
+// /api/signup, /api/signup/complete, and /api/enterprise-leads into one shared bucket
+// for every visitor combined, instead of one bucket per real visitor.
+app.set("trust proxy", 1);
 app.use(helmet({ contentSecurityPolicy: false }));
 const allowedOrigins = process.env.CORS_ORIGIN?.split(",").map((o) => o.trim());
 app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
