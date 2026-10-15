@@ -288,6 +288,43 @@ describe("metaConnector.sync", () => {
     });
   });
 
+  it("treats a campaign/ad with no activity today as zero, instead of crashing on Meta's missing (not zero) numeric fields", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        if (url.includes("/campaigns?")) {
+          return new Response(JSON.stringify({ data: [{ id: "camp_1", name: "Quiet Campaign", status: "ACTIVE" }] }), { status: 200 });
+        }
+        if (url.includes("camp_1/insights?")) {
+          // Confirmed live: Meta omits spend/impressions/clicks entirely (not "0") for a
+          // campaign with no activity in the requested window, once date_preset narrows it.
+          return new Response(JSON.stringify({ data: [{ campaign_id: "camp_1", campaign_name: "Quiet Campaign" }] }), { status: 200 });
+        }
+        if (url.includes("/ads?")) {
+          return new Response(
+            JSON.stringify({
+              data: [{ id: "ad_1", name: "Quiet Ad", campaign_id: "camp_1", status: "ACTIVE", created_time: "2026-08-15T00:00:00+0000", creative: { id: "creative_1", object_type: "IMAGE" } }],
+            }),
+            { status: 200 },
+          );
+        }
+        if (url.includes("ad_1/insights?")) {
+          return new Response(JSON.stringify({ data: [{}] }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    const result = await metaConnector.sync("55555555-5555-5555-5555-555555555555");
+    expect(result.recordsSynced).toBe(1);
+
+    const metrics = await testPool.query("select * from meta_campaign_metrics where campaign_id = 'camp_1'");
+    expect(metrics.rows[0]).toMatchObject({ spend: 0, impressions: 0, clicks: 0, results: 0, revenue: 0 });
+
+    const creatives = await testPool.query("select * from campaign_creatives where external_creative_id = 'creative_1'");
+    expect(creatives.rows[0]).toMatchObject({ spend: 0, impressions: 0, clicks: 0, results: 0, revenue: 0 });
+  });
+
   it("skips an ad with no creative object at all, rather than crashing the whole sync (Advantage+/dynamic-creative ads have none)", async () => {
     vi.stubGlobal(
       "fetch",

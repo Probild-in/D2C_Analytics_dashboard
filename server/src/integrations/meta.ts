@@ -59,12 +59,23 @@ function mapCampaignStatus(status: string): string {
   return "paused";
 }
 
+// Meta omits a numeric field entirely (rather than returning "0") for a campaign/ad with
+// no activity in the requested window — confirmed live once date_preset=today narrowed the
+// window enough for this to actually happen. parseFloat(undefined) is NaN, which Postgres
+// rejects outright for an integer column ("invalid input syntax for type integer: NaN"),
+// crashing the whole sync on the first affected row. Every numeric field read from Meta's
+// response goes through this so a missing/non-numeric value becomes 0, not a crash.
+function toInt(value: string | undefined): number {
+  const n = Math.round(parseFloat(value ?? ""));
+  return Number.isNaN(n) ? 0 : n;
+}
+
 // Extracts the purchase count from Meta Insights' `actions` array, which lists every
 // action type (link clicks, video views, purchases, ...) the ad drove — we only care
 // about purchases for the "results" metric this dashboard shows.
 function extractPurchases(actions: { action_type: string; value: string }[] | undefined): number {
   const purchase = actions?.find((a) => a.action_type === "omni_purchase" || a.action_type === "purchase");
-  return purchase ? Math.round(parseFloat(purchase.value)) : 0;
+  return purchase ? toInt(purchase.value) : 0;
 }
 
 // Same lookup as extractPurchases, but against action_values — the revenue those
@@ -72,7 +83,7 @@ function extractPurchases(actions: { action_type: string; value: string }[] | un
 // all, which is why ROAS was hardcoded to 0 in server/src/routes/campaigns.ts.
 function extractPurchaseValue(actionValues: { action_type: string; value: string }[] | undefined): number {
   const purchase = actionValues?.find((a) => a.action_type === "omni_purchase" || a.action_type === "purchase");
-  return purchase ? Math.round(parseFloat(purchase.value)) : 0;
+  return purchase ? toInt(purchase.value) : 0;
 }
 
 function getRedirectUri(): string {
@@ -257,9 +268,9 @@ export const metaConnector: OAuthConnector = {
             connectionId,
             row.campaign_id,
             row.campaign_name,
-            Math.round(parseFloat(row.spend)),
-            Math.round(parseFloat(row.impressions)),
-            Math.round(parseFloat(row.clicks)),
+            toInt(row.spend),
+            toInt(row.impressions),
+            toInt(row.clicks),
             extractPurchases(row.actions),
             extractPurchaseValue(row.action_values),
           ],
@@ -308,9 +319,9 @@ export const metaConnector: OAuthConnector = {
             ad.creative.call_to_action_type ?? null,
             ad.creative.thumbnail_url ?? null,
             mapCampaignStatus(ad.status),
-            adMetrics ? Math.round(parseFloat(adMetrics.spend)) : 0,
-            adMetrics ? Math.round(parseFloat(adMetrics.impressions)) : 0,
-            adMetrics ? Math.round(parseFloat(adMetrics.clicks)) : 0,
+            adMetrics ? toInt(adMetrics.spend) : 0,
+            adMetrics ? toInt(adMetrics.impressions) : 0,
+            adMetrics ? toInt(adMetrics.clicks) : 0,
             adMetrics ? extractPurchases(adMetrics.actions) : 0,
             adMetrics ? extractPurchaseValue(adMetrics.action_values) : 0,
             ad.created_time.slice(0, 10),
