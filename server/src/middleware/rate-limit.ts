@@ -18,14 +18,18 @@ export function createRateLimiter({
   max: number;
   windowMs: number;
   now?: () => number;
-  scope?: "user" | "user-and-client";
+  scope?: "user" | "user-and-client" | "ip";
   maxKeys?: number;
 }) {
   const hits = new Map<string, number[]>();
 
   const middleware = (req: Request, _res: Response, next: NextFunction) => {
-    const userId = req.auth?.userId ?? "anon";
-    const key = scope === "user" ? userId : `${userId}:${req.params.id ?? ""}`;
+    const key =
+      scope === "ip"
+        ? (req.ip ?? "unknown-ip")
+        : scope === "user"
+          ? (req.auth?.userId ?? "anon")
+          : `${req.auth?.userId ?? "anon"}:${req.params.id ?? ""}`;
     const t = now();
 
     if (hits.size > maxKeys) {

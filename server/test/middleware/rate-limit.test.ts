@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import type { Request, Response } from "express";
+import express from "express";
+import request from "supertest";
 import { createRateLimiter } from "../../src/middleware/rate-limit.js";
 import { HttpError } from "../../src/lib/http-error.js";
 
@@ -65,5 +67,19 @@ describe("createRateLimiter", () => {
     t = 5000;
     limiter(fakeReq("u1", "c4"), res, next);
     expect(limiter.size()).toBe(1);
+  });
+
+  it("scope 'ip' keys by request IP instead of req.auth.userId, so it works on public routes with no auth", async () => {
+    const limiter = createRateLimiter({ max: 2, windowMs: 60_000, scope: "ip" });
+    const app = express();
+    app.use(limiter);
+    app.get("/", (_req, res) => res.json({ ok: true }));
+
+    // supertest requests from the same agent share the same source IP (127.0.0.1),
+    // so three requests in a row should trip the limit on the third.
+    await request(app).get("/").expect(200);
+    await request(app).get("/").expect(200);
+    const third = await request(app).get("/");
+    expect(third.status).toBe(429);
   });
 });
