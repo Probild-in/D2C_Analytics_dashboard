@@ -3,6 +3,7 @@ import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 import { assertClientAccess, getAccessibleClientIds } from "../lib/access.js";
 import { HttpError } from "../lib/http-error.js";
+import { publishNotification } from "../lib/notification-bus.js";
 
 const router = Router({ mergeParams: true });
 
@@ -122,6 +123,21 @@ router.post("/", requireAuth, async (req, res, next) => {
       [clientId, title.trim(), description?.trim() ?? "", assigneeId, priority, dueDate, tags ?? [], req.auth!.userId],
     );
 
+    const clientName = (await pool.query<{ name: string }>("select name from clients where id = $1", [clientId])).rows[0].name;
+    const notif = await pool.query(
+      `insert into notifications (client_id, kind, title, description) values ($1, 'task', $2, $3) returning id, created_at`,
+      [clientId, `Task assigned to ${assignee.rows[0].name}`, `${assignee.rows[0].name} was assigned: "${title.trim()}".`],
+    );
+    publishNotification({
+      id: notif.rows[0].id,
+      clientId,
+      clientName,
+      kind: "task",
+      title: `Task assigned to ${assignee.rows[0].name}`,
+      description: `${assignee.rows[0].name} was assigned: "${title.trim()}".`,
+      createdAt: notif.rows[0].created_at.toISOString(),
+    });
+
     res.status(201).json(mapTaskRow({ ...inserted.rows[0], assignee_name: assignee.rows[0].name }));
   } catch (err) {
     next(err);
@@ -145,6 +161,23 @@ router.patch("/:taskId", requireAuth, async (req, res, next) => {
     );
     if (updated.rowCount === 0) {
       throw new HttpError(404, "not_found", "Task not found");
+    }
+
+    if (status === "Completed") {
+      const clientName = (await pool.query<{ name: string }>("select name from clients where id = $1", [clientId])).rows[0].name;
+      const notif = await pool.query(
+        `insert into notifications (client_id, kind, title, description) values ($1, 'task', 'Task completed', $2) returning id, created_at`,
+        [clientId, `"${updated.rows[0].title}" was marked completed.`],
+      );
+      publishNotification({
+        id: notif.rows[0].id,
+        clientId,
+        clientName,
+        kind: "task",
+        title: "Task completed",
+        description: `"${updated.rows[0].title}" was marked completed.`,
+        createdAt: notif.rows[0].created_at.toISOString(),
+      });
     }
 
     const assignee = await pool.query("select name from team_members where id = $1", [updated.rows[0].assignee_id]);

@@ -126,6 +126,56 @@ describe("POST /api/clients/:id/tasks", () => {
   });
 });
 
+describe("task notifications", () => {
+  it("creating a task inserts a real notification naming the assignee, not a generic placeholder", async () => {
+    const token = signTestJwt({ sub: OWNER_ID, email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ title: "Review creative", assigneeId: OWNER_ID, priority: "Medium", dueDate: "2026-11-01" });
+    expect(res.status).toBe(201);
+
+    const notifs = await testPool.query("select kind, title, description, client_id from notifications where client_id = $1", [
+      "abc-fashion",
+    ]);
+    expect(notifs.rows).toContainEqual(
+      expect.objectContaining({
+        kind: "task",
+        title: "Task assigned to Riya Kapoor",
+        description: `Riya Kapoor was assigned: "Review creative".`,
+      }),
+    );
+  });
+
+  it("marking a task Completed inserts a real notification; other status transitions do not", async () => {
+    const token = signTestJwt({ sub: OWNER_ID, email: "riya@agency.com" });
+    const created = await request(app)
+      .post("/api/clients/abc-fashion/tasks")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ title: "Approve copy", assigneeId: OWNER_ID, priority: "Low", dueDate: "2026-11-01" });
+    const taskId = created.body.id;
+
+    await request(app)
+      .patch(`/api/clients/abc-fashion/tasks/${taskId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "In Progress" });
+    const afterInProgress = await testPool.query(
+      "select count(*)::int as count from notifications where kind = 'task' and title = 'Task completed'",
+    );
+    expect(afterInProgress.rows[0].count).toBe(0);
+
+    await request(app)
+      .patch(`/api/clients/abc-fashion/tasks/${taskId}`)
+      .set("Authorization", `Bearer ${token}`)
+      .send({ status: "Completed" });
+    const afterCompleted = await testPool.query(
+      "select description from notifications where kind = 'task' and title = 'Task completed' and client_id = $1",
+      ["abc-fashion"],
+    );
+    expect(afterCompleted.rows).toContainEqual({ description: `"Approve copy" was marked completed.` });
+  });
+});
+
 describe("PATCH /api/clients/:id/tasks/:taskId", () => {
   it("moves a task to a new status", async () => {
     const created = await testPool.query(
