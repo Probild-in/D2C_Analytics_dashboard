@@ -237,12 +237,12 @@ describe("sweepExpiredPendingConnections", () => {
 });
 
 describe("startScheduler", () => {
-  it("schedules the hourly Shopify sync and a 6-hourly sync for both Meta and Google", () => {
+  it("schedules the hourly Shopify sync and a 15-minutely sync for both Meta and Google, offset from each other", () => {
     const scheduleSpy = vi.spyOn(cron, "schedule");
     startScheduler();
     expect(scheduleSpy).toHaveBeenCalledWith("0 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
-    const sixHourlyCalls = scheduleSpy.mock.calls.filter((call) => call[0] === "0 */6 * * *");
-    expect(sixHourlyCalls).toHaveLength(2);
+    expect(scheduleSpy).toHaveBeenCalledWith("*/15 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
+    expect(scheduleSpy).toHaveBeenCalledWith("3,18,33,48 * * * *", expect.any(Function), expect.objectContaining({ noOverlap: true }));
     scheduleSpy.mockRestore();
   });
 

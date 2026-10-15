@@ -18,6 +18,8 @@ import tasksRouter from "./routes/tasks.js";
 import teamMembersRouter from "./routes/team-members.js";
 import pendingConnectionsRouter from "./routes/pending-connections.js";
 import shopifyWebhooksRouter from "./routes/shopify-webhooks.js";
+import delhiveryWebhooksRouter from "./routes/delhivery-webhooks.js";
+import shiprocketWebhooksRouter from "./routes/shiprocket-webhooks.js";
 import { startScheduler } from "./scheduler.js";
 
 process.on("unhandledRejection", (reason) => {
@@ -59,6 +61,11 @@ app.use("/api/clients/:id/campaigns", campaignsRouter);
 app.use("/api/clients/:id/tasks", tasksRouter);
 app.use("/api/clients/:id/couriers", courierDataRouter);
 app.use("/api/couriers", couriersRouter);
+// Unlike Shopify's, neither courier's webhook system has a documented HMAC/signature
+// scheme — the connectionId in the URL path (an unguessable UUID) is the practical
+// safeguard, so these can sit after the normal express.json() parser.
+app.use("/api/webhooks/delhivery", delhiveryWebhooksRouter);
+app.use("/api/webhooks/shiprocket", shiprocketWebhooksRouter);
 app.use("/api/integrations", integrationsRouter);
 app.use("/api/team-members", teamMembersRouter);
 app.use("/api/connections/pending", pendingConnectionsRouter);

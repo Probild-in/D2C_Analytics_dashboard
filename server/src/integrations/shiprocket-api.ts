@@ -79,6 +79,41 @@ function parseOrder(raw: unknown): ShiprocketOrder {
   };
 }
 
+export interface ShiprocketWebhookEvent {
+  awb: string;
+  orderRef: string | null;
+  status: string | null;
+  courier: string | null;
+  destinationState: string | null;
+  deliveredAt: Date | null;
+}
+
+// Shiprocket's webhook payload shape is UNCONFIRMED — same caveat as the rest of this file
+// (see the module header). Their own docs describe the mechanism (POST on every tracking
+// event) but not a field-by-field schema, so this tries the same field-name variants
+// already established for their REST API's order/shipment resources, on the assumption a
+// webhook event mirrors that same resource shape. Confirm against a real delivered webhook
+// before relying on it in production.
+export function parseWebhookEvent(raw: unknown): ShiprocketWebhookEvent | null {
+  if (!isRecord(raw)) return null;
+  // Some webhook integrations wrap the event in an envelope (e.g. { data: {...} } or
+  // { order: {...} }) — unwrap one level if the awb/status fields aren't at the top.
+  const hasAwbAtTopLevel = asString(raw.awb) !== null || asString(raw.awb_code) !== null;
+  const body: Record<string, unknown> = hasAwbAtTopLevel
+    ? raw
+    : (isRecord(raw.data) ? raw.data : null) ?? (isRecord(raw.order) ? raw.order : null) ?? raw;
+  const awb = asString(body.awb) ?? asString(body.awb_code);
+  if (!awb) return null;
+  return {
+    awb,
+    orderRef: asString(body.channel_order_id) ?? asString(body.order_id) ?? asString(body.id),
+    status: asString(body.current_status) ?? asString(body.status) ?? asString(body.shipment_status),
+    courier: asString(body.courier_name) ?? asString(body.courier),
+    destinationState: asString(body.customer_state) ?? asString(body.state) ?? asString(body.destination_state),
+    deliveredAt: asDate(body.delivered_date) ?? asDate(body.delivered_at),
+  };
+}
+
 export async function shiprocketLogin(email: string, password: string): Promise<string> {
   const res = await fetch(`${API_BASE}/auth/login`, {
     method: "POST",

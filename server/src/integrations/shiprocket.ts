@@ -2,7 +2,7 @@ import type { CredentialsConnector } from "./types.js";
 import { CredentialsRejectedError } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
-import { fetchOrdersPage, shiprocketLogin, ShiprocketAuthError, type ShiprocketOrdersPage } from "./shiprocket-api.js";
+import { fetchOrdersPage, shiprocketLogin, ShiprocketAuthError, type ShiprocketOrdersPage, type ShiprocketShipment } from "./shiprocket-api.js";
 import { mapShiprocketStatus } from "./shiprocket-status.js";
 
 const SYNC_WINDOW_DAYS = 30;
@@ -12,6 +12,44 @@ const MAX_PAGES = 50;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 const RECONNECT_MESSAGE = "Shiprocket rejected the stored credentials. Reconnect with the API user's current password.";
+
+// Shared by the hourly poll (sync, below) and the real-time webhook route — both upsert a
+// shipment identically once they have one. Logs (rather than throws on) an unrecognized
+// status label, same tolerance the poll loop already had, so one unfamiliar label doesn't
+// drop an otherwise-good webhook delivery.
+export async function upsertShiprocketShipment(
+  clientId: string,
+  connectionId: string,
+  shipment: ShiprocketShipment,
+  order: { orderRef: string | null; status: string | null; state: string | null; createdAt: Date | null },
+): Promise<void> {
+  const rawStatus = shipment.status ?? order.status;
+  const mapped = mapShiprocketStatus(rawStatus);
+  if (!mapped && rawStatus) {
+    console.warn(`Shiprocket: unrecognized status label treated as In Transit: ${rawStatus}`);
+  }
+  await pool.query(
+    `insert into shipments
+       (client_id, connection_id, awb, order_ref, courier_name, status, destination_state, ordered_at, delivered_at)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     on conflict (client_id, awb)
+     do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
+       courier_name = excluded.courier_name, status = excluded.status,
+       destination_state = excluded.destination_state, ordered_at = excluded.ordered_at,
+       delivered_at = excluded.delivered_at, synced_at = now()`,
+    [
+      clientId,
+      connectionId,
+      shipment.awb,
+      order.orderRef,
+      shipment.courier ?? "Unknown courier",
+      mapped ?? "In Transit",
+      order.state,
+      order.createdAt,
+      shipment.deliveredAt,
+    ],
+  );
+}
 
 export const shiprocketConnector: CredentialsConnector = {
   platform: "courier_shiprocket",
@@ -62,7 +100,6 @@ export const shiprocketConnector: CredentialsConnector = {
     // Orders arrive newest first. Non-terminal shipments older than the window are not
     // re-polled: an accepted gap for this version.
     const cutoff = Date.now() - SYNC_WINDOW_DAYS * DAY_MS;
-    const unmapped = new Set<string>();
     let recordsSynced = 0;
 
     for (let page = 1; page <= MAX_PAGES; page++) {
@@ -77,31 +114,7 @@ export const shiprocketConnector: CredentialsConnector = {
 
       for (const order of orders) {
         for (const shipment of order.shipments) {
-          const rawStatus = shipment.status ?? order.status;
-          const mapped = mapShiprocketStatus(rawStatus);
-          if (!mapped && rawStatus) unmapped.add(rawStatus);
-
-          await pool.query(
-            `insert into shipments
-               (client_id, connection_id, awb, order_ref, courier_name, status, destination_state, ordered_at, delivered_at)
-             values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-             on conflict (client_id, awb)
-             do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
-               courier_name = excluded.courier_name, status = excluded.status,
-               destination_state = excluded.destination_state, ordered_at = excluded.ordered_at,
-               delivered_at = excluded.delivered_at, synced_at = now()`,
-            [
-              conn.client_id,
-              connectionId,
-              shipment.awb,
-              order.orderRef,
-              shipment.courier ?? "Unknown courier",
-              mapped ?? "In Transit",
-              order.state,
-              order.createdAt,
-              shipment.deliveredAt,
-            ],
-          );
+          await upsertShiprocketShipment(conn.client_id, connectionId, shipment, order);
           recordsSynced++;
         }
       }
@@ -109,10 +122,6 @@ export const shiprocketConnector: CredentialsConnector = {
       const pageIsEntirelyOld =
         orders.length > 0 && orders.every((o) => o.createdAt !== null && o.createdAt.getTime() < cutoff);
       if (orders.length === 0 || page >= totalPages || pageIsEntirelyOld) break;
-    }
-
-    if (unmapped.size > 0) {
-      console.warn(`Shiprocket: unrecognized status labels treated as In Transit: ${[...unmapped].join(", ")}`);
     }
 
     await pool.query(
