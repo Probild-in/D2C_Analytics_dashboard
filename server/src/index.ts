@@ -20,6 +20,7 @@ import pendingConnectionsRouter from "./routes/pending-connections.js";
 import shopifyWebhooksRouter from "./routes/shopify-webhooks.js";
 import delhiveryWebhooksRouter from "./routes/delhivery-webhooks.js";
 import shiprocketWebhooksRouter from "./routes/shiprocket-webhooks.js";
+import publicPlansRouter from "./routes/public-plans.js";
 import { startScheduler } from "./scheduler.js";
 
 process.on("unhandledRejection", (reason) => {
@@ -69,6 +70,7 @@ app.use("/api/webhooks/shiprocket", shiprocketWebhooksRouter);
 app.use("/api/integrations", integrationsRouter);
 app.use("/api/team-members", teamMembersRouter);
 app.use("/api/connections/pending", pendingConnectionsRouter);
+app.use("/api/plans", publicPlansRouter);
 
 app.get("/health", async (_req, res) => {
   try {
