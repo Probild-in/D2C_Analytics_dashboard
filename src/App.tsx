@@ -17,6 +17,7 @@ const BlendedMarketing = lazy(() => import("@/pages/blended-marketing"));
 const Tasks = lazy(() => import("@/pages/tasks"));
 const ManageClients = lazy(() => import("@/pages/manage-clients"));
 const Login = lazy(() => import("@/pages/login"));
+const Pricing = lazy(() => import("@/pages/pricing"));
 const ConnectPickAccounts = lazy(() => import("@/pages/connect-pick-accounts"));
 const ConnectClaim = lazy(() => import("@/pages/connect-claim"));
 
@@ -36,6 +37,7 @@ export default function App() {
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route element={<RequireAuth />}>
                 <Route path="/connect/pick-accounts" element={<ConnectPickAccounts />} />
                 <Route path="/connect/claim" element={<ConnectClaim />} />
