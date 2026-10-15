@@ -19,6 +19,7 @@ const ManageClients = lazy(() => import("@/pages/manage-clients"));
 const Login = lazy(() => import("@/pages/login"));
 const Pricing = lazy(() => import("@/pages/pricing"));
 const Signup = lazy(() => import("@/pages/signup"));
+const ContactEnterprise = lazy(() => import("@/pages/contact-enterprise"));
 const ConnectPickAccounts = lazy(() => import("@/pages/connect-pick-accounts"));
 const ConnectClaim = lazy(() => import("@/pages/connect-claim"));
 
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/contact-enterprise" element={<ContactEnterprise />} />
               <Route element={<RequireAuth />}>
                 <Route path="/connect/pick-accounts" element={<ConnectPickAccounts />} />
                 <Route path="/connect/claim" element={<ConnectClaim />} />
