@@ -9,12 +9,12 @@ function getCredentials(): { url: string; serviceRoleKey: string } {
   return { url, serviceRoleKey };
 }
 
-export async function createSupabaseUser(email: string, password: string): Promise<{ id: string }> {
+export async function createSupabaseUser(email: string, password?: string): Promise<{ id: string }> {
   const { url, serviceRoleKey } = getCredentials();
   const res = await fetch(`${url}/auth/v1/admin/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json", apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
-    body: JSON.stringify({ email, password, email_confirm: true }),
+    body: JSON.stringify(password ? { email, password, email_confirm: true } : { email, email_confirm: true }),
   });
   // GoTrue uses 422 for several validation failures (e.g. a weak password), not only a
   // duplicate email — only treat it as "already registered" when the body says so.
@@ -32,6 +32,20 @@ export async function createSupabaseUser(email: string, password: string): Promi
   }
   const body = (await res.json()) as { id: string };
   return { id: body.id };
+}
+
+export async function generateMagicLink(email: string): Promise<{ actionLink: string }> {
+  const { url, serviceRoleKey } = getCredentials();
+  const res = await fetch(`${url}/auth/v1/admin/generate_link`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` },
+    body: JSON.stringify({ type: "magiclink", email }),
+  });
+  if (!res.ok) {
+    throw new Error(`Failed to generate magic link: ${res.status} ${await res.text()}`);
+  }
+  const body = (await res.json()) as { properties: { action_link: string } };
+  return { actionLink: body.properties.action_link };
 }
 
 export async function deleteSupabaseUser(userId: string): Promise<void> {

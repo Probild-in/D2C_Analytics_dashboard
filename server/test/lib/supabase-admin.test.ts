@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { createSupabaseUser, deleteSupabaseUser, EmailAlreadyRegisteredError } from "../../src/lib/supabase-admin.js";
+import { createSupabaseUser, deleteSupabaseUser, EmailAlreadyRegisteredError, generateMagicLink } from "../../src/lib/supabase-admin.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -61,6 +61,50 @@ describe("createSupabaseUser", () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ msg: "internal error" }), { status: 500 })));
     await expect(createSupabaseUser("riya@newbrand.com", "a-real-password")).rejects.toThrow(/Supabase user creation failed/);
+  });
+});
+
+describe("createSupabaseUser without a password", () => {
+  it("omits the password field entirely when none is given", async () => {
+    process.env.SUPABASE_URL = "https://test-project.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    let capturedBody: Record<string, unknown> | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url: string, init?: RequestInit) => {
+        capturedBody = JSON.parse(init?.body as string);
+        return new Response(JSON.stringify({ id: "11111111-1111-1111-1111-111111111111" }), { status: 200 });
+      }),
+    );
+    const result = await createSupabaseUser("riya@newbrand.com");
+    expect(result).toEqual({ id: "11111111-1111-1111-1111-111111111111" });
+    expect(capturedBody).not.toHaveProperty("password");
+    expect(capturedBody).toMatchObject({ email: "riya@newbrand.com", email_confirm: true });
+  });
+});
+
+describe("generateMagicLink", () => {
+  it("requests a magiclink and returns the action link", async () => {
+    process.env.SUPABASE_URL = "https://test-project.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        expect(url).toBe("https://test-project.supabase.co/auth/v1/admin/generate_link");
+        const body = JSON.parse(init?.body as string);
+        expect(body).toMatchObject({ type: "magiclink", email: "riya@newbrand.com" });
+        return new Response(JSON.stringify({ properties: { action_link: "https://test-project.supabase.co/auth/v1/verify?token=abc" } }), { status: 200 });
+      }),
+    );
+    const result = await generateMagicLink("riya@newbrand.com");
+    expect(result).toEqual({ actionLink: "https://test-project.supabase.co/auth/v1/verify?token=abc" });
+  });
+
+  it("throws a clear error on a non-2xx response", async () => {
+    process.env.SUPABASE_URL = "https://test-project.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("server error", { status: 500 })));
+    await expect(generateMagicLink("riya@newbrand.com")).rejects.toThrow(/Failed to generate magic link/);
   });
 });
 
