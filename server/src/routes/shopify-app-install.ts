@@ -3,9 +3,17 @@ import pool from "../db.js";
 import { getShopifyAppInstallUrl, exchangeShopifyAppCode, getShopInfo } from "../integrations/shopify-app-oauth.js";
 import { signState, verifyState } from "../lib/state-token.js";
 import { normalizeShopDomain } from "../lib/shop-domain.js";
-import { createSupabaseUser, deleteSupabaseUser } from "../lib/supabase-admin.js";
+import { createSupabaseUser, deleteSupabaseUser, generateMagicLink } from "../lib/supabase-admin.js";
 import { generateUniqueClientId, pickLogoColor } from "../lib/slug.js";
-import { encryptToken } from "../lib/crypto.js";
+import { encryptToken, decryptToken } from "../lib/crypto.js";
+import { createAppSubscription, getAppSubscription } from "../integrations/shopify-billing.js";
+import { HttpError } from "../lib/http-error.js";
+
+const SELF_SERVE_PLAN_IDS = ["small", "medium", "large"] as const;
+type SelfServePlanId = (typeof SELF_SERVE_PLAN_IDS)[number];
+function isSelfServePlanId(value: unknown): value is SelfServePlanId {
+  return typeof value === "string" && (SELF_SERVE_PLAN_IDS as readonly string[]).includes(value);
+}
 
 const router = Router();
 
@@ -99,6 +107,77 @@ router.get("/callback", async (req, res) => {
 
     const params = new URLSearchParams({ client: clientId });
     res.redirect(`${frontendUrl}/#/shopify-app/plans?${params.toString()}`);
+  } catch (err) {
+    const params = new URLSearchParams({ connection: "error", message: err instanceof Error ? err.message : "Something went wrong." });
+    res.redirect(`${frontendUrl}/#/shopify-app/error?${params.toString()}`);
+  }
+});
+
+router.post("/:clientId/subscribe", async (req, res, next) => {
+  try {
+    const { clientId } = req.params;
+    const { planId } = req.body as { planId?: string };
+    if (!isSelfServePlanId(planId)) {
+      throw new HttpError(400, "invalid_plan", "planId must be one of: small, medium, large");
+    }
+    const connResult = await pool.query<{ external_account_id: string; access_token: string }>(
+      `select external_account_id, access_token from platform_connections where client_id = $1 and platform = 'shopify'`,
+      [clientId],
+    );
+    if (connResult.rowCount === 0) {
+      throw new HttpError(404, "not_found", "No Shopify connection for this client");
+    }
+    const shop = connResult.rows[0].external_account_id;
+    const accessToken = decryptToken(connResult.rows[0].access_token);
+    const returnUrl = `${process.env.PUBLIC_API_URL}/api/shopify-app/billing-callback?client=${clientId}`;
+
+    const { confirmationUrl, subscriptionGid } = await createAppSubscription(shop, accessToken, planId, returnUrl);
+
+    await pool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values ($1, $2, 'pending', $3, 'shopify')
+       on conflict (client_id) do update set plan_id = excluded.plan_id, status = 'pending', gateway_subscription_id = excluded.gateway_subscription_id, billing_provider = 'shopify'`,
+      [clientId, planId, subscriptionGid],
+    );
+
+    res.json({ confirmationUrl });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/billing-callback", async (req, res) => {
+  const frontendUrl = process.env.FRONTEND_URL;
+  const clientId = req.query.client as string;
+  try {
+    const subResult = await pool.query<{ gateway_subscription_id: string; email: string }>(
+      `select s.gateway_subscription_id, tm.email from subscriptions s
+       join clients c on c.id = s.client_id join team_members tm on tm.id = c.owner_id
+       where s.client_id = $1 and s.billing_provider = 'shopify'`,
+      [clientId],
+    );
+    if (subResult.rowCount === 0) {
+      throw new Error("No pending Shopify subscription for this client");
+    }
+    const { gateway_subscription_id: subscriptionGid, email } = subResult.rows[0];
+
+    const connResult = await pool.query<{ external_account_id: string; access_token: string }>(
+      `select external_account_id, access_token from platform_connections where client_id = $1 and platform = 'shopify'`,
+      [clientId],
+    );
+    const shop = connResult.rows[0].external_account_id;
+    const accessToken = decryptToken(connResult.rows[0].access_token);
+
+    const { status } = await getAppSubscription(shop, accessToken, subscriptionGid);
+    if (status !== "ACTIVE") {
+      const params = new URLSearchParams({ client: clientId, billing: "declined" });
+      res.redirect(`${frontendUrl}/#/shopify-app/plans?${params.toString()}`);
+      return;
+    }
+
+    await pool.query("update subscriptions set status = 'active' where client_id = $1", [clientId]);
+
+    const { actionLink } = await generateMagicLink(email);
+    res.redirect(actionLink);
   } catch (err) {
     const params = new URLSearchParams({ connection: "error", message: err instanceof Error ? err.message : "Something went wrong." });
     res.redirect(`${frontendUrl}/#/shopify-app/error?${params.toString()}`);

@@ -234,3 +234,72 @@ describe("GET /api/shopify-app/callback", () => {
     expect(third.headers.location).toContain("https://d2c.probild.in/#/shopify-app/plans");
   });
 });
+
+describe("POST /api/shopify-app/:clientId/subscribe", () => {
+  it("creates a Shopify charge and returns its confirmation URL", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        expect(url).toBe("https://newbrand.myshopify.com/admin/api/2024-10/graphql.json");
+        return new Response(
+          JSON.stringify({ data: { appSubscriptionCreate: { appSubscription: { id: "gid://shopify/AppSubscription/1" }, confirmationUrl: "https://newbrand.myshopify.com/admin/charges/1/confirm", userErrors: [] } } }),
+          { status: 200 },
+        );
+      }),
+    );
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ confirmationUrl: "https://newbrand.myshopify.com/admin/charges/1/confirm" });
+
+    const subs = await testPool.query("select plan_id, status, billing_provider from subscriptions where client_id = $1", [clientId]);
+    expect(subs.rows[0]).toMatchObject({ plan_id: "medium", status: "pending", billing_provider: "shopify" });
+  });
+
+  it("rejects enterprise", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "enterprise" });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("GET /api/shopify-app/billing-callback", () => {
+  it("activates the subscription and redirects through a real magic link on approval", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/graphql.json")) {
+          const body = JSON.parse(init?.body as string);
+          if (body.query.includes("appSubscriptionCreate")) {
+            return new Response(JSON.stringify({ data: { appSubscriptionCreate: { appSubscription: { id: "gid://shopify/AppSubscription/1" }, confirmationUrl: "https://newbrand.myshopify.com/admin/charges/1/confirm", userErrors: [] } } }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ data: { node: { status: "ACTIVE", name: "Medium" } } }), { status: 200 });
+        }
+        if (url.includes("/admin/generate_link")) {
+          return new Response(JSON.stringify({ properties: { action_link: "https://test-project.supabase.co/auth/v1/verify?token=magic" } }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("https://test-project.supabase.co/auth/v1/verify?token=magic");
+
+    const subs = await testPool.query("select status from subscriptions where client_id = $1", [clientId]);
+    expect(subs.rows[0].status).toBe("active");
+  });
+});
