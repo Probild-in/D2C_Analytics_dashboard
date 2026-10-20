@@ -22,6 +22,8 @@ const Signup = lazy(() => import("@/pages/signup"));
 const ContactEnterprise = lazy(() => import("@/pages/contact-enterprise"));
 const ConnectPickAccounts = lazy(() => import("@/pages/connect-pick-accounts"));
 const ConnectClaim = lazy(() => import("@/pages/connect-claim"));
+const ShopifyAppPlans = lazy(() => import("@/pages/shopify-app-plans"));
+const ShopifyAppError = lazy(() => import("@/pages/shopify-app-error"));
 
 function RouteFallback() {
   return (
@@ -42,6 +44,8 @@ export default function App() {
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/contact-enterprise" element={<ContactEnterprise />} />
+              <Route path="/shopify-app/plans" element={<ShopifyAppPlans />} />
+              <Route path="/shopify-app/error" element={<ShopifyAppError />} />
               <Route element={<RequireAuth />}>
                 <Route path="/connect/pick-accounts" element={<ConnectPickAccounts />} />
                 <Route path="/connect/claim" element={<ConnectClaim />} />
