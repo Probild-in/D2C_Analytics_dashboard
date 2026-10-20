@@ -69,9 +69,22 @@ router.post("/shop/redact", async (req, res, next) => {
           "select count(*)::int as count from team_member_clients where team_member_id = $1",
           [ownerId],
         );
+        // Defensive third check: today, an owner's team_members row can only ever be
+        // clients.owner_id for the single client row just deleted above, so this count
+        // should always be 0 by the time we get here. But nothing in the schema enforces
+        // that one-owner-per-client-row invariant, and a future feature (e.g. an admin
+        // "transfer ownership" flow) could let one team_members row end up as owner_id for
+        // more than one clients row. Checking it explicitly — rather than trusting that
+        // invariant to hold forever — means this guard can't delete an owner who still
+        // legitimately owns another live client.
+        const stillOwnsAnotherClientResult = await dbClient.query<{ count: number }>(
+          "select count(*)::int as count from clients where owner_id = $1",
+          [ownerId],
+        );
         const isSelfServeOwner = ownerResult.rows[0]?.account_type === "self_serve_owner";
         const hasNoOtherClientAccess = (remainingResult.rows[0]?.count ?? 0) === 0;
-        if (isSelfServeOwner && hasNoOtherClientAccess) {
+        const ownsNoOtherClient = (stillOwnsAnotherClientResult.rows[0]?.count ?? 0) === 0;
+        if (isSelfServeOwner && hasNoOtherClientAccess && ownsNoOtherClient) {
           await dbClient.query("delete from team_members where id = $1", [ownerId]);
           ownerIdToPurge = ownerId;
         }
@@ -98,53 +111,66 @@ router.post("/shop/redact", async (req, res, next) => {
   }
 });
 
-router.post("/customers/data-request", async (req, res) => {
-  if (!verifyWebhookHmac(req.body as Buffer, req.header("x-shopify-hmac-sha256"))) {
-    res.status(401).send();
-    return;
-  }
-  // This app stores no customer data beyond what's embedded in synced shopify_orders rows
-  // (customer_name, city, state — no separate customer record). There is nothing further
-  // to export beyond what Shopify itself already has; acknowledge the request.
-  logger.info(req.body, "Shopify customers/data_request webhook received");
-  res.status(200).send();
-});
-
-router.post("/customers/redact", async (req, res) => {
-  if (!verifyWebhookHmac(req.body as Buffer, req.header("x-shopify-hmac-sha256"))) {
-    res.status(401).send();
-    return;
-  }
-  const payload = JSON.parse((req.body as Buffer).toString("utf8")) as { shop_domain: string; customer?: { id?: number } };
-  logger.info(payload, "Shopify customers/redact webhook received");
-  // No separate customer PII table to redact against for this data model today — flagged
-  // explicitly, same discipline as this session's other best-effort external-payload
-  // handlers, rather than silently claiming full compliance with no real redaction logic.
-  res.status(200).send();
-});
-
-router.post("/app-subscriptions-update", async (req, res) => {
-  if (!verifyWebhookHmac(req.body as Buffer, req.header("x-shopify-hmac-sha256"))) {
-    res.status(401).send();
-    return;
-  }
-  const payload = JSON.parse((req.body as Buffer).toString("utf8")) as {
-    app_subscription: { admin_graphql_api_id: string; status: string };
-  };
-  const statusMap: Record<string, string> = { ACTIVE: "active", CANCELLED: "canceled", EXPIRED: "canceled", FROZEN: "past_due" };
-  const newStatus = statusMap[payload.app_subscription.status];
-  if (!newStatus) {
+router.post("/customers/data-request", async (req, res, next) => {
+  try {
+    if (!verifyWebhookHmac(req.body as Buffer, req.header("x-shopify-hmac-sha256"))) {
+      res.status(401).send();
+      return;
+    }
+    const payload = JSON.parse((req.body as Buffer).toString("utf8")) as { shop_domain: string; customer?: { id?: number } };
+    // This app stores no customer data beyond what's embedded in synced shopify_orders rows
+    // (customer_name, city, state — no separate customer record). There is nothing further
+    // to export beyond what Shopify itself already has; acknowledge the request.
+    logger.info(payload, "Shopify customers/data_request webhook received");
     res.status(200).send();
-    return;
+  } catch (err) {
+    next(err);
   }
-  // billing_provider = 'shopify' is the load-bearing filter: without it, a gateway_subscription_id
-  // string that happens to collide with a Razorpay-billed row's value would update the
-  // wrong subscription.
-  await pool.query(
-    "update subscriptions set status = $1 where gateway_subscription_id = $2 and billing_provider = 'shopify'",
-    [newStatus, payload.app_subscription.admin_graphql_api_id],
-  );
-  res.status(200).send();
+});
+
+router.post("/customers/redact", async (req, res, next) => {
+  try {
+    if (!verifyWebhookHmac(req.body as Buffer, req.header("x-shopify-hmac-sha256"))) {
+      res.status(401).send();
+      return;
+    }
+    const payload = JSON.parse((req.body as Buffer).toString("utf8")) as { shop_domain: string; customer?: { id?: number } };
+    logger.info(payload, "Shopify customers/redact webhook received");
+    // No separate customer PII table to redact against for this data model today — flagged
+    // explicitly, same discipline as this session's other best-effort external-payload
+    // handlers, rather than silently claiming full compliance with no real redaction logic.
+    res.status(200).send();
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post("/app-subscriptions-update", async (req, res, next) => {
+  try {
+    if (!verifyWebhookHmac(req.body as Buffer, req.header("x-shopify-hmac-sha256"))) {
+      res.status(401).send();
+      return;
+    }
+    const payload = JSON.parse((req.body as Buffer).toString("utf8")) as {
+      app_subscription: { admin_graphql_api_id: string; status: string };
+    };
+    const statusMap: Record<string, string> = { ACTIVE: "active", CANCELLED: "canceled", EXPIRED: "canceled", FROZEN: "past_due" };
+    const newStatus = statusMap[payload.app_subscription.status];
+    if (!newStatus) {
+      res.status(200).send();
+      return;
+    }
+    // billing_provider = 'shopify' is the load-bearing filter: without it, a gateway_subscription_id
+    // string that happens to collide with a Razorpay-billed row's value would update the
+    // wrong subscription.
+    await pool.query(
+      "update subscriptions set status = $1 where gateway_subscription_id = $2 and billing_provider = 'shopify'",
+      [newStatus, payload.app_subscription.admin_graphql_api_id],
+    );
+    res.status(200).send();
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;

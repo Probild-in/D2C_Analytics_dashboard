@@ -227,6 +227,49 @@ describe("POST /api/webhooks/shopify-app/shop/redact", () => {
       ).rowCount,
     ).toBe(1);
   });
+
+  it("never deletes a self-serve owner's team_members row when it still owns a second, non-redacted client", async () => {
+    // The two ORIGINAL guard conditions alone would say "delete it": account_type is
+    // self_serve_owner, and there are zero team_member_clients rows for this owner. Only
+    // the NEW third check (clients.owner_id count) catches that this owner row is still
+    // the legitimate owner of a second clients row for a shop that is NOT being redacted
+    // here — a scenario that, today, shouldn't exist via any normal code path, but which a
+    // future "transfer ownership" feature could produce.
+    const ownerId = crypto.randomUUID();
+    await testPool.query(
+      `insert into team_members (id, name, email, role, all_client_access, account_type) values
+       ($1, 'Multi Owner', 'multiowner@example.com', 'owner', false, 'self_serve_owner')`,
+      [ownerId],
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial, owner_id, shopify_shop_domain) values
+       ('multi-owner-shop-a', 'Multi Owner Shop A', 'Uncategorized', 'bg-pink-500', 'A', $1, 'multiownershopa.myshopify.com')`,
+      [ownerId],
+    );
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial, owner_id, shopify_shop_domain) values
+       ('multi-owner-shop-b', 'Multi Owner Shop B', 'Uncategorized', 'bg-cyan-500', 'B', $1, 'multiownershopb.myshopify.com')`,
+      [ownerId],
+    );
+    // Deliberately no team_member_clients rows for ownerId — the original hasNoOtherClientAccess
+    // check would read as true here.
+
+    const rawBody = JSON.stringify({ shop_domain: "multiownershopa.myshopify.com" });
+    const res = await request(app)
+      .post("/api/webhooks/shopify-app/shop/redact")
+      .set("Content-Type", "application/json")
+      .set("X-Shopify-Hmac-Sha256", signBody(rawBody, "test-app-store-secret"))
+      .send(rawBody);
+    expect(res.status).toBe(200);
+
+    expect(
+      (await testPool.query("select 1 from clients where shopify_shop_domain = 'multiownershopa.myshopify.com'")).rowCount,
+    ).toBe(0);
+    expect((await testPool.query("select 1 from team_members where id = $1", [ownerId])).rowCount).toBe(1);
+    expect(
+      (await testPool.query("select 1 from clients where shopify_shop_domain = 'multiownershopb.myshopify.com'")).rowCount,
+    ).toBe(1);
+  });
 });
 
 describe("POST /api/webhooks/shopify-app/customers/data-request and customers/redact", () => {
