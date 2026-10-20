@@ -47,6 +47,22 @@ describe("exchangeShopifyAppCode", () => {
   it("throws when shop or code is missing", async () => {
     await expect(exchangeShopifyAppCode({ hmac: "x" })).rejects.toThrow(/shop or code/);
   });
+
+  it("throws on an invalid shop domain", async () => {
+    const query = { shop: "not a valid shop!!", code: "auth-code", state: "x", timestamp: "123" };
+    const hmac = computeTestHmac(query, "test-app-store-secret");
+    await expect(exchangeShopifyAppCode({ ...query, hmac })).rejects.toThrow(/valid.*myshopify\.com domain/);
+  });
+
+  it("throws when the token exchange fails", async () => {
+    const query = { shop: "abc-fashion.myshopify.com", code: "auth-code", state: "x", timestamp: "123" };
+    const hmac = computeTestHmac(query, "test-app-store-secret");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("server error", { status: 500 })),
+    );
+    await expect(exchangeShopifyAppCode({ ...query, hmac })).rejects.toThrow(/token exchange failed/);
+  });
 });
 
 describe("getShopInfo", () => {
