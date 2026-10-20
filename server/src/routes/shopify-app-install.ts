@@ -133,6 +133,15 @@ router.post("/:clientId/subscribe", async (req, res, next) => {
 
     const { confirmationUrl, subscriptionGid } = await createAppSubscription(shop, accessToken, planId, returnUrl);
 
+    // Accepted risk: if createAppSubscription succeeds above but this upsert then fails
+    // (e.g. a transient DB error), the Shopify-side charge object exists with no local
+    // record of it. Low real-world impact because confirmationUrl is only returned to the
+    // caller AFTER this query succeeds (see res.json below) — if we throw here instead,
+    // the merchant's browser never receives the confirmation link, so the charge can never
+    // actually be approved and no money can move. Not fixed with retry/rollback logic here;
+    // see this file's billing-callback handler for how a drifted gateway_subscription_id
+    // (e.g. from a second /subscribe call overwriting this row before the first charge is
+    // approved) is corrected using Shopify's own charge_id as the source of truth.
     await pool.query(
       `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values ($1, $2, 'pending', $3, 'shopify')
        on conflict (client_id) do update set plan_id = excluded.plan_id, status = 'pending', gateway_subscription_id = excluded.gateway_subscription_id, billing_provider = 'shopify'`,
@@ -158,14 +167,26 @@ router.get("/billing-callback", async (req, res) => {
     if (subResult.rowCount === 0) {
       throw new Error("No pending Shopify subscription for this client");
     }
-    const { gateway_subscription_id: subscriptionGid, email } = subResult.rows[0];
+    const { gateway_subscription_id: storedSubscriptionGid, email } = subResult.rows[0];
 
     const connResult = await pool.query<{ external_account_id: string; access_token: string }>(
       `select external_account_id, access_token from platform_connections where client_id = $1 and platform = 'shopify'`,
       [clientId],
     );
+    if (connResult.rowCount === 0) {
+      throw new Error("No Shopify connection for this client");
+    }
     const shop = connResult.rows[0].external_account_id;
     const accessToken = decryptToken(connResult.rows[0].access_token);
+
+    // Shopify appends its own charge_id to the returnUrl on redirect — that, not whatever
+    // gateway_subscription_id currently sits in the DB row, is the source of truth for WHICH
+    // charge was just approved/declined. The row can drift to point at a DIFFERENT charge (e.g.
+    // a second /subscribe call overwrote it before this first charge was approved), so when
+    // charge_id is present we check THAT specific charge rather than trusting the stored one.
+    // Fall back to the stored gateway_subscription_id only if charge_id is absent.
+    const chargeId = typeof req.query.charge_id === "string" ? req.query.charge_id : undefined;
+    const subscriptionGid = chargeId ? `gid://shopify/AppSubscription/${chargeId}` : storedSubscriptionGid;
 
     const { status } = await getAppSubscription(shop, accessToken, subscriptionGid);
     if (status !== "ACTIVE") {
@@ -174,7 +195,9 @@ router.get("/billing-callback", async (req, res) => {
       return;
     }
 
-    await pool.query("update subscriptions set status = 'active' where client_id = $1", [clientId]);
+    // Correct the stored row to point at whichever charge Shopify actually just approved,
+    // even if it had drifted to a different (still-pending) charge via the race above.
+    await pool.query("update subscriptions set status = 'active', gateway_subscription_id = $2 where client_id = $1", [clientId, subscriptionGid]);
 
     const { actionLink } = await generateMagicLink(email);
     res.redirect(actionLink);

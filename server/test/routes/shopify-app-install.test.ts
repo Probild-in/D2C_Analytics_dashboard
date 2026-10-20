@@ -302,4 +302,71 @@ describe("GET /api/shopify-app/billing-callback", () => {
     const subs = await testPool.query("select status from subscriptions where client_id = $1", [clientId]);
     expect(subs.rows[0].status).toBe("active");
   });
+
+  it("trusts Shopify's own charge_id over a DB row that drifted to a later, still-pending charge", async () => {
+    // Exploit scenario: merchant calls /subscribe twice before approving either tab (e.g. a
+    // double-click or retry). The second call creates a NEW Shopify charge and overwrites the
+    // DB row to point at it, even though the FIRST charge is the one the merchant actually goes
+    // on to approve. billing-callback must trust Shopify's own charge_id query param — not
+    // whatever gid currently sits in the DB row — or it will misreport the approved charge as
+    // declined and leave the DB pointed at the wrong (still-pending) subscription.
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    const firstGid = "gid://shopify/AppSubscription/1";
+    const secondGid = "gid://shopify/AppSubscription/2";
+    let createCallCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/graphql.json")) {
+          const body = JSON.parse(init?.body as string);
+          if (body.query.includes("appSubscriptionCreate")) {
+            createCallCount += 1;
+            const gid = createCallCount === 1 ? firstGid : secondGid;
+            const chargeNumericId = createCallCount === 1 ? "1" : "2";
+            return new Response(
+              JSON.stringify({
+                data: {
+                  appSubscriptionCreate: {
+                    appSubscription: { id: gid },
+                    confirmationUrl: `https://newbrand.myshopify.com/admin/charges/${chargeNumericId}/confirm`,
+                    userErrors: [],
+                  },
+                },
+              }),
+              { status: 200 },
+            );
+          }
+          // getAppSubscription: report the FIRST charge as ACTIVE (the one actually
+          // approved) and the SECOND (what the DB row would wrongly point at) as pending.
+          const variables = body.variables as { id: string };
+          const status = variables.id === firstGid ? "ACTIVE" : "PENDING";
+          return new Response(JSON.stringify({ data: { node: { status, name: "Medium" } } }), { status: 200 });
+        }
+        if (url.includes("/admin/generate_link")) {
+          return new Response(JSON.stringify({ properties: { action_link: "https://test-project.supabase.co/auth/v1/verify?token=magic" } }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    // Two /subscribe calls — the second overwrites the DB row to point at the second gid.
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+
+    const afterSubscribe = await testPool.query("select gateway_subscription_id from subscriptions where client_id = $1", [clientId]);
+    expect(afterSubscribe.rows[0].gateway_subscription_id).toBe(secondGid);
+
+    // The merchant approves the FIRST charge; Shopify redirects with its charge_id.
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("https://test-project.supabase.co/auth/v1/verify?token=magic");
+
+    const subs = await testPool.query("select status, gateway_subscription_id from subscriptions where client_id = $1", [clientId]);
+    expect(subs.rows[0].status).toBe("active");
+    expect(subs.rows[0].gateway_subscription_id).toBe(firstGid);
+  });
 });
