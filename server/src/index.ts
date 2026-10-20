@@ -19,6 +19,7 @@ import teamMembersRouter from "./routes/team-members.js";
 import notificationsRouter from "./routes/notifications.js";
 import pendingConnectionsRouter from "./routes/pending-connections.js";
 import shopifyWebhooksRouter from "./routes/shopify-webhooks.js";
+import shopifyAppWebhooksRouter from "./routes/shopify-app-webhooks.js";
 import razorpayWebhooksRouter from "./routes/razorpay-webhooks.js";
 import delhiveryWebhooksRouter from "./routes/delhivery-webhooks.js";
 import shiprocketWebhooksRouter from "./routes/shiprocket-webhooks.js";
@@ -58,6 +59,7 @@ app.use(cors(allowedOrigins ? { origin: allowedOrigins } : {}));
 // Mounted ahead of express.json(): Shopify webhook HMAC verification needs the raw,
 // unparsed request body, and this router applies its own express.raw() for just this path.
 app.use("/api/webhooks/shopify", shopifyWebhooksRouter);
+app.use("/api/webhooks/shopify-app", shopifyAppWebhooksRouter);
 app.use("/api/webhooks/razorpay", razorpayWebhooksRouter);
 app.use(express.json());
 app.use("/api/clients", clientsRouter);
