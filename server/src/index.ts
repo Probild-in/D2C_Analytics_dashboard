@@ -25,6 +25,7 @@ import shiprocketWebhooksRouter from "./routes/shiprocket-webhooks.js";
 import publicPlansRouter from "./routes/public-plans.js";
 import signupRouter from "./routes/signup.js";
 import enterpriseLeadsRouter from "./routes/enterprise-leads.js";
+import shopifyAppInstallRouter from "./routes/shopify-app-install.js";
 import { startScheduler } from "./scheduler.js";
 
 process.on("unhandledRejection", (reason) => {
@@ -84,6 +85,7 @@ app.use("/api/connections/pending", pendingConnectionsRouter);
 app.use("/api/plans", publicPlansRouter);
 app.use("/api/signup", signupRouter);
 app.use("/api/enterprise-leads", enterpriseLeadsRouter);
+app.use("/api/shopify-app", shopifyAppInstallRouter);
 
 app.get("/health", async (_req, res) => {
   try {
