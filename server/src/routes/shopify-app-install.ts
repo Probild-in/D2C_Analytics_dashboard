@@ -39,6 +39,8 @@ router.get("/callback", async (req, res) => {
       );
     } else {
       const shopInfo = await getShopInfo(shop, accessToken);
+      const user = await createSupabaseUser(shopInfo.email);
+
       const dbClient = await pool.connect();
       try {
         await dbClient.query("BEGIN");
@@ -46,53 +48,49 @@ router.get("/callback", async (req, res) => {
         const logoColor = pickLogoColor(clientId);
         const logoInitial = (shopInfo.name || shop).trim().charAt(0).toUpperCase();
 
-        const user = await createSupabaseUser(shopInfo.email);
-
-        try {
-          await dbClient.query(
-            `insert into team_members (id, name, email, role, all_client_access, account_type) values ($1, $2, $3, 'owner', false, 'self_serve_owner')`,
-            [user.id, shopInfo.name || shop, shopInfo.email],
-          );
-          await dbClient.query(
-            `insert into clients (id, name, category, logo_color, logo_initial, owner_id, shopify_shop_domain) values ($1, $2, 'Uncategorized', $3, $4, $5, $6)`,
-            [clientId, shopInfo.name || shop, logoColor, logoInitial, user.id, shop],
-          );
-          await dbClient.query(`insert into team_member_clients (team_member_id, client_id) values ($1, $2)`, [user.id, clientId]);
-          await dbClient.query(
-            `insert into platform_connections (client_id, platform, external_account_id, access_token, status, connected_by) values ($1, 'shopify', $2, $3, 'connected', $4)`,
-            [clientId, shop, encryptToken(accessToken), user.id],
-          );
-          await dbClient.query("COMMIT");
-        } catch (err) {
-          await dbClient.query("ROLLBACK");
-          await deleteSupabaseUser(user.id);
-          // A concurrent callback for the same brand-new shop that raced this one and won
-          // can make this transaction fail on ANY of several unique constraints, depending
-          // on exactly how the two requests interleave:
-          //   - team_members.email (both flows read the same shop.email from Shopify; this
-          //     insert runs FIRST and is the most likely one to collide, since the winner's
-          //     row, once committed, makes every later attempt to insert that same email a
-          //     duplicate — regardless of each attempt's own distinct Supabase user id)
-          //   - clients.id (generateUniqueClientId's own existence check is a plain,
-          //     unlocked SELECT — two concurrent callers can both compute the same
-          //     candidate slug before either commits)
-          //   - clients.shopify_shop_domain (the dedup column itself)
-          // Matching on a specific constraint name is fragile here because which one fires
-          // first depends on insert order and timing, not on which race actually happened.
-          // Instead: on ANY unique-violation in this block, re-look-up the client by
-          // shopify_shop_domain — if the winner's row is there, adopt its id rather than
-          // erroring; if it isn't (a genuine, unrelated conflict), rethrow.
-          const pgErr = err as { code?: string };
-          if (pgErr.code === "23505") {
-            const winner = await pool.query<{ id: string }>("select id from clients where shopify_shop_domain = $1", [shop]);
-            if (winner.rowCount && winner.rowCount > 0) {
-              clientId = winner.rows[0].id;
-            } else {
-              throw err;
-            }
+        await dbClient.query(
+          `insert into team_members (id, name, email, role, all_client_access, account_type) values ($1, $2, $3, 'owner', false, 'self_serve_owner')`,
+          [user.id, shopInfo.name || shop, shopInfo.email],
+        );
+        await dbClient.query(
+          `insert into clients (id, name, category, logo_color, logo_initial, owner_id, shopify_shop_domain) values ($1, $2, 'Uncategorized', $3, $4, $5, $6)`,
+          [clientId, shopInfo.name || shop, logoColor, logoInitial, user.id, shop],
+        );
+        await dbClient.query(`insert into team_member_clients (team_member_id, client_id) values ($1, $2)`, [user.id, clientId]);
+        await dbClient.query(
+          `insert into platform_connections (client_id, platform, external_account_id, access_token, status, connected_by) values ($1, 'shopify', $2, $3, 'connected', $4)`,
+          [clientId, shop, encryptToken(accessToken), user.id],
+        );
+        await dbClient.query("COMMIT");
+      } catch (err) {
+        await dbClient.query("ROLLBACK");
+        await deleteSupabaseUser(user.id);
+        // A concurrent callback for the same brand-new shop that raced this one and won
+        // can make this transaction fail on ANY of several unique constraints, depending
+        // on exactly how the two requests interleave:
+        //   - team_members.email (both flows read the same shop.email from Shopify; this
+        //     insert runs FIRST and is the most likely one to collide, since the winner's
+        //     row, once committed, makes every later attempt to insert that same email a
+        //     duplicate — regardless of each attempt's own distinct Supabase user id)
+        //   - clients.id (generateUniqueClientId's own existence check is a plain,
+        //     unlocked SELECT — two concurrent callers can both compute the same
+        //     candidate slug before either commits)
+        //   - clients.shopify_shop_domain (the dedup column itself)
+        // Matching on a specific constraint name is fragile here because which one fires
+        // first depends on insert order and timing, not on which race actually happened.
+        // Instead: on ANY unique-violation in this block, re-look-up the client by
+        // shopify_shop_domain — if the winner's row is there, adopt its id rather than
+        // erroring; if it isn't (a genuine, unrelated conflict), rethrow.
+        const pgErr = err as { code?: string };
+        if (pgErr.code === "23505") {
+          const winner = await pool.query<{ id: string }>("select id from clients where shopify_shop_domain = $1", [shop]);
+          if (winner.rowCount && winner.rowCount > 0) {
+            clientId = winner.rows[0].id;
           } else {
             throw err;
           }
+        } else {
+          throw err;
         }
       } finally {
         dbClient.release();

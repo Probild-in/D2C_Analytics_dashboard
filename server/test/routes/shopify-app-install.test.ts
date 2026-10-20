@@ -159,4 +159,78 @@ describe("GET /api/shopify-app/callback", () => {
     const clients = await testPool.query("select count(*)::int as count from clients where shopify_shop_domain = 'newbrand.myshopify.com'");
     expect(clients.rows[0].count).toBe(1);
   });
+
+  it("sends a genuine cross-shop email collision to the error page, without poisoning the connection pool", async () => {
+    // Two DIFFERENT, brand-new shops whose shop-owner email happens to be the same
+    // (e.g. one merchant runs two stores under one email). This is NOT the same-shop
+    // race the concurrency test above covers — these are two sequential, unrelated
+    // requests, and Supabase's own email-uniqueness check is expected to reject the
+    // second one for real, the same way it would outside any test.
+    const install1 = await request(app).get("/api/shopify-app/install").query({ shop: "firstshop" });
+    const state1 = new URL(install1.headers.location).searchParams.get("state")!;
+    const install2 = await request(app).get("/api/shopify-app/install").query({ shop: "secondshop" });
+    const state2 = new URL(install2.headers.location).searchParams.get("state")!;
+
+    let adminUsersCallCount = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/admin/oauth/access_token")) {
+          return new Response(JSON.stringify({ access_token: "shpat_token" }), { status: 200 });
+        }
+        if (url.includes("/shop.json")) {
+          // firstshop and secondshop's owners share the same email — the real-world
+          // trigger for a genuine GoTrue email collision between two unrelated
+          // provisioning attempts. thirdshop gets its own distinct email so the
+          // pool-health check below isn't itself blocked by that same collision.
+          if (url.includes("firstshop")) {
+            return new Response(JSON.stringify({ shop: { email: "shared-owner@example.com", name: "First Shop" } }), { status: 200 });
+          }
+          if (url.includes("secondshop")) {
+            return new Response(JSON.stringify({ shop: { email: "shared-owner@example.com", name: "Second Shop" } }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ shop: { email: "owner@thirdshop.com", name: "Third Shop" } }), { status: 200 });
+        }
+        if (url.includes("/auth/v1/admin/users")) {
+          if (init?.method === "DELETE") {
+            return new Response(null, { status: 200 });
+          }
+          adminUsersCallCount += 1;
+          // Only the SECOND createSupabaseUser call (secondshop, colliding email) is
+          // rejected — the first (firstshop) and third (thirdshop, distinct email)
+          // calls both succeed, same as real GoTrue would behave.
+          if (adminUsersCallCount === 2) {
+            // GoTrue's real shape for a duplicate-email rejection (see
+            // supabase-admin.ts's createSupabaseUser, which matches on error_code).
+            return new Response(JSON.stringify({ error_code: "email_exists", msg: "A user with this email address has already been registered" }), { status: 422 });
+          }
+          return new Response(JSON.stringify({ id: crypto.randomUUID() }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    const query1 = { shop: "firstshop.myshopify.com", code: "auth-code", state: state1, timestamp: "123" };
+    const hmac1 = computeTestHmac(query1, "test-app-store-secret");
+    const first = await request(app).get("/api/shopify-app/callback").query({ ...query1, hmac: hmac1 });
+    expect(first.status).toBe(302);
+    expect(first.headers.location).toContain("https://d2c.probild.in/#/shopify-app/plans");
+
+    const query2 = { shop: "secondshop.myshopify.com", code: "auth-code", state: state2, timestamp: "123" };
+    const hmac2 = computeTestHmac(query2, "test-app-store-secret");
+    const second = await request(app).get("/api/shopify-app/callback").query({ ...query2, hmac: hmac2 });
+    expect(second.status).toBe(302);
+    expect(second.headers.location).toContain("https://d2c.probild.in/#/shopify-app/error");
+
+    // The second attempt's transaction must not have left a connection "idle in
+    // transaction" in the shared pool — a subsequent, unrelated request should still
+    // work normally.
+    const install3 = await request(app).get("/api/shopify-app/install").query({ shop: "thirdshop" });
+    const state3 = new URL(install3.headers.location).searchParams.get("state")!;
+    const query3 = { shop: "thirdshop.myshopify.com", code: "auth-code", state: state3, timestamp: "123" };
+    const hmac3 = computeTestHmac(query3, "test-app-store-secret");
+    const third = await request(app).get("/api/shopify-app/callback").query({ ...query3, hmac: hmac3 });
+    expect(third.status).toBe(302);
+    expect(third.headers.location).toContain("https://d2c.probild.in/#/shopify-app/plans");
+  });
 });
