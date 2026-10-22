@@ -27,7 +27,10 @@ export default function ShopifyAppPlans() {
   }, []);
 
   const choose = async (planId: string) => {
-    if (!clientId || !token) return;
+    if (!clientId || !token) {
+      setError("This link is missing some information. Please reinstall the app from Shopify to try again.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {

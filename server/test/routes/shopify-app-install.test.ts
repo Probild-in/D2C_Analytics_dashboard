@@ -3,7 +3,7 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/index.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
-import { signState } from "../../src/lib/state-token.js";
+import { signState, verifyState } from "../../src/lib/state-token.js";
 
 // Mints the same kind of token /callback's redirect embeds, directly — the brief's own
 // suggested pattern for existing/new tests that need a valid, correctly-scoped token
@@ -447,6 +447,54 @@ describe("GET /api/shopify-app/billing-callback", () => {
 
     const subs = await testPool.query("select status from subscriptions where client_id = $1", [clientId]);
     expect(subs.rows[0].status).toBe("active");
+  });
+
+  it("on decline, redirects with a fresh, valid subscribe token so the merchant can retry — not a dead end", async () => {
+    // Regression test: an earlier version of this fix wave's token scheme redirected a
+    // declined merchant back to the plan picker with NO token at all, which the frontend's
+    // choose() (now requiring a token) would silently no-op against — a merchant whose
+    // charge was declined had no way to retry short of uninstalling and reinstalling.
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "declinedbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const subscribeToken = callbackUrl.searchParams.get("token")!;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/graphql.json")) {
+          const body = JSON.parse(init?.body as string);
+          if (body.query.includes("appSubscriptionCreate")) {
+            return new Response(JSON.stringify({ data: { appSubscriptionCreate: { appSubscription: { id: "gid://shopify/AppSubscription/1" }, confirmationUrl: "https://declinedbrand.myshopify.com/admin/charges/1/confirm", userErrors: [] } } }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ data: { node: { status: "PENDING", name: "Medium" } } }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token: subscribeToken });
+
+    const billingToken = await billingTokenFor(clientId);
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1", token: billingToken });
+    expect(res.status).toBe(302);
+    const redirectUrl = new URL(res.headers.location.replace("#", ""));
+    expect(redirectUrl.pathname).toBe("//shopify-app/plans");
+    expect(redirectUrl.searchParams.get("billing")).toBe("declined");
+    expect(redirectUrl.searchParams.get("client")).toBe(clientId);
+
+    // The core assertion: the retry token is present AND actually valid/correctly-scoped —
+    // not just any string — proving a merchant can genuinely retry picking a plan from here.
+    const retryToken = redirectUrl.searchParams.get("token");
+    expect(retryToken).toBeTruthy();
+    const payload = await verifyState(retryToken!);
+    expect(payload.platform).toBe("shopify-app-store-subscribe");
+    expect(payload.clientId).toBe(clientId);
+
+    // Prove it's not just well-formed but actually usable: retry /subscribe with it.
+    const retryRes = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "small", token: retryToken });
+    expect(retryRes.status).toBe(200);
   });
 
   it("trusts Shopify's own charge_id over a DB row that drifted to a later, still-pending charge", async () => {

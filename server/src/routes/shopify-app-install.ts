@@ -330,7 +330,13 @@ router.get("/billing-callback", async (req, res) => {
 
     const { status } = await getAppSubscription(shop, accessToken, subscriptionGid);
     if (status !== "ACTIVE") {
-      const params = new URLSearchParams({ client: clientId, billing: "declined" });
+      // Mint a fresh subscribe-flow token so the merchant can retry picking a plan — this
+      // request already proved its legitimacy via the billing token + charge_id checks
+      // above, so re-minting here is safe, not a new trust decision. Without this, the
+      // plan picker's choose() (which now requires a token) would silently no-op on a
+      // decline, leaving a declined merchant with no way to retry short of uninstalling.
+      const retryToken = await signState({ platform: "shopify-app-store-subscribe", clientId }, SUBSCRIBE_FLOW_TOKEN_TTL);
+      const params = new URLSearchParams({ client: clientId, billing: "declined", token: retryToken });
       res.redirect(`${frontendUrl}/#/shopify-app/plans?${params.toString()}`);
       return;
     }
