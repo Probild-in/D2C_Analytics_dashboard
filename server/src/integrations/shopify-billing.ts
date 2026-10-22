@@ -21,7 +21,7 @@ const SHOPIFY_API_VERSION = "2024-10";
 
 // PLACEHOLDER VALUES — not confirmed pricing sign-off. These are a rough USD conversion for
 // development/testing only. Replace with real, approved prices before this goes live.
-const PLAN_PRICES_USD: Record<"small" | "medium" | "large", number> = {
+export const PLAN_PRICES_USD: Record<"small" | "medium" | "large", number> = {
   small: 19,
   medium: 39,
   large: 79,

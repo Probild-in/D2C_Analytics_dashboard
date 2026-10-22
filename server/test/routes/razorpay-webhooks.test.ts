@@ -101,4 +101,25 @@ describe("POST /api/webhooks/razorpay", () => {
     const res = await postWebhook(rawBody, signWebhookBody(rawBody));
     expect(res.status).toBe(200);
   });
+
+  it("never touches a shopify-billed subscription with the same-looking gateway id (M1)", async () => {
+    // A SEPARATE client (subscriptions.client_id is unique, so this can't reuse abc-fashion's
+    // row from beforeEach) billed through the Shopify App Store, whose gateway_subscription_id
+    // happens to collide with what a Razorpay webhook might send.
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('shopify-billed-co', 'Shopify Billed Co', 'Uncategorized', 'bg-blue-500', 'S')`,
+    );
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ('shopify-billed-co', 'medium', 'active', 'sub_shopify_lookalike', 'shopify')`,
+    );
+    const rawBody = JSON.stringify({ event: "subscription.cancelled", payload: { subscription: { entity: { id: "sub_shopify_lookalike" } } } });
+    const res = await postWebhook(rawBody, signWebhookBody(rawBody));
+    expect(res.status).toBe(200);
+    const sub = await testPool.query(
+      "select status from subscriptions where gateway_subscription_id = 'sub_shopify_lookalike' and billing_provider = 'shopify'",
+    );
+    expect(sub.rows[0].status).toBe("active"); // unchanged — billing_provider gate held
+  });
 });

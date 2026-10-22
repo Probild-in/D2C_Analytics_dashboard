@@ -210,6 +210,28 @@ describe("POST /api/clients/:id/subscription", () => {
     expect(subs.rows[0]).toEqual({ plan_id: "enterprise", gateway_subscription_id: null });
   });
 
+  it("refuses to assign a Razorpay plan to a client already billed through the Shopify App Store (M2)", async () => {
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ('abc-fashion', 'medium', 'active', 'gid://shopify/AppSubscription/1', 'shopify')`,
+    );
+    const fetchMock = vi.fn(async () => {
+      throw new Error("fetch must not be called — billing_provider conflict must short-circuit before Razorpay");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .post("/api/clients/abc-fashion/subscription")
+      .set("Authorization", `Bearer ${token}`)
+      .send({ planId: "large" });
+
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe("billing_provider_conflict");
+    expect(fetchMock).not.toHaveBeenCalled();
+    const sub = await testPool.query("select billing_provider, plan_id from subscriptions where client_id = 'abc-fashion'");
+    expect(sub.rows[0]).toMatchObject({ billing_provider: "shopify", plan_id: "medium" });
+  });
+
   it("403s a self-serve owner even for their own client", async () => {
     await testPool.query(
       `insert into team_members (id, name, email, role, all_client_access, account_type) values

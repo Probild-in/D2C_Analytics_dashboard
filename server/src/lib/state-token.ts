@@ -15,11 +15,11 @@ function getSecret(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-export async function signState(payload: StatePayload): Promise<string> {
+export async function signState(payload: StatePayload, expiresIn: string = "10m"): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("10m")
+    .setExpirationTime(expiresIn)
     .sign(getSecret());
 }
 

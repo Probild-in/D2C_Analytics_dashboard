@@ -7,30 +7,31 @@ interface Plan {
   id: string;
   name: string;
   orderLimit: number | null;
-  monthlyFeeInr: number;
+  priceUsd: number;
 }
 
 export default function ShopifyAppPlans() {
   const [params] = useSearchParams();
   const clientId = params.get("client");
+  const token = params.get("token");
   const declined = params.get("billing") === "declined";
   const [plans, setPlans] = React.useState<Plan[]>([]);
   const [error, setError] = React.useState<string | null>(declined ? "Payment was not approved. Pick a plan to try again." : null);
   const [busy, setBusy] = React.useState(false);
 
   React.useEffect(() => {
-    publicApiFetch("/api/plans")
+    publicApiFetch("/api/shopify-app/plans")
       .then((res) => res.json())
-      .then((data: Plan[]) => setPlans(data.filter((p) => p.id !== "enterprise")))
+      .then((data: Plan[]) => setPlans(data))
       .catch((err) => setError(err instanceof ApiError ? err.message : "Couldn't load plans."));
   }, []);
 
   const choose = async (planId: string) => {
-    if (!clientId) return;
+    if (!clientId || !token) return;
     setBusy(true);
     setError(null);
     try {
-      const res = await publicApiFetch(`/api/shopify-app/${clientId}/subscribe`, { method: "POST", body: JSON.stringify({ planId }) });
+      const res = await publicApiFetch(`/api/shopify-app/${clientId}/subscribe`, { method: "POST", body: JSON.stringify({ planId, token }) });
       const { confirmationUrl } = await res.json();
       window.location.href = confirmationUrl;
     } catch (err) {
@@ -49,7 +50,7 @@ export default function ShopifyAppPlans() {
           <div key={plan.id} className="rounded-[var(--radius-lg)] border border-border bg-surface p-6">
             <h2 className="text-lg font-semibold text-text-primary">{plan.name}</h2>
             <p className="mt-1 text-sm text-text-secondary">{plan.orderLimit ? `Up to ${plan.orderLimit} orders/month` : "Custom"}</p>
-            <p className="mt-4 text-2xl font-bold text-text-primary">₹{plan.monthlyFeeInr.toLocaleString("en-IN")}<span className="text-sm font-normal text-text-secondary"> /month</span></p>
+            <p className="mt-4 text-2xl font-bold text-text-primary">${plan.priceUsd}<span className="text-sm font-normal text-text-secondary"> /month</span></p>
             <Button className="mt-6 w-full" disabled={busy} onClick={() => choose(plan.id)}>
               {busy ? "Starting…" : "Select"}
             </Button>

@@ -3,6 +3,17 @@ import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import request from "supertest";
 import app from "../../src/index.js";
 import { testPool, resetTestDb } from "../helpers/test-db.js";
+import { signState } from "../../src/lib/state-token.js";
+
+// Mints the same kind of token /callback's redirect embeds, directly — the brief's own
+// suggested pattern for existing/new tests that need a valid, correctly-scoped token
+// without round-tripping through a mocked fetch call just to recover it.
+function subscribeTokenFor(clientId: string): Promise<string> {
+  return signState({ platform: "shopify-app-store-subscribe", clientId }, "2h");
+}
+function billingTokenFor(clientId: string): Promise<string> {
+  return signState({ platform: "shopify-app-store-billing", clientId }, "2h");
+}
 
 function computeTestHmac(query: Record<string, string>, secret: string): string {
   const { hmac, ...rest } = query;
@@ -31,7 +42,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-async function fakeShopifyCallback(stateToken: string, overrides: { email?: string; name?: string } = {}) {
+async function fakeShopifyCallback(
+  stateToken: string,
+  overrides: { email?: string; name?: string; shopDomain?: string } = {},
+) {
+  const shopDomain = overrides.shopDomain ?? "newbrand.myshopify.com";
   vi.stubGlobal(
     "fetch",
     vi.fn(async (url: string, init?: RequestInit) => {
@@ -61,7 +76,7 @@ async function fakeShopifyCallback(stateToken: string, overrides: { email?: stri
       throw new Error(`Unexpected fetch: ${url}`);
     }),
   );
-  const query = { shop: "newbrand.myshopify.com", code: "auth-code", state: stateToken, timestamp: "123" };
+  const query = { shop: shopDomain, code: "auth-code", state: stateToken, timestamp: "123" };
   const hmac = computeTestHmac(query, "test-app-store-secret");
   return request(app).get("/api/shopify-app/callback").query({ ...query, hmac });
 }
@@ -78,6 +93,19 @@ describe("GET /api/shopify-app/install", () => {
     const res = await request(app).get("/api/shopify-app/install").query({ shop: "not a store" });
     expect(res.status).toBe(302);
     expect(res.headers.location).toContain("connection=error");
+  });
+});
+
+describe("GET /api/shopify-app/plans", () => {
+  it("returns small/medium/large with USD prices, no auth required, excluding enterprise (I3)", async () => {
+    const res = await request(app).get("/api/shopify-app/plans");
+    expect(res.status).toBe(200);
+    expect(res.body.map((p: { id: string }) => p.id).sort()).toEqual(["large", "medium", "small"]);
+    for (const plan of res.body) {
+      expect(typeof plan.priceUsd).toBe("number");
+      expect(plan.priceUsd).toBeGreaterThan(0);
+      expect(plan).not.toHaveProperty("monthlyFeeInr");
+    }
   });
 });
 
@@ -240,7 +268,9 @@ describe("POST /api/shopify-app/:clientId/subscribe", () => {
     const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
     const state = new URL(installRes.headers.location).searchParams.get("state")!;
     const callbackRes = await fakeShopifyCallback(state);
-    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const token = callbackUrl.searchParams.get("token")!;
 
     vi.stubGlobal(
       "fetch",
@@ -252,7 +282,7 @@ describe("POST /api/shopify-app/:clientId/subscribe", () => {
         );
       }),
     );
-    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token });
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ confirmationUrl: "https://newbrand.myshopify.com/admin/charges/1/confirm" });
 
@@ -264,9 +294,122 @@ describe("POST /api/shopify-app/:clientId/subscribe", () => {
     const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
     const state = new URL(installRes.headers.location).searchParams.get("state")!;
     const callbackRes = await fakeShopifyCallback(state);
-    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
-    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "enterprise" });
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const token = callbackUrl.searchParams.get("token")!;
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "enterprise", token });
     expect(res.status).toBe(400);
+  });
+
+  // --- C2: unauthenticated cross-tenant billing corruption, closed ---
+
+  it("rejects a subscribe request with no token", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe("invalid_token");
+    expect((await testPool.query("select 1 from subscriptions where client_id = $1", [clientId])).rowCount).toBe(0);
+  });
+
+  it("rejects a subscribe request with a garbage/invalid token", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token: "not-a-real-jwt" });
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe("invalid_token");
+  });
+
+  it("rejects a subscribe request carrying a token minted for a DIFFERENT clientId", async () => {
+    const install1 = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state1 = new URL(install1.headers.location).searchParams.get("state")!;
+    const callback1 = await fakeShopifyCallback(state1);
+    const clientId1 = new URL(callback1.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    // Attacker guesses a second, unrelated client's id and tries to reuse their OWN
+    // legitimately-issued token (for clientId1) against it.
+    const res = await request(app)
+      .post(`/api/shopify-app/some-other-guessed-client-id/subscribe`)
+      .send({ planId: "medium", token: await subscribeTokenFor(clientId1) });
+    expect(res.status).toBe(401);
+    expect(res.body.error.code).toBe("invalid_token");
+  });
+
+  it("rejects a subscribe request against a client with no shopify_shop_domain, even with a validly-scoped token", async () => {
+    // Defense in depth: simulates a leaked/forged-somehow token for a clientId that was
+    // never actually provisioned through the Shopify App Store install flow at all.
+    await testPool.query(
+      `insert into clients (id, name, category, logo_color, logo_initial) values
+       ('agency-only-client', 'Agency Only Client', 'Uncategorized', 'bg-orange-500', 'A')`,
+    );
+    const res = await request(app)
+      .post(`/api/shopify-app/agency-only-client/subscribe`)
+      .send({ planId: "medium", token: await subscribeTokenFor("agency-only-client") });
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("not_found");
+  });
+
+  it("refuses to switch a client already billed via Razorpay", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    // Simulates a client that separately connected Shopify for data sync while already on
+    // an active Razorpay plan (the real pre-existing agency-connect flow this isolation
+    // discipline protects).
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ($1, 'medium', 'active', 'razorpay_sub_1', 'razorpay')`,
+      [clientId],
+    );
+
+    const res = await request(app)
+      .post(`/api/shopify-app/${clientId}/subscribe`)
+      .send({ planId: "small", token: await subscribeTokenFor(clientId) });
+    expect(res.status).toBe(409);
+    expect(res.body.error.code).toBe("billing_provider_conflict");
+    const sub = await testPool.query("select billing_provider from subscriptions where client_id = $1", [clientId]);
+    expect(sub.rows[0].billing_provider).toBe("razorpay");
+  });
+
+  it("uses the connection matching shopify_shop_domain when a client has more than one Shopify connection (I5)", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state, { email: "owner@multiconn.com", name: "Multi Conn" });
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const token = callbackUrl.searchParams.get("token")!;
+
+    // A second, unrelated Shopify connection for the same client (e.g. the
+    // extra_shopify_stores plan feature) — inserted BEFORE the real one alphabetically/by
+    // insertion order, so a naive `rows[0]` pick would grab this one instead.
+    await testPool.query(
+      `insert into platform_connections (client_id, platform, external_account_id, access_token, status) values
+       ($1, 'shopify', 'other-store.myshopify.com', 'encrypted-placeholder', 'connected')`,
+      [clientId],
+    );
+
+    let calledShop: string | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        calledShop = new URL(url).hostname;
+        return new Response(
+          JSON.stringify({ data: { appSubscriptionCreate: { appSubscription: { id: "gid://shopify/AppSubscription/1" }, confirmationUrl: "https://newbrand.myshopify.com/admin/charges/1/confirm", userErrors: [] } } }),
+          { status: 200 },
+        );
+      }),
+    );
+    const res = await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token });
+    expect(res.status).toBe(200);
+    expect(calledShop).toBe("newbrand.myshopify.com");
   });
 });
 
@@ -275,7 +418,9 @@ describe("GET /api/shopify-app/billing-callback", () => {
     const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
     const state = new URL(installRes.headers.location).searchParams.get("state")!;
     const callbackRes = await fakeShopifyCallback(state);
-    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const subscribeToken = callbackUrl.searchParams.get("token")!;
 
     vi.stubGlobal(
       "fetch",
@@ -293,9 +438,10 @@ describe("GET /api/shopify-app/billing-callback", () => {
         throw new Error(`Unexpected fetch: ${url}`);
       }),
     );
-    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token: subscribeToken });
 
-    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1" });
+    const billingToken = await billingTokenFor(clientId);
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1", token: billingToken });
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe("https://test-project.supabase.co/auth/v1/verify?token=magic");
 
@@ -313,7 +459,9 @@ describe("GET /api/shopify-app/billing-callback", () => {
     const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
     const state = new URL(installRes.headers.location).searchParams.get("state")!;
     const callbackRes = await fakeShopifyCallback(state);
-    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const subscribeToken = callbackUrl.searchParams.get("token")!;
 
     const firstGid = "gid://shopify/AppSubscription/1";
     const secondGid = "gid://shopify/AppSubscription/2";
@@ -354,19 +502,154 @@ describe("GET /api/shopify-app/billing-callback", () => {
     );
 
     // Two /subscribe calls — the second overwrites the DB row to point at the second gid.
-    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
-    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium" });
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token: subscribeToken });
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token: subscribeToken });
 
     const afterSubscribe = await testPool.query("select gateway_subscription_id from subscriptions where client_id = $1", [clientId]);
     expect(afterSubscribe.rows[0].gateway_subscription_id).toBe(secondGid);
 
     // The merchant approves the FIRST charge; Shopify redirects with its charge_id.
-    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1" });
+    const billingToken = await billingTokenFor(clientId);
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1", token: billingToken });
     expect(res.status).toBe(302);
     expect(res.headers.location).toBe("https://test-project.supabase.co/auth/v1/verify?token=magic");
 
     const subs = await testPool.query("select status, gateway_subscription_id from subscriptions where client_id = $1", [clientId]);
     expect(subs.rows[0].status).toBe("active");
     expect(subs.rows[0].gateway_subscription_id).toBe(firstGid);
+  });
+
+  // --- C1: unauthenticated account takeover, closed ---
+
+  it("redirects to the error page instead of issuing a magic link when the token is missing", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    // Even an ACTIVE subscription must not be enough on its own.
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ($1, 'medium', 'active', 'gid://shopify/AppSubscription/1', 'shopify')`,
+      [clientId],
+    );
+
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/shopify-app/error");
+    expect(res.headers.location).not.toContain("supabase.co");
+  });
+
+  it("redirects to the error page instead of issuing a magic link when the token is invalid/garbage", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ($1, 'medium', 'active', 'gid://shopify/AppSubscription/1', 'shopify')`,
+      [clientId],
+    );
+
+    const res = await request(app)
+      .get("/api/shopify-app/billing-callback")
+      .query({ client: clientId, charge_id: "1", token: "not-a-real-jwt" });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/shopify-app/error");
+  });
+
+  it("redirects to the error page when the token is validly-signed but for a DIFFERENT clientId — the core account-takeover guard", async () => {
+    // Attacker's own shop legitimately generated a real billing token for ITS OWN
+    // clientId, then tries to replay it against a victim's guessed clientId.
+    const install1 = await request(app).get("/api/shopify-app/install").query({ shop: "attackershop" });
+    const state1 = new URL(install1.headers.location).searchParams.get("state")!;
+    const callback1 = await fakeShopifyCallback(state1, {
+      email: "attacker@example.com",
+      name: "Attacker Shop",
+      shopDomain: "attackershop.myshopify.com",
+    });
+    const attackerClientId = new URL(callback1.headers.location.replace("#", "")).searchParams.get("client")!;
+    const attackerToken = await billingTokenFor(attackerClientId);
+
+    const install2 = await request(app).get("/api/shopify-app/install").query({ shop: "victimshop" });
+    const state2 = new URL(install2.headers.location).searchParams.get("state")!;
+    const callback2 = await fakeShopifyCallback(state2, {
+      email: "victim@example.com",
+      name: "Victim Shop",
+      shopDomain: "victimshop.myshopify.com",
+    });
+    const victimClientId = new URL(callback2.headers.location.replace("#", "")).searchParams.get("client")!;
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ($1, 'medium', 'active', 'gid://shopify/AppSubscription/1', 'shopify')`,
+      [victimClientId],
+    );
+
+    const res = await request(app)
+      .get("/api/shopify-app/billing-callback")
+      .query({ client: victimClientId, charge_id: "1", token: attackerToken });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/shopify-app/error");
+    expect(res.headers.location).not.toContain("supabase.co");
+  });
+
+  it("redirects to the error page when charge_id is missing, even with a validly-scoped token (no more stored-gateway-id fallback)", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state);
+    const clientId = new URL(callbackRes.headers.location.replace("#", "")).searchParams.get("client")!;
+    await testPool.query(
+      `insert into subscriptions (client_id, plan_id, status, gateway_subscription_id, billing_provider) values
+       ($1, 'medium', 'active', 'gid://shopify/AppSubscription/1', 'shopify')`,
+      [clientId],
+    );
+
+    const res = await request(app)
+      .get("/api/shopify-app/billing-callback")
+      .query({ client: clientId, token: await billingTokenFor(clientId) });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toContain("https://d2c.probild.in/#/shopify-app/error");
+  });
+
+  it("uses the connection matching shopify_shop_domain when a client has more than one Shopify connection (I5)", async () => {
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+    const callbackRes = await fakeShopifyCallback(state, { email: "owner@multiconnbill.com", name: "Multi Conn Bill" });
+    const callbackUrl = new URL(callbackRes.headers.location.replace("#", ""));
+    const clientId = callbackUrl.searchParams.get("client")!;
+    const subscribeToken = callbackUrl.searchParams.get("token")!;
+
+    await testPool.query(
+      `insert into platform_connections (client_id, platform, external_account_id, access_token, status) values
+       ($1, 'shopify', 'other-store.myshopify.com', 'encrypted-placeholder', 'connected')`,
+      [clientId],
+    );
+
+    const calledShops: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/graphql.json")) {
+          calledShops.push(new URL(url).hostname);
+          const body = JSON.parse(init?.body as string);
+          if (body.query.includes("appSubscriptionCreate")) {
+            return new Response(JSON.stringify({ data: { appSubscriptionCreate: { appSubscription: { id: "gid://shopify/AppSubscription/1" }, confirmationUrl: "https://newbrand.myshopify.com/admin/charges/1/confirm", userErrors: [] } } }), { status: 200 });
+          }
+          return new Response(JSON.stringify({ data: { node: { status: "ACTIVE", name: "Medium" } } }), { status: 200 });
+        }
+        if (url.includes("/admin/generate_link")) {
+          return new Response(JSON.stringify({ properties: { action_link: "https://test-project.supabase.co/auth/v1/verify?token=magic" } }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+    await request(app).post(`/api/shopify-app/${clientId}/subscribe`).send({ planId: "medium", token: subscribeToken });
+
+    const billingToken = await billingTokenFor(clientId);
+    const res = await request(app).get("/api/shopify-app/billing-callback").query({ client: clientId, charge_id: "1", token: billingToken });
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("https://test-project.supabase.co/auth/v1/verify?token=magic");
+    expect(calledShops.every((shop) => shop === "newbrand.myshopify.com")).toBe(true);
   });
 });

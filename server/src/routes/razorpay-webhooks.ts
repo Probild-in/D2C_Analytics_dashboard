@@ -30,7 +30,7 @@ router.post("/", async (req, res, next) => {
     }
 
     const subResult = await pool.query(
-      "select id, client_id from subscriptions where gateway_subscription_id = $1",
+      "select id, client_id from subscriptions where gateway_subscription_id = $1 and billing_provider = 'razorpay'",
       [subscriptionId],
     );
     if (subResult.rowCount === 0) {

@@ -71,9 +71,12 @@ router.post("/", requireAuth, async (req, res, next) => {
 
     // Check if subscription already exists for this client
     const existingSubResult = await pool.query(
-      "select plan_id, gateway_subscription_id from subscriptions where client_id = $1",
+      "select plan_id, gateway_subscription_id, billing_provider from subscriptions where client_id = $1",
       [clientId],
     );
+    if ((existingSubResult.rowCount ?? 0) > 0 && existingSubResult.rows[0].billing_provider === "shopify") {
+      throw new HttpError(409, "billing_provider_conflict", "This client is billed through the Shopify App Store and cannot have a plan assigned here.");
+    }
     const existingPlanId = (existingSubResult.rowCount ?? 0) > 0 ? existingSubResult.rows[0].plan_id : null;
     const existingGatewaySubscriptionId =
       (existingSubResult.rowCount ?? 0) > 0 ? existingSubResult.rows[0].gateway_subscription_id : null;
