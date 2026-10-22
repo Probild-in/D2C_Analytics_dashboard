@@ -121,7 +121,10 @@ router.post("/customers/data-request", async (req, res, next) => {
     // This app stores no customer data beyond what's embedded in synced shopify_orders rows
     // (customer_name, city, state — no separate customer record). There is nothing further
     // to export beyond what Shopify itself already has; acknowledge the request.
-    logger.info(payload, "Shopify customers/data_request webhook received");
+    // Log only non-sensitive identifiers — never the raw payload, which can carry the
+    // customer's email/name (Shopify's data_request payload includes `customer.email` and
+    // `customer.phone` alongside `orders_requested`).
+    logger.info({ shopDomain: payload.shop_domain, customerId: payload.customer?.id }, "Shopify customers/data_request webhook received");
     res.status(200).send();
   } catch (err) {
     next(err);
@@ -135,10 +138,26 @@ router.post("/customers/redact", async (req, res, next) => {
       return;
     }
     const payload = JSON.parse((req.body as Buffer).toString("utf8")) as { shop_domain: string; customer?: { id?: number } };
-    logger.info(payload, "Shopify customers/redact webhook received");
-    // No separate customer PII table to redact against for this data model today — flagged
-    // explicitly, same discipline as this session's other best-effort external-payload
-    // handlers, rather than silently claiming full compliance with no real redaction logic.
+    logger.info({ shopDomain: payload.shop_domain, customerId: payload.customer?.id }, "Shopify customers/redact webhook received");
+
+    // shopify_orders stores real PII keyed off shopify_customer_id (customer_name, city,
+    // state) — anonymize every order for this customer at this client, rather than just
+    // acknowledging the webhook with nothing done.
+    if (payload.customer?.id !== undefined && payload.customer?.id !== null) {
+      const clientResult = await pool.query<{ id: string }>(
+        "select id from clients where shopify_shop_domain = $1",
+        [payload.shop_domain],
+      );
+      if (clientResult.rowCount && clientResult.rowCount > 0) {
+        const clientId = clientResult.rows[0].id;
+        // shopify_customer_id is stored as text (see shopify.ts's upsertShopifyOrder,
+        // which writes String(order.customer.id)), so the same String() cast is used here.
+        await pool.query(
+          "update shopify_orders set customer_name = '[redacted]', city = null, state = null where client_id = $1 and shopify_customer_id = $2",
+          [clientId, String(payload.customer.id)],
+        );
+      }
+    }
     res.status(200).send();
   } catch (err) {
     next(err);

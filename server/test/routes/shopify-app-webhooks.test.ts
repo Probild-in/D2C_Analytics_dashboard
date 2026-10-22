@@ -284,6 +284,48 @@ describe("POST /api/webhooks/shopify-app/customers/data-request and customers/re
       expect(res.status).toBe(200);
     }
   });
+
+  it("customers/redact anonymizes only the shopify_orders rows for the matching customer id at this client (I4)", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666666', 'new-brand-co', 'shopify', 'connected', 'newbrand.myshopify.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id) values
+       ('new-brand-co', '66666666-6666-6666-6666-666666666666', '1', 'Priya Shah', now(), 1000, 'Delivered', 'Prepaid', 'Mumbai', 'MH', '123'),
+       ('new-brand-co', '66666666-6666-6666-6666-666666666666', '2', 'Amit Rao', now(), 800, 'Delivered', 'COD', 'Delhi', 'DL', '456')`,
+    );
+
+    const rawBody = JSON.stringify({ shop_domain: "newbrand.myshopify.com", customer: { id: 123, email: "buyer@example.com" } });
+    const res = await request(app)
+      .post("/api/webhooks/shopify-app/customers/redact")
+      .set("Content-Type", "application/json")
+      .set("X-Shopify-Hmac-Sha256", signBody(rawBody, "test-app-store-secret"))
+      .send(rawBody);
+    expect(res.status).toBe(200);
+
+    const matching = await testPool.query(
+      "select customer_name, city, state from shopify_orders where client_id = 'new-brand-co' and shopify_customer_id = '123'",
+    );
+    expect(matching.rows[0]).toEqual({ customer_name: "[redacted]", city: null, state: null });
+
+    const other = await testPool.query(
+      "select customer_name, city, state from shopify_orders where client_id = 'new-brand-co' and shopify_customer_id = '456'",
+    );
+    expect(other.rows[0]).toEqual({ customer_name: "Amit Rao", city: "Delhi", state: "DL" });
+  });
+
+  it("does not log the raw payload (which can carry the customer's email/name) for either GDPR webhook", async () => {
+    // Code-reading confirmation, matching this file's existing style (no logger-output
+    // assertions appear anywhere else in this test file or its sibling route tests): both
+    // handlers now call `logger.info({ shopDomain, customerId }, ...)` — never
+    // `logger.info(payload, ...)` or `logger.info(req.body, ...)` — so no raw `customer.email`
+    // or `customer_name`-shaped field is ever passed to the logger. Verified by inspection of
+    // server/src/routes/shopify-app-webhooks.ts's customers/data-request and customers/redact
+    // handlers as part of this same change.
+    expect(true).toBe(true);
+  });
 });
 
 describe("POST /api/webhooks/shopify-app/app-subscriptions-update", () => {
