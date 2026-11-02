@@ -58,7 +58,7 @@
 <body>
   <div class="wrap">
     <h1>Privacy Policy</h1>
-    <p class="updated">Last updated: October 2026</p>
+    <p class="updated">Last updated: November 2026</p>
 
     <p>
       This Privacy Policy describes how the D2C Analytics Dashboard ("the Dashboard"), operated by
@@ -66,16 +66,24 @@
       ("Client") connects its e-commerce and advertising accounts to the Dashboard.
     </p>
     <p>
-      The Dashboard is a business-to-business analytics tool used by Probild and its Clients'
-      authorized team members to view sales, advertising, and fulfilment performance in one place.
-      It is not a consumer-facing app, and it is not directed at the general public.
+      The Dashboard is a business analytics tool. A Client's account is set up in one of two ways:
+      (1) an existing Probild agency client, set up and managed by Probild's own team on the
+      Client's behalf, or (2) a merchant who installs the Dashboard directly and self-serve from
+      the <strong>Shopify App Store</strong>, which automatically creates the Client's account,
+      connects their Shopify store, and signs them in — no manual setup by Probild required. Either
+      way, the Dashboard itself is used by the Client's own authorized team members to view sales,
+      advertising, and fulfilment performance in one place; it is a business tool, not a
+      consumer-facing product, even though installation itself (for merchants using the Shopify App
+      Store path) is self-serve and open to the public.
     </p>
 
     <h2>Information We Collect</h2>
     <p>When a Client connects a platform to the Dashboard, we access and store:</p>
     <ul>
       <li><strong>Shopify:</strong> order records (order date, amount, status, payment method,
-        shipping city and state, product line items) and the customer name on each order.</li>
+        shipping city and state, product line items) and the customer name on each order. For
+        Shopify App Store installs specifically, we also read the store's own name and contact
+        email (a standard shop-level field, not a customer's) to create the Client's account.</li>
       <li><strong>Meta Ads and Google Ads:</strong> advertising account identifiers, campaign
         names and statuses, and aggregate performance metrics (spend, impressions, clicks,
         conversions). We do not access personal data about the people an ad was shown to.</li>
@@ -84,6 +92,10 @@
       <li><strong>Account access tokens:</strong> the OAuth tokens each platform issues when a
         Client authorizes a connection, stored encrypted, used only to fetch the data described
         above on the Client's behalf.</li>
+      <li><strong>Billing information:</strong> we do not ourselves store payment card numbers.
+        Subscription billing is handled entirely by Razorpay or, for merchants who subscribe
+        through the Shopify App Store, by Shopify's own Billing system — we store only the
+        resulting subscription status and plan, not any card or bank details.</li>
     </ul>
     <p>
       We only request read access to the data needed to power the Dashboard's analytics. We do not
@@ -102,9 +114,11 @@
     <h2>Data Sharing</h2>
     <p>
       We do not share Client data with third parties, except: the platforms the Client has
-      themselves connected (to fetch the data back), and service providers who host our
-      infrastructure (e.g. our database and application hosting provider), who only process data
-      on our instructions.
+      themselves connected (to fetch the data back), the payment processors handling that
+      Client's subscription (Razorpay, or Shopify's Billing system for App Store installs), and
+      service providers who host our infrastructure — our application server, and Supabase, which
+      hosts our database and handles account authentication — who only process data on our
+      instructions.
     </p>
 
     <h2>Data Security</h2>
@@ -118,9 +132,19 @@
     <p>
       We retain synced data for as long as a Client's account remains connected, so historical
       analytics stay available. A Client can disconnect any platform at any time from within the
-      Dashboard, which stops further syncing. To request deletion of previously synced data or an
-      access token, see our
-      <a href="/data-deletion.html">Data Deletion instructions</a>.
+      Dashboard, which stops further syncing.
+    </p>
+    <p>
+      <strong>Merchants who installed via the Shopify App Store:</strong> uninstalling the app
+      from Shopify Admin automatically and promptly deletes that Client's account and all data
+      we hold for it — no separate request needed. This happens through Shopify's own mandatory
+      <code>shop/redact</code> webhook, which we implement to actually remove the data (the
+      Client's account, team member records, and synced Shopify order data), not merely
+      acknowledge the request.
+    </p>
+    <p>
+      For any other deletion request, or a Client set up outside the Shopify App Store path, see
+      our <a href="/data-deletion.html">Data Deletion instructions</a>.
     </p>
 
     <h2>Changes to This Policy</h2>
@@ -133,7 +157,9 @@
       <strong>Contact us</strong>
       <p style="margin-bottom: 0;">
         Questions about this policy or your data can be sent to
-        <a href="mailto:admin@probild.in">admin@probild.in</a>.
+        <a href="mailto:admin@probild.in">admin@probild.in</a> — see also our
+        <a href="/terms-of-service.html">Terms of Service</a> and
+        <a href="/data-deletion.html">Data Deletion instructions</a>.
       </p>
     </div>
   </div>
