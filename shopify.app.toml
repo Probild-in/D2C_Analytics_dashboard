@@ -1,0 +1,31 @@
+# Shopify CLI config for the D2C Dashboard Shopify App Store app (a SEPARATE
+# Partner app from the existing agency-connect integration — see
+# docs/superpowers/specs/2026-10-20-shopify-app-store-design.md).
+#
+# This file is what's missing: the "D2C Dashboard" app at
+# dev.shopify.com/dashboard/143444285/apps/418531868673 was created through the web
+# dashboard with no local shopify.app.toml ever linked to it, so it has never had a
+# deployed configuration version — which is exactly why Shopify shows "The
+# installation link for this app is invalid" on every install attempt, including
+# Partner Dashboard's own "Install link" / "Test on development store" button.
+# Deploying this file (see commands below) creates that first version.
+client_id = "0bfb1a6f392cfe0d3888d455b1e62009"
+name = "D2C Dashboard"
+application_url = "https://d2c.probild.online"
+# Redirect-out model, not embedded (per the spec's user-confirmed decision): the
+# merchant's day-to-day experience is the existing, unchanged d2c.probild.online
+# dashboard, not a Polaris/App-Bridge rebuild inside Shopify Admin.
+embedded = false
+
+[access_scopes]
+# Matches SHOPIFY_APP_SCOPES in server/src/integrations/shopify-app-oauth.ts exactly —
+# keep these two in sync if either ever changes.
+scopes = "read_orders,read_products,read_customers"
+
+[auth]
+# Must match getRedirectUri() in server/src/integrations/shopify-app-oauth.ts exactly:
+# `${PUBLIC_API_URL}/api/shopify-app/callback`.
+redirect_urls = [ "https://d2c.probild.online/api/shopify-app/callback" ]
+
+[webhooks]
+api_version = "2024-10"
