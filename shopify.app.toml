@@ -1,11 +1,23 @@
-# Shopify CLI config for the D2C Dashboard Shopify App Store app (a SEPARATE
-# Partner app from the existing agency-connect integration — see
-# docs/superpowers/specs/2026-10-20-shopify-app-store-design.md).
+# Shopify CLI config for the D2C Dashboard Shopify Partner app.
 #
-# This file is what's missing: the "D2C Dashboard" app at
+# IMPORTANT, deliberate deviation from the original design (see
+# docs/superpowers/specs/2026-10-20-shopify-app-store-design.md, which called for a
+# SEPARATE Partner app for the public App Store listing): the user confirmed on
+# 2026-11-02 there is only ONE real Shopify Partner app ("D2C Dashboard", this
+# client_id) and chose to reuse it for BOTH the existing agency-connect flow
+# (server/src/integrations/shopify.ts, SHOPIFY_API_KEY/_SECRET in /etc/d2c.env) AND
+# this App Store install flow (server/src/integrations/shopify-app-oauth.ts,
+# SHOPIFY_APP_STORE_CLIENT_ID/_SECRET) — both env var pairs hold the SAME value in
+# production. The tradeoff: Shopify's public-listing app-review requirements now
+# apply to the same app the agency-connect flow depends on, not an isolated one.
+# Both flows request identical scopes (read_orders,read_products,read_customers),
+# so there's no scope conflict — only redirect_urls needed both callback paths
+# listed, done below.
+#
+# This file is what was missing: "D2C Dashboard" at
 # dev.shopify.com/dashboard/143444285/apps/418531868673 was created through the web
-# dashboard with no local shopify.app.toml ever linked to it, so it has never had a
-# deployed configuration version — which is exactly why Shopify shows "The
+# dashboard with no local shopify.app.toml ever linked to it, so it had never had a
+# deployed configuration version — which is exactly why Shopify showed "The
 # installation link for this app is invalid" on every install attempt, including
 # Partner Dashboard's own "Install link" / "Test on development store" button.
 # Deploying this file (see commands below) creates that first version.
@@ -18,14 +30,20 @@ application_url = "https://d2c.probild.online"
 embedded = false
 
 [access_scopes]
-# Matches SHOPIFY_APP_SCOPES in server/src/integrations/shopify-app-oauth.ts exactly —
-# keep these two in sync if either ever changes.
+# Matches BOTH server/src/integrations/shopify.ts's SHOPIFY_SCOPES and
+# server/src/integrations/shopify-app-oauth.ts's SHOPIFY_APP_SCOPES exactly — they
+# happen to already be identical, which is what makes sharing one app safe scope-wise.
 scopes = "read_orders,read_products,read_customers"
 
 [auth]
-# Must match getRedirectUri() in server/src/integrations/shopify-app-oauth.ts exactly:
-# `${PUBLIC_API_URL}/api/shopify-app/callback`.
-redirect_urls = [ "https://d2c.probild.online/api/shopify-app/callback" ]
+# Two entries — one per flow sharing this app. Must match each flow's own
+# getRedirectUri() exactly:
+#   shopify.ts:            `${PUBLIC_API_URL}/api/integrations/shopify/callback`
+#   shopify-app-oauth.ts:   `${PUBLIC_API_URL}/api/shopify-app/callback`
+redirect_urls = [
+  "https://d2c.probild.online/api/shopify-app/callback",
+  "https://d2c.probild.online/api/integrations/shopify/callback",
+]
 
 [webhooks]
 api_version = "2024-10"
