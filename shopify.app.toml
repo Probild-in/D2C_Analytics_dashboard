@@ -1,32 +1,24 @@
-# Shopify CLI config for the D2C Dashboard Shopify Partner app.
+# Shopify CLI config for the DTC Cockpit Shopify App Store app — a SEPARATE Shopify
+# Partner app from the existing agency-connect integration (server/src/integrations/
+# shopify.ts, SHOPIFY_API_KEY/_SECRET), matching the original design (see
+# docs/superpowers/specs/2026-10-20-shopify-app-store-design.md): keeping this app
+# isolated means Shopify's public-listing app-review requirements never touch the
+# already-shipped agency-connect flow.
 #
-# Domain reverted back to d2c.probild.in on 2026-11-06 (it had briefly been migrated
-# to d2c.probild.online — see git history around 2026-11-02 if that migration's
-# reasoning/checklist is ever needed again).
+# History: a "D2C Dashboard" app (org "Ecomaksh") was briefly reused for both flows
+# (2026-11-02 to 2026-11-06 — see git history if that reasoning is ever needed again),
+# then replaced on 2026-11-06 by this dedicated app, "DTC cockpit" (org "dtccockpit"),
+# created directly through dev.shopify.com with "Embed app in Shopify admin" UNCHECKED
+# and "Use legacy install flow" CHECKED.
 #
-# IMPORTANT, deliberate deviation from the original design (see
-# docs/superpowers/specs/2026-10-20-shopify-app-store-design.md, which called for a
-# SEPARATE Partner app for the public App Store listing): the user confirmed on
-# 2026-11-02 there is only ONE real Shopify Partner app ("D2C Dashboard", this
-# client_id) and chose to reuse it for BOTH the existing agency-connect flow
-# (server/src/integrations/shopify.ts, SHOPIFY_API_KEY/_SECRET in /etc/d2c.env) AND
-# this App Store install flow (server/src/integrations/shopify-app-oauth.ts,
-# SHOPIFY_APP_STORE_CLIENT_ID/_SECRET) — both env var pairs hold the SAME value in
-# production. The tradeoff: Shopify's public-listing app-review requirements now
-# apply to the same app the agency-connect flow depends on, not an isolated one.
-# Both flows request identical scopes (read_orders,read_products,read_customers),
-# so there's no scope conflict — only redirect_urls needed both callback paths
-# listed, done below.
-#
-# This file is what was missing: "D2C Dashboard" at
-# dev.shopify.com/dashboard/143444285/apps/418531868673 was created through the web
-# dashboard with no local shopify.app.toml ever linked to it, so it had never had a
-# deployed configuration version — which is exactly why Shopify showed "The
-# installation link for this app is invalid" on every install attempt, including
-# Partner Dashboard's own "Install link" / "Test on development store" button.
-# Deploying this file (see commands below) creates that first version.
-client_id = "0bfb1a6f392cfe0d3888d455b1e62009"
-name = "D2C Dashboard"
+# use_legacy_install_flow MUST stay true (see [auth] below): by default Shopify uses
+# "managed installation," which never calls this app's OAuth callback at all — it
+# handles everything itself via session tokens, a mechanism this backend does not
+# implement. server/src/integrations/shopify-app-oauth.ts expects the classic flow:
+# Shopify redirects to /api/shopify-app/callback with a code to exchange. Leaving this
+# false/unset would make the install flow silently never fire.
+client_id = "7db4b308fd33c642b3da784dc1777700"
+name = "DTC cockpit"
 application_url = "https://d2c.probild.in"
 # Redirect-out model, not embedded (per the spec's user-confirmed decision): the
 # merchant's day-to-day experience is the existing, unchanged d2c.probild.in
@@ -34,20 +26,18 @@ application_url = "https://d2c.probild.in"
 embedded = false
 
 [access_scopes]
-# Matches BOTH server/src/integrations/shopify.ts's SHOPIFY_SCOPES and
-# server/src/integrations/shopify-app-oauth.ts's SHOPIFY_APP_SCOPES exactly — they
-# happen to already be identical, which is what makes sharing one app safe scope-wise.
+# Matches SHOPIFY_APP_SCOPES in server/src/integrations/shopify-app-oauth.ts exactly —
+# keep these two in sync if either ever changes.
 scopes = "read_orders,read_products,read_customers"
 
 [auth]
-# Two entries — one per flow sharing this app. Must match each flow's own
-# getRedirectUri() exactly:
-#   shopify.ts:            `${PUBLIC_API_URL}/api/integrations/shopify/callback`
-#   shopify-app-oauth.ts:   `${PUBLIC_API_URL}/api/shopify-app/callback`
-redirect_urls = [
-  "https://d2c.probild.in/api/shopify-app/callback",
-  "https://d2c.probild.in/api/integrations/shopify/callback",
-]
+# Must match getRedirectUri() in server/src/integrations/shopify-app-oauth.ts exactly:
+# `${PUBLIC_API_URL}/api/shopify-app/callback`. Only this one path — this app is no
+# longer shared with the agency-connect flow, which keeps its own, separate app.
+redirect_urls = [ "https://d2c.probild.in/api/shopify-app/callback" ]
+# See the top-of-file note — required for the classic OAuth callback flow this
+# backend actually implements, not Shopify's newer managed-installation flow.
+use_legacy_install_flow = true
 
 [webhooks]
 api_version = "2024-10"
