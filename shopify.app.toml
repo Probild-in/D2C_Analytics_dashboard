@@ -1,5 +1,9 @@
 # Shopify CLI config for the D2C Dashboard Shopify Partner app.
 #
+# Domain reverted back to d2c.probild.in on 2026-11-06 (it had briefly been migrated
+# to d2c.probild.online — see git history around 2026-11-02 if that migration's
+# reasoning/checklist is ever needed again).
+#
 # IMPORTANT, deliberate deviation from the original design (see
 # docs/superpowers/specs/2026-10-20-shopify-app-store-design.md, which called for a
 # SEPARATE Partner app for the public App Store listing): the user confirmed on
@@ -23,9 +27,9 @@
 # Deploying this file (see commands below) creates that first version.
 client_id = "0bfb1a6f392cfe0d3888d455b1e62009"
 name = "D2C Dashboard"
-application_url = "https://d2c.probild.online"
+application_url = "https://d2c.probild.in"
 # Redirect-out model, not embedded (per the spec's user-confirmed decision): the
-# merchant's day-to-day experience is the existing, unchanged d2c.probild.online
+# merchant's day-to-day experience is the existing, unchanged d2c.probild.in
 # dashboard, not a Polaris/App-Bridge rebuild inside Shopify Admin.
 embedded = false
 
@@ -41,8 +45,8 @@ scopes = "read_orders,read_products,read_customers"
 #   shopify.ts:            `${PUBLIC_API_URL}/api/integrations/shopify/callback`
 #   shopify-app-oauth.ts:   `${PUBLIC_API_URL}/api/shopify-app/callback`
 redirect_urls = [
-  "https://d2c.probild.online/api/shopify-app/callback",
-  "https://d2c.probild.online/api/integrations/shopify/callback",
+  "https://d2c.probild.in/api/shopify-app/callback",
+  "https://d2c.probild.in/api/integrations/shopify/callback",
 ]
 
 [webhooks]

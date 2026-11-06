@@ -57,7 +57,7 @@ Also needed: a `NODE_ENV=production` setting on the host.
 Items marked "decision" need an answer from you before I can build them.
 
 1. 🔧 **Real payment gateway (decision needed).** `server/src/integrations/payment-gateway.ts` is a stub. `chargeInvoice` always returns `failed`, so no client can actually be billed. Decision: Razorpay (India, UPI and cards) or Stripe (international). Then I implement subscription creation, invoice charging, cancellation, and signature-verified webhooks. Needs your account and keys. **Still open** — this is the one item explicitly excluded from the 2026-10-13 production-hardening branch, by your own instruction, pending the provider decision.
-2. ✅ **Deployment setup.** `server/Dockerfile` + `server/docker-entrypoint.sh` (runs migrations before starting the server) and `.github/workflows/ci.yml` (server tests/typecheck + frontend build/lint on every push) now exist. `docs/DEPLOY.md` documents the actual manual sequence used for the real deploy to `d2c.probild.online` (systemd + nginx — not containerized yet). **Still open:** which hosting provider to containerize on, if you want to move off the current VPS/systemd setup.
+2. ✅ **Deployment setup.** `server/Dockerfile` + `server/docker-entrypoint.sh` (runs migrations before starting the server) and `.github/workflows/ci.yml` (server tests/typecheck + frontend build/lint on every push) now exist. `docs/DEPLOY.md` documents the actual manual sequence used for the real deploy to `d2c.probild.in` (systemd + nginx — not containerized yet). **Still open:** which hosting provider to containerize on, if you want to move off the current VPS/systemd setup.
 3. ✅ **Database migrations are not run automatically — fixed for the container path.** `server/docker-entrypoint.sh` runs `npm run migrate up` before starting the server. For the current non-containerized deploy, `docs/DEPLOY.md` now makes this an explicit, numbered step instead of something only session memory knew about.
 4. ✅ **Scheduler assumes one instance — fixed.** A Postgres advisory lock (`pg_try_advisory_lock`, keyed per platform) now wraps `runScheduledSyncs`, so a second process instance's tick is skipped rather than double-running the same syncs.
 5. 🔧 **Security hardening — partially done.** ✅ `helmet()` added. ✅ `CORS_ORIGIN` is now mandatory when `NODE_ENV=production` (the server refuses to start without it, verified). **Still open:** request body size limits (Express's 100kb default applies implicitly — never explicitly set or reviewed). **Still open:** the existing rate-limit middleware's configuration was never reviewed or tuned specifically for production traffic volumes.
@@ -87,7 +87,7 @@ Items marked "decision" need an answer from you before I can build them.
 | Real payment flow (sandbox, then live) | 🔧 Blocked on item C1 |
 | Load test of the scheduler with realistic client count | 🔧 Not yet run |
 | Security review of OAuth state, HMAC verification, and redirect URIs | 🔧 Not yet run |
-| `probild-meta-login` (all 5 integration plans) merged onto `probild-live` and deployed to `d2c.probild.online` | ✅ Done |
+| `probild-meta-login` (all 5 integration plans) merged onto `probild-live` and deployed to `d2c.probild.in` | ✅ Done |
 | `probild-production-hardening` branch merged and deployed | 🔧 Pending your merge/deploy decision |
 | Pull request opened against `Probild-in/main` | 🔧 Not yet opened |
 

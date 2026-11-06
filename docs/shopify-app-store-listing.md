@@ -59,9 +59,9 @@ Shopify Billing, not just listing copy.
 ## Support
 
 - Support email: `admin@probild.in`
-- Privacy Policy URL: `https://d2c.probild.online/privacy-policy.html`
-- Terms of Service URL: `https://d2c.probild.online/terms-of-service.html`
-- Data deletion instructions: `https://d2c.probild.online/data-deletion.html`
+- Privacy Policy URL: `https://d2c.probild.in/privacy-policy.html`
+- Terms of Service URL: `https://d2c.probild.in/terms-of-service.html`
+- Data deletion instructions: `https://d2c.probild.in/data-deletion.html`
 
 ## Required app icon
 
@@ -92,6 +92,6 @@ what sells the product fastest:
 - [ ] `shopify.app.toml` deployed (`npx @shopify/cli@latest app deploy`) — creates the app's
   first configuration version, without which Shopify rejects every install link.
 - [ ] The 4 mandatory webhooks registered in the Partner Dashboard, pointing at
-  `https://d2c.probild.online/api/webhooks/shopify-app/...`.
+  `https://d2c.probild.in/api/webhooks/shopify-app/...`.
 - [ ] Submit for Shopify's protected customer data access review (separate gate from general
   app review — can block the whole listing if not done ahead of time).
