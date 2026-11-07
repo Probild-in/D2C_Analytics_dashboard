@@ -57,19 +57,25 @@ router.get("/sales", requireAuth, async (req, res, next) => {
        ),
        shopify_rto_by_client_day as (
          select client_id, ${istDay("order_date")} as day,
-           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders
+           count(*) filter (where status = 'RTO Initiated' or status = 'RTO Delivered') as rto_orders,
+           coalesce(sum(amount) filter (where status = 'RTO Initiated' or status = 'RTO Delivered'), 0) as rto_value
          from shopify_orders
          where client_id = any($1::text[]) and order_date >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
          group by client_id, ${istDay("order_date")}
        ),
+       -- shipments itself has no order value — join back to shopify_orders (via order_ref =
+       -- shopify_order_id, the same match rto-status.ts's single-client CTE already relies
+       -- on) to get the amount each RTO'd order was actually worth.
        shipment_rto_by_client_day as (
-         select client_id, ${istDay("ordered_at")} as day,
-           count(*) as rto_orders
-         from shipments
-         where client_id = any($1::text[])
-           and status in ('RTO Initiated', 'RTO Delivered')
-           and ordered_at >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
-         group by client_id, ${istDay("ordered_at")}
+         select s.client_id, ${istDay("s.ordered_at")} as day,
+           count(*) as rto_orders,
+           coalesce(sum(so.amount), 0) as rto_value
+         from shipments s
+         left join shopify_orders so on so.client_id = s.client_id and so.shopify_order_id = s.order_ref
+         where s.client_id = any($1::text[])
+           and s.status in ('RTO Initiated', 'RTO Delivered')
+           and s.ordered_at >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
+         group by s.client_id, ${istDay("s.ordered_at")}
        ),
        client_has_shipments as (
          select distinct client_id from shipments where client_id = any($1::text[]) and ordered_at is not null
@@ -85,7 +91,13 @@ router.get("/sales", requireAuth, async (req, res, next) => {
                then coalesce(srd.rto_orders, 0)
                else coalesce(shrd.rto_orders, 0)
              end
-           ) as rto_orders
+           ) as rto_orders,
+           sum(
+             case when chs.client_id is not null
+               then coalesce(srd.rto_value, 0)
+               else coalesce(shrd.rto_value, 0)
+             end
+           ) as rto_value
          from scoped_clients sc
          cross join days d
          left join client_has_shipments chs on chs.client_id = sc.client_id
@@ -96,7 +108,12 @@ router.get("/sales", requireAuth, async (req, res, next) => {
        select
          days.day,
          coalesce(orders_by_day.gross_sales, 0)::int as gross_sales,
-         coalesce(orders_by_day.net_sales, 0)::int as net_sales,
+         -- Matches this page's own stated definition ("discounts, cancellations & RTO
+         -- value deducted"): cancellations were already excluded via orders_by_day's own
+         -- status filter; RTO orders aren't 'Cancelled' in shopify_orders.status (Shopify
+         -- has no native RTO concept — see rto-status.ts), so their value survived into
+         -- net_sales until this subtraction was added.
+         greatest(0, coalesce(orders_by_day.net_sales, 0)::int - coalesce(rto_by_day.rto_value, 0)::int) as net_sales,
          coalesce(orders_by_day.orders, 0)::int as orders,
          coalesce(ad_spend_by_day.spend, 0)::int as ad_spend,
          coalesce(orders_by_day.new_customers, 0)::int as new_customers,
@@ -186,7 +203,9 @@ router.get("/products", requireAuth, async (req, res, next) => {
          li.product_name,
          sum(li.quantity)::int as orders,
          sum(li.quantity * li.price)::int as sales,
-         sum(li.quantity * li.price) filter (where o.status <> 'Cancelled')::int as net_sales,
+         -- Matches /sales's own definition (discounts, cancellations & RTO value deducted) —
+         -- excludes both cancelled orders and RTO'd orders, not just cancelled ones.
+         sum(li.quantity * li.price) filter (where o.status <> 'Cancelled' and not orr.is_rto)::int as net_sales,
          coalesce(sum(li.quantity) filter (where orr.is_rto), 0)::int as rto_quantity,
          coalesce(sum(li.quantity) filter (where o.status = 'Cancelled'), 0)::int as cancelled_quantity
        from shopify_order_line_items li

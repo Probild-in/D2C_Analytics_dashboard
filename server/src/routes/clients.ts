@@ -94,12 +94,27 @@ router.get("/summary", requireAuth, async (req, res, next) => {
          select
            so.client_id,
            count(*) as orders,
-           coalesce(sum(so.amount) filter (where so.status <> 'Cancelled'), 0) as net_sales,
            -- Shopify has no native RTO concept (shopify.ts's mapOrderStatus never produces
            -- 'RTO Initiated'/'RTO Delivered') — once a courier is connected, shipments.status
            -- (joined via order_ref = shopify_order_id) is the real source of truth; so.status
            -- is only a fallback for clients with no courier connected yet. See
-           -- server/src/lib/rto-status.ts.
+           -- server/src/lib/rto-status.ts. net_sales excludes both cancelled AND RTO'd
+           -- orders (same definition this dashboard states elsewhere) — the RTO check is
+           -- duplicated inline here, rather than factored out, to match rto_orders' own
+           -- condition exactly below.
+           coalesce(sum(so.amount) filter (
+             where so.status <> 'Cancelled'
+               and not (
+                 case
+                   when chs.client_id is not null then exists (
+                     select 1 from shipments s
+                     where s.client_id = so.client_id and s.order_ref = so.shopify_order_id
+                       and s.status in ('RTO Initiated', 'RTO Delivered')
+                   )
+                   else so.status in ('RTO Initiated', 'RTO Delivered')
+                 end
+               )
+           ), 0) as net_sales,
            count(*) filter (
              where case
                when chs.client_id is not null then exists (

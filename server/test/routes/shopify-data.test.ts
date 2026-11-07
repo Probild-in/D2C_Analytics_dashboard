@@ -161,6 +161,43 @@ describe("GET /api/clients/:id/sales", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body[0].rtoOrders).toBe(2);
+    // gross_sales still counts all 3 (2200); net_sales excludes the two RTO'd orders'
+    // value (1000 + 500), leaving only the Delivered order (700) — proves Net Sales
+    // deducts RTO value via the Shopify-status fallback path (no courier connected).
+    expect(res.body[0].grossSales).toBe(2200);
+    expect(res.body[0].netSales).toBe(700);
+  });
+
+  it("deducts RTO value from net sales via the linked courier shipment, once a courier is connected", async () => {
+    await testPool.query(
+      `insert into platform_connections (id, client_id, platform, status, external_account_id) values
+       ('66666666-6666-6666-6666-666666666666', 'abc-fashion', 'courier_delhivery', 'connected', 'ops@abc.com')`,
+    );
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '301', 'Priya Shah', now(), 1200, 'Dispatched', 'COD'),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '302', 'Amit Rao', now(), 800, 'Delivered', 'Prepaid')`,
+    );
+    // Order 301's shipment is genuinely RTO, but order 301's own Shopify status is just
+    // "Dispatched" (Shopify has no native RTO concept) — order_ref matches
+    // shopify_order_id, same as the real courier connectors write it.
+    await testPool.query(
+      `insert into shipments (client_id, connection_id, awb, order_ref, courier_name, status, ordered_at) values
+       ('abc-fashion', '66666666-6666-6666-6666-666666666666', 'AWB301', '301', 'Delhivery', 'RTO Initiated', now())`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body[0].rtoOrders).toBe(1);
+    expect(res.body[0].grossSales).toBe(2000);
+    // Only order 302 (800) survives into net sales — order 301's 1200 is deducted via
+    // the shipment-to-order value join, not just counted.
+    expect(res.body[0].netSales).toBe(800);
   });
 
   it("sums real Meta and Google ad spend for the correct day, scoped to this client", async () => {
@@ -383,7 +420,10 @@ describe("GET /api/clients/:id/products", () => {
 
     expect(res.status).toBe(200);
     const linenShirt = res.body.find((p: { name: string }) => p.name === "Linen Shirt");
-    expect(linenShirt).toMatchObject({ orders: 2, rtoPercent: 50 });
+    // sales (gross) still counts both orders (2000); netSales excludes order 501's
+    // value (1000) since it's RTO via the linked shipment — proves the "Top products"
+    // panel's own net sales figure deducts RTO value, not just gross.
+    expect(linenShirt).toMatchObject({ orders: 2, sales: 2000, netSales: 1000, rtoPercent: 50 });
   });
 });
 

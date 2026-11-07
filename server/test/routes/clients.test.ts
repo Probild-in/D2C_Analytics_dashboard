@@ -160,7 +160,10 @@ describe("GET /api/clients/summary", () => {
     expect(res.status).toBe(200);
     const abc = res.body.find((r: { clientId: string }) => r.clientId === "abc-fashion");
     const xyz = res.body.find((r: { clientId: string }) => r.clientId === "xyz-cosmetics");
-    expect(abc).toMatchObject({ netSales: 1500, orders: 2, rtoOrders: 1, adSpend: 300 });
+    // 1000 (Delivered) + 500 (RTO Initiated) under the old, buggy "only exclude
+    // Cancelled" definition — net sales must now also exclude the RTO'd order's value
+    // (1000), matching this dashboard's own stated "RTO value deducted" definition.
+    expect(abc).toMatchObject({ netSales: 1000, orders: 2, rtoOrders: 1, adSpend: 300 });
     expect(xyz).toMatchObject({ netSales: 2000, orders: 1, rtoOrders: 0, adSpend: 0 });
   });
 
@@ -215,9 +218,10 @@ describe("GET /api/clients/summary", () => {
     const res = await request(app).get("/api/clients/summary?days=1").set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     const abc = res.body.find((r: { clientId: string }) => r.clientId === "abc-fashion");
-    // Pre-existing seed data for abc-fashion already contributes 2 orders/1500 net
-    // sales "today" (see beforeEach); this order must be added on top, not dropped.
-    expect(abc).toMatchObject({ netSales: 2400, orders: 3 });
+    // Pre-existing seed data for abc-fashion already contributes 2 orders/1000 net
+    // sales "today" (see beforeEach — the RTO'd order's 500 is excluded); this order
+    // (900, Delivered) must be added on top, not dropped.
+    expect(abc).toMatchObject({ netSales: 1900, orders: 3 });
   });
 });
 
