@@ -256,8 +256,10 @@ export function getOrders(clientId: string, count = 60): Order[] {
     const amount = Math.round(base.aov * (0.5 + rand() * 1.3));
     const d = new Date("2026-08-21T00:00:00Z");
     d.setDate(d.getDate() - Math.floor(rand() * 30));
+    const orderNumber = `#${10000 + Math.floor(rand() * 89999)}`;
     orders.push({
-      id: `#${10000 + Math.floor(rand() * 89999)}`,
+      id: orderNumber,
+      orderNumber,
       clientId,
       customer: `${FIRST_NAMES[Math.floor(rand() * FIRST_NAMES.length)]} ${LAST_NAMES[Math.floor(rand() * LAST_NAMES.length)]}`,
       date: d.toISOString().slice(0, 10),

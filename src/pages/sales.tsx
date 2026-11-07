@@ -246,7 +246,7 @@ export default function Sales() {
                         onClick={() => setSelectedOrder(o)}
                         className="underline-offset-2 hover:text-brand hover:underline"
                       >
-                        {o.id}
+                        {o.orderNumber}
                       </button>
                     </td>
                     <td className="px-3 py-2.5 text-text-secondary">{o.customer}</td>
@@ -290,7 +290,7 @@ function OrderDetailDialog({ order, onOpenChange }: { order: Order | null; onOpe
           <>
             <DialogHeader>
               <div className="flex items-center justify-between gap-2 pr-6">
-                <DialogTitle>Order {order.id}</DialogTitle>
+                <DialogTitle>Order {order.orderNumber}</DialogTitle>
                 <OrderStatusBadge status={order.status} />
               </div>
               <DialogDescription>Placed on {dateFmtLong.format(new Date(order.date))}</DialogDescription>

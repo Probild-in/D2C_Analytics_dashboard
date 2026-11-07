@@ -40,6 +40,9 @@ export type OrderStatus =
 
 export interface Order {
   id: string;
+  // The merchant-facing order reference (e.g. "VR15537") — what a merchant actually
+  // recognizes from Shopify Admin. `id` is this app's own internal row id, never shown.
+  orderNumber: string;
   clientId: string;
   customer: string;
   date: string;

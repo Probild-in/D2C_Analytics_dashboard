@@ -266,9 +266,9 @@ describe("GET /api/clients/:id/orders", () => {
   it("returns orders newest first, with a representative product name", async () => {
     await testPool.query(
       `insert into shopify_orders
-         (id, client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state) values
-       ('88888888-8888-8888-8888-888888888888', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '1', 'Priya Shah', now() - interval '1 day', 1000, 'Delivered', 'Prepaid', 'Mumbai', 'Maharashtra'),
-       ('99999999-9999-9999-9999-999999999999', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '2', 'Amit Rao', now(), 500, 'Dispatched', 'COD', 'Pune', 'Maharashtra')`,
+         (id, client_id, connection_id, shopify_order_id, order_name, customer_name, order_date, amount, status, payment_method, city, state) values
+       ('88888888-8888-8888-8888-888888888888', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '1', null, 'Priya Shah', now() - interval '1 day', 1000, 'Delivered', 'Prepaid', 'Mumbai', 'Maharashtra'),
+       ('99999999-9999-9999-9999-999999999999', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '2', '#VR2002', 'Amit Rao', now(), 500, 'Dispatched', 'COD', 'Pune', 'Maharashtra')`,
     );
     await testPool.query(
       `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price) values
@@ -283,6 +283,9 @@ describe("GET /api/clients/:id/orders", () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(2);
     expect(res.body[0]).toMatchObject({
+      // order_name is set for this row ('#VR2002') — the merchant-facing reference,
+      // never the raw shopify_order_id or this table's internal uuid.
+      orderNumber: "#VR2002",
       clientId: "abc-fashion",
       customer: "Amit Rao",
       amount: 500,
@@ -293,6 +296,9 @@ describe("GET /api/clients/:id/orders", () => {
       product: "Cotton Kurta",
     });
     expect(res.body[1].customer).toBe("Priya Shah");
+    // order_name is null for this row (simulates an order synced before this fix) —
+    // falls back to the raw shopify_order_id, never the meaningless internal uuid.
+    expect(res.body[1].orderNumber).toBe("1");
   });
 
   it("returns the real courier field when present", async () => {

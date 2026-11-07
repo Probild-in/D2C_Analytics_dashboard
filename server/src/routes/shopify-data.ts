@@ -141,7 +141,7 @@ router.get("/orders", requireAuth, async (req, res, next) => {
 
     const result = await pool.query(
       `select
-         o.id, o.customer_name, o.order_date, o.amount, o.status, o.payment_method, o.city, o.state, o.courier,
+         o.id, o.order_name, o.shopify_order_id, o.customer_name, o.order_date, o.amount, o.status, o.payment_method, o.city, o.state, o.courier,
          (select li.product_name from shopify_order_line_items li where li.order_id = o.id order by li.id limit 1) as product_name
        from shopify_orders o
        where o.client_id = $1
@@ -153,6 +153,11 @@ router.get("/orders", requireAuth, async (req, res, next) => {
     res.json(
       result.rows.map((r) => ({
         id: r.id,
+        // The merchant-facing order reference (e.g. "VR15537", Shopify's own `name` field)
+        // — not shopify_orders.id (this table's internal uuid). order_name backfills on an
+        // order's next sync touch (see shopify.ts's upsertShopifyOrder) — orders synced
+        // before this fix fall back to the raw numeric shopify_order_id until then.
+        orderNumber: r.order_name ?? r.shopify_order_id,
         clientId,
         customer: r.customer_name,
         date: r.order_date.toISOString(),

@@ -163,6 +163,7 @@ describe("shopifyConnector.sync", () => {
             orders: [
               {
                 id: 1001,
+                name: "#VR1001",
                 created_at: "2026-08-15T10:00:00Z",
                 total_price: "1499.00",
                 financial_status: "paid",
@@ -187,6 +188,10 @@ describe("shopifyConnector.sync", () => {
     expect(orders.rowCount).toBe(1);
     expect(orders.rows[0]).toMatchObject({
       shopify_order_id: "1001",
+      // The merchant-facing order reference ("#VR1001") — the whole point of this
+      // migration/fix, real bug it closes: the dashboard was showing this table's
+      // internal uuid as "the order number" instead of what Shopify actually calls it.
+      order_name: "#VR1001",
       customer_name: "Priya Shah",
       amount: 1499,
       status: "Delivered",

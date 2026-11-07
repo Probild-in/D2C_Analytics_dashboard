@@ -17,6 +17,7 @@ export const SHOPIFY_WEBHOOK_TOPICS = ["orders/create", "orders/updated", "order
 
 export interface ShopifyOrder {
   id: number;
+  name: string;
   created_at: string;
   total_price: string;
   financial_status: string;
@@ -135,10 +136,10 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
 
   const orderResult = await pool.query(
     `insert into shopify_orders
-       (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+       (client_id, connection_id, shopify_order_id, order_name, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
      on conflict (connection_id, shopify_order_id)
-     do update set customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
+     do update set order_name = excluded.order_name, customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
        payment_method = excluded.payment_method, city = excluded.city, state = excluded.state,
        tracking_number = excluded.tracking_number, tracking_company = excluded.tracking_company
      returning id`,
@@ -146,6 +147,7 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
       clientId,
       connectionId,
       String(order.id),
+      order.name,
       customerName,
       order.created_at,
       Math.round(parseFloat(order.total_price)),
