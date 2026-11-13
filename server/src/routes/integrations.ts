@@ -64,7 +64,9 @@ router.get("/:platform/callback", async (req, res) => {
   }
 
   if (statePayload.shopDomain && query.shop !== statePayload.shopDomain) {
-    redirectError("Shop domain mismatch");
+    // TEMPORARY debug detail (remove after diagnosing 2026-11-13 production issue):
+    // domains aren't secret, this just saves an SSH round-trip to read logs we can't access.
+    redirectError(`Shop domain mismatch: expected "${statePayload.shopDomain}", got "${query.shop}"`);
     return;
   }
 
