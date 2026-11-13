@@ -143,6 +143,34 @@ router.get("/callback", async (req, res) => {
       }
     }
 
+    // TEMPORARY TESTING BYPASS — env-var-gated, OFF by default, must be unset before this
+    // app is ever submitted for Shopify's App Store review. Exists only because Shopify
+    // requires review before ANY store can install a billing-enabled app once its
+    // distribution is set to "Shopify App Store" — confirmed live: this app shows "This
+    // app is under review" on every install attempt right now, including the developer's
+    // own stores, with no way to test the real install/auto-login flow first. When this
+    // flag is set, skip the real Shopify Billing charge entirely and grant an 'active',
+    // unbilled subscription on the 'small' plan instead — lets the developer verify
+    // install -> provisioning -> auto-login works end to end on real stores before
+    // submitting for review. Re-enabling billing for the real submission requires nothing
+    // beyond unsetting this one env var; no other code path changes.
+    if (process.env.SHOPIFY_APP_STORE_SKIP_BILLING === "true") {
+      await pool.query(
+        `insert into subscriptions (client_id, plan_id, status, billing_provider) values ($1, 'small', 'active', 'shopify')
+         on conflict (client_id) do update set plan_id = excluded.plan_id, status = 'active', billing_provider = 'shopify'`,
+        [clientId],
+      );
+      const ownerResult = await pool.query<{ email: string }>(
+        "select tm.email from clients c join team_members tm on tm.id = c.owner_id where c.id = $1",
+        [clientId],
+      );
+      if (ownerResult.rowCount && ownerResult.rowCount > 0) {
+        const { actionLink } = await generateMagicLink(ownerResult.rows[0].email);
+        res.redirect(actionLink);
+        return;
+      }
+    }
+
     // Fresh or not-yet-subscribed client: send them to the plan picker, carrying a signed,
     // short-lived token scoping this specific /subscribe attempt to this specific clientId
     // (C2) — without it, anyone who can guess a clientId could POST /subscribe for ANY

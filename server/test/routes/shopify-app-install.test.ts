@@ -40,6 +40,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  delete process.env.SHOPIFY_APP_STORE_SKIP_BILLING;
 });
 
 async function fakeShopifyCallback(
@@ -127,6 +128,54 @@ describe("GET /api/shopify-app/callback", () => {
 
     const connections = await testPool.query("select platform, external_account_id from platform_connections where client_id = $1", [clients.rows[0].id]);
     expect(connections.rows[0]).toMatchObject({ platform: "shopify", external_account_id: "newbrand.myshopify.com" });
+  });
+
+  it("skips Shopify Billing and logs straight in when SHOPIFY_APP_STORE_SKIP_BILLING is set (temporary testing bypass)", async () => {
+    process.env.SHOPIFY_APP_STORE_SKIP_BILLING = "true";
+    const installRes = await request(app).get("/api/shopify-app/install").query({ shop: "newbrand" });
+    const state = new URL(installRes.headers.location).searchParams.get("state")!;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        if (url.includes("/admin/oauth/access_token")) {
+          return new Response(JSON.stringify({ access_token: "shpat_newbrand_token" }), { status: 200 });
+        }
+        if (url.includes("/shop.json")) {
+          return new Response(JSON.stringify({ shop: { email: "owner@newbrand.com", name: "New Brand Co" } }), { status: 200 });
+        }
+        if (url.includes("/auth/v1/admin/users")) {
+          return new Response(JSON.stringify({ id: crypto.randomUUID() }), { status: 200 });
+        }
+        if (url.includes("/admin/generate_link")) {
+          return new Response(JSON.stringify({ properties: { action_link: "https://test-project.supabase.co/auth/v1/verify?token=bypass-magic" } }), { status: 200 });
+        }
+        throw new Error(`Unexpected fetch: ${url}`);
+      }),
+    );
+
+    const res = await request(app).get("/api/shopify-app/callback").query({
+      shop: "newbrand.myshopify.com",
+      code: "auth-code",
+      state,
+      timestamp: "123",
+      hmac: computeTestHmac({ shop: "newbrand.myshopify.com", code: "auth-code", state, timestamp: "123" }, "test-app-store-secret"),
+    });
+
+    // No plan picker, no Shopify Billing charge — straight to the magic link, same as the
+    // already-subscribed reinstall path.
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("https://test-project.supabase.co/auth/v1/verify?token=bypass-magic");
+
+    const clients = await testPool.query("select id from clients where shopify_shop_domain = 'newbrand.myshopify.com'");
+    expect(clients.rowCount).toBe(1);
+    const subs = await testPool.query("select plan_id, status, billing_provider, gateway_subscription_id from subscriptions where client_id = $1", [
+      clients.rows[0].id,
+    ]);
+    // No real Shopify charge was ever created — gateway_subscription_id stays null,
+    // proving this genuinely bypassed createAppSubscription rather than just hiding the
+    // plan picker UI.
+    expect(subs.rows[0]).toMatchObject({ plan_id: "small", status: "active", billing_provider: "shopify", gateway_subscription_id: null });
   });
 
   it("reuses the existing client on a reinstall, rather than creating a duplicate", async () => {
