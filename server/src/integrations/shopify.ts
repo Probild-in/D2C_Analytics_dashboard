@@ -26,6 +26,14 @@ export interface ShopifyOrder {
   // order (orders/updated and refunds both re-fire this same webhook topic, so the fix
   // also self-heals on the next poll/webhook for orders already synced).
   current_total_price: string;
+  // Components of Shopify's own sales-report maths (Gross − Discounts − Reversals =
+  // Net; Net + Shipping + Taxes = Total). Captured so the dashboard's tiles can use
+  // Shopify's exact formulas instead of approximating everything from the charged
+  // total. Optional: webhook payloads from very old API versions may omit them.
+  total_line_items_price?: string;
+  current_total_discounts?: string;
+  current_total_tax?: string;
+  total_shipping_price_set?: { shop_money: { amount: string } };
   financial_status: string;
   fulfillment_status: string | null;
   cancelled_at: string | null;
@@ -140,14 +148,26 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
   const customerName = order.customer ? `${order.customer.first_name} ${order.customer.last_name}`.trim() : "Guest";
   const { company: trackingCompany, number: trackingNumber } = firstFulfillmentTracking(order);
 
+  const money = (value: string | undefined | null) => {
+    const parsed = value == null ? NaN : parseFloat(value);
+    return Number.isFinite(parsed) ? Math.round(parsed) : 0;
+  };
+  const amount = money(order.current_total_price);
+  // Shopify never decreases total_price after a refund; current_total_price is the
+  // only field that does — their difference is the refunded (sales-reversal) value.
+  const refunded = Math.max(0, money(order.total_price) - amount);
+
   const orderResult = await pool.query(
     `insert into shopify_orders
-       (client_id, connection_id, shopify_order_id, order_name, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+       (client_id, connection_id, shopify_order_id, order_name, customer_name, order_date, amount, status, payment_method, city, state, shopify_customer_id, tracking_number, tracking_company,
+        gross_amount, discount_amount, tax_amount, shipping_amount, refunded_amount)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
      on conflict (connection_id, shopify_order_id)
      do update set order_name = excluded.order_name, customer_name = excluded.customer_name, amount = excluded.amount, status = excluded.status,
        payment_method = excluded.payment_method, city = excluded.city, state = excluded.state,
-       tracking_number = excluded.tracking_number, tracking_company = excluded.tracking_company
+       tracking_number = excluded.tracking_number, tracking_company = excluded.tracking_company,
+       gross_amount = excluded.gross_amount, discount_amount = excluded.discount_amount, tax_amount = excluded.tax_amount,
+       shipping_amount = excluded.shipping_amount, refunded_amount = excluded.refunded_amount
      returning id`,
     [
       clientId,
@@ -156,7 +176,7 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
       order.name,
       customerName,
       order.created_at,
-      Math.round(parseFloat(order.current_total_price)),
+      amount,
       status,
       paymentMethod,
       order.shipping_address?.city ?? null,
@@ -164,6 +184,13 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
       order.customer ? String(order.customer.id) : null,
       trackingNumber,
       trackingCompany,
+      // null (not 0) when Shopify omitted the field, so read-side coalesces
+      // (gross_amount -> amount) can tell "absent" apart from "actually zero".
+      order.total_line_items_price != null ? money(order.total_line_items_price) : null,
+      order.current_total_discounts != null ? money(order.current_total_discounts) : null,
+      order.current_total_tax != null ? money(order.current_total_tax) : null,
+      order.total_shipping_price_set?.shop_money?.amount != null ? money(order.total_shipping_price_set.shop_money.amount) : null,
+      refunded,
     ],
   );
   const orderId = orderResult.rows[0].id;

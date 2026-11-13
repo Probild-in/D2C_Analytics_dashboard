@@ -154,6 +154,9 @@ export function sumSeries(points: SalesPoint[]) {
     (acc, p) => {
       acc.grossSales += p.grossSales;
       acc.netSales += p.netSales;
+      acc.totalSales += p.totalSales ?? p.netSales;
+      acc.cancelledValue += p.cancelledValue ?? 0;
+      acc.rtoValue += p.rtoValue ?? 0;
       acc.orders += p.orders;
       acc.adSpend += p.adSpend;
       acc.newCustomers += p.newCustomers;
@@ -167,6 +170,9 @@ export function sumSeries(points: SalesPoint[]) {
     {
       grossSales: 0,
       netSales: 0,
+      totalSales: 0,
+      cancelledValue: 0,
+      rtoValue: 0,
       orders: 0,
       adSpend: 0,
       newCustomers: 0,

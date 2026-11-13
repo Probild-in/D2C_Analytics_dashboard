@@ -94,27 +94,14 @@ router.get("/summary", requireAuth, async (req, res, next) => {
          select
            so.client_id,
            count(*) as orders,
-           -- Shopify has no native RTO concept (shopify.ts's mapOrderStatus never produces
-           -- 'RTO Initiated'/'RTO Delivered') — once a courier is connected, shipments.status
-           -- (joined via order_ref = shopify_order_id) is the real source of truth; so.status
-           -- is only a fallback for clients with no courier connected yet. See
-           -- server/src/lib/rto-status.ts. net_sales excludes both cancelled AND RTO'd
-           -- orders (same definition this dashboard states elsewhere) — the RTO check is
-           -- duplicated inline here, rather than factored out, to match rto_orders' own
-           -- condition exactly below.
-           coalesce(sum(so.amount) filter (
-             where so.status <> 'Cancelled'
-               and not (
-                 case
-                   when chs.client_id is not null then exists (
-                     select 1 from shipments s
-                     where s.client_id = so.client_id and s.order_ref = so.shopify_order_id
-                       and s.status in ('RTO Initiated', 'RTO Delivered')
-                   )
-                   else so.status in ('RTO Initiated', 'RTO Delivered')
-                 end
-               )
-           ), 0) as net_sales,
+           -- Same Shopify-report formula as shopify-data.ts's /sales (gross - discounts -
+           -- refunds, cancelled excluded, legacy nulls degrading to amount): the two pages
+           -- must agree with each other and with Shopify's own analytics. RTO is NOT
+           -- deducted here any more — Shopify has no RTO concept, and deducting it made
+           -- this number irreconcilable against Shopify's; RTO stays visible via
+           -- rto_orders below and the Operations page.
+           coalesce(sum(coalesce(so.gross_amount, so.amount) - coalesce(so.discount_amount, 0) - coalesce(so.refunded_amount, 0))
+             filter (where so.status <> 'Cancelled'), 0) as net_sales,
            count(*) filter (
              where case
                when chs.client_id is not null then exists (

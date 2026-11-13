@@ -161,14 +161,16 @@ describe("GET /api/clients/:id/sales", () => {
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
     expect(res.body[0].rtoOrders).toBe(2);
-    // gross_sales still counts all 3 (2200); net_sales excludes the two RTO'd orders'
-    // value (1000 + 500), leaving only the Delivered order (700) — proves Net Sales
-    // deducts RTO value via the Shopify-status fallback path (no courier connected).
+    // Net sales follows Shopify's own formula (gross - discounts - refunds, cancelled
+    // excluded) and does NOT deduct RTO — Shopify has no RTO concept, and deducting it
+    // made the tile irreconcilable against Shopify's analytics. RTO value is surfaced
+    // separately (rtoValue, via the Shopify-status fallback path here).
     expect(res.body[0].grossSales).toBe(2200);
-    expect(res.body[0].netSales).toBe(700);
+    expect(res.body[0].netSales).toBe(2200);
+    expect(res.body[0].rtoValue).toBe(1500);
   });
 
-  it("deducts RTO value from net sales via the linked courier shipment, once a courier is connected", async () => {
+  it("reports RTO value from the linked courier shipment without deducting it from net sales", async () => {
     await testPool.query(
       `insert into platform_connections (id, client_id, platform, status, external_account_id) values
        ('66666666-6666-6666-6666-666666666666', 'abc-fashion', 'courier_delhivery', 'connected', 'ops@abc.com')`,
@@ -195,9 +197,40 @@ describe("GET /api/clients/:id/sales", () => {
     expect(res.status).toBe(200);
     expect(res.body[0].rtoOrders).toBe(1);
     expect(res.body[0].grossSales).toBe(2000);
-    // Only order 302 (800) survives into net sales — order 301's 1200 is deducted via
-    // the shipment-to-order value join, not just counted.
-    expect(res.body[0].netSales).toBe(800);
+    // Net sales stays un-deducted (Shopify parity); order 301's 1200 shows up as
+    // rtoValue via the shipment-to-order value join instead.
+    expect(res.body[0].netSales).toBe(2000);
+    expect(res.body[0].rtoValue).toBe(1200);
+  });
+
+  it("computes gross/net/total sales with Shopify's own formulas from the per-order components", async () => {
+    // Mirrors Shopify's Total sales breakdown: gross = pre-discount product revenue;
+    // net = gross - discounts - refunds; total = net + shipping + taxes. The cancelled
+    // order contributes only to cancelledValue, and a legacy row (null components)
+    // falls back to amount for gross/net/total.
+    await testPool.query(
+      `insert into shopify_orders
+         (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method,
+          gross_amount, discount_amount, tax_amount, shipping_amount, refunded_amount) values
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '601', 'Priya Shah', now(), 1070, 'Delivered', 'Prepaid', 1500, 300, 50, 120, 300),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '602', 'Amit Rao', now(), 500, 'Cancelled', 'COD', 600, 100, 0, 0, 0),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '603', 'Legacy Row', now(), 400, 'Delivered', 'Prepaid', null, null, null, null, null)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/sales?days=1")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    // gross: 1500 (601) + 400 (603 fallback to amount); 602 cancelled, excluded
+    expect(res.body[0].grossSales).toBe(1900);
+    // net: (1500 - 300 - 300) + 400 = 1300
+    expect(res.body[0].netSales).toBe(1300);
+    // total: net + shipping 120 + tax 50 = 1470
+    expect(res.body[0].totalSales).toBe(1470);
+    // cancelledValue = the cancelled order's charged amount
+    expect(res.body[0].cancelledValue).toBe(500);
   });
 
   it("sums real Meta and Google ad spend for the correct day, scoped to this client", async () => {

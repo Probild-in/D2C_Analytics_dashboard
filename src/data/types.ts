@@ -18,6 +18,11 @@ export interface SalesPoint {
   date: string;
   grossSales: number;
   netSales: number;
+  // Shopify-report figures (net + shipping + taxes, real cancelled/RTO order value).
+  // Optional because the mock data layer predates them; sumSeries falls back.
+  totalSales?: number;
+  cancelledValue?: number;
+  rtoValue?: number;
   orders: number;
   adSpend: number;
   newCustomers: number;

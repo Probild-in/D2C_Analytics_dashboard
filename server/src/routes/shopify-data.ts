@@ -22,8 +22,22 @@ router.get("/sales", requireAuth, async (req, res, next) => {
          select
            ${istDay("order_date")} as day,
            count(*) as orders,
-           coalesce(sum(amount) filter (where status <> 'Cancelled'), 0) as net_sales,
-           coalesce(sum(amount), 0) as gross_sales,
+           -- Shopify's own report maths (Analytics > Total sales breakdown), so these
+           -- tiles reconcile against what the merchant sees in Shopify itself:
+           --   Gross sales = pre-discount product revenue (total_line_items_price)
+           --   Net sales   = gross - discounts - reversals (refunds); excludes tax/shipping
+           --   Total sales = net + shipping + taxes
+           -- Cancelled orders are excluded from all three (matches Shopify's net-zero
+           -- treatment of a cancelled+refunded order). Legacy rows synced before
+           -- migration 020 have null components: gross falls back to amount, the
+           -- rest to 0, which degrades to the old single-number behaviour.
+           coalesce(sum(coalesce(gross_amount, amount)) filter (where status <> 'Cancelled'), 0) as gross_sales,
+           coalesce(sum(coalesce(gross_amount, amount) - coalesce(discount_amount, 0) - coalesce(refunded_amount, 0))
+             filter (where status <> 'Cancelled'), 0) as net_sales,
+           coalesce(sum(coalesce(gross_amount, amount) - coalesce(discount_amount, 0) - coalesce(refunded_amount, 0)
+               + coalesce(shipping_amount, 0) + coalesce(tax_amount, 0))
+             filter (where status <> 'Cancelled'), 0) as total_sales,
+           coalesce(sum(amount) filter (where status = 'Cancelled'), 0) as cancelled_value,
            count(*) filter (where status = 'Cancelled') as cancelled_orders,
            count(*) filter (where payment_method = 'COD') as cod_orders,
            count(*) filter (where payment_method = 'Prepaid') as prepaid_orders,
@@ -108,12 +122,14 @@ router.get("/sales", requireAuth, async (req, res, next) => {
        select
          days.day,
          coalesce(orders_by_day.gross_sales, 0)::int as gross_sales,
-         -- Matches this page's own stated definition ("discounts, cancellations & RTO
-         -- value deducted"): cancellations were already excluded via orders_by_day's own
-         -- status filter; RTO orders aren't 'Cancelled' in shopify_orders.status (Shopify
-         -- has no native RTO concept — see rto-status.ts), so their value survived into
-         -- net_sales until this subtraction was added.
-         greatest(0, coalesce(orders_by_day.net_sales, 0)::int - coalesce(rto_by_day.rto_value, 0)::int) as net_sales,
+         -- Net/total follow Shopify's own formulas (see orders_by_day) and deliberately
+         -- do NOT deduct RTO — Shopify has no RTO concept, and deducting it here made
+         -- these tiles impossible to reconcile against Shopify's own analytics. RTO
+         -- impact stays visible via rto_orders/rto_value and the Operations page.
+         coalesce(orders_by_day.net_sales, 0)::int as net_sales,
+         coalesce(orders_by_day.total_sales, 0)::int as total_sales,
+         coalesce(orders_by_day.cancelled_value, 0)::int as cancelled_value,
+         coalesce(rto_by_day.rto_value, 0)::int as rto_value,
          coalesce(orders_by_day.orders, 0)::int as orders,
          coalesce(ad_spend_by_day.spend, 0)::int as ad_spend,
          coalesce(orders_by_day.new_customers, 0)::int as new_customers,
@@ -135,6 +151,9 @@ router.get("/sales", requireAuth, async (req, res, next) => {
         date: `${r.day.getFullYear()}-${String(r.day.getMonth() + 1).padStart(2, "0")}-${String(r.day.getDate()).padStart(2, "0")}`,
         grossSales: r.gross_sales,
         netSales: r.net_sales,
+        totalSales: r.total_sales,
+        cancelledValue: r.cancelled_value,
+        rtoValue: r.rto_value,
         orders: r.orders,
         adSpend: r.ad_spend,
         newCustomers: r.new_customers,

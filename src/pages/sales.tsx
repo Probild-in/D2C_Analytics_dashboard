@@ -143,28 +143,26 @@ export default function Sales() {
 
   const chartData = current.map((p) => ({
     date: dateFmt.format(new Date(p.date)),
-    "Gross Sales": p.grossSales,
+    "Total Sales": p.totalSales ?? p.netSales,
     "Net Sales": p.netSales,
   }));
-
-  const cancelledValue = Math.round(currentSum.cancelledOrders * metrics.aov);
 
   return (
     <Page title="Shopify / Sales" description={isAllClients ? "Aggregated storefront performance" : `${client?.name} — Shopify store performance`}>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <KpiCard label="Gross Sales" value={formatCurrencyCompact(currentSum.grossSales)} delta={percentDelta(currentSum.grossSales, previousSum.grossSales)} icon={<IndianRupee />} />
+        <KpiCard label="Total Sales" value={formatCurrencyCompact(currentSum.totalSales)} delta={percentDelta(currentSum.totalSales, previousSum.totalSales)} icon={<IndianRupee />} />
         <KpiCard label="Net Sales" value={formatCurrencyCompact(currentSum.netSales)} delta={percentDelta(currentSum.netSales, previousSum.netSales)} icon={<Wallet />} accent="positive" />
         <KpiCard label="Orders" value={formatNumber(currentSum.orders)} delta={percentDelta(currentSum.orders, previousSum.orders)} icon={<ShoppingCart />} accent="cyan" />
         <KpiCard label="AOV" value={formatCurrencyCompact(metrics.aov)} delta={percentDelta(metrics.aov, prevMetrics.aov)} icon={<Banknote />} accent="violet" />
         <KpiCard label="COD %" value={formatPercent(metrics.codPercent)} icon={<Percent />} accent="warning" />
-        <KpiCard label="Cancelled Value" value={formatCurrencyCompact(cancelledValue)} invertColor delta={0.4} icon={<XCircle />} accent="warning" />
+        <KpiCard label="Cancelled Value" value={formatCurrencyCompact(currentSum.cancelledValue)} invertColor delta={percentDelta(currentSum.cancelledValue, previousSum.cancelledValue)} icon={<XCircle />} accent="warning" />
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
             <CardTitle>Sales trend</CardTitle>
-            <CardDescription>Gross vs net sales — discounts, cancellations &amp; RTO value deducted</CardDescription>
+            <CardDescription>Total vs net sales — Shopify's own formulas, so these match your Shopify analytics</CardDescription>
           </CardHeader>
           <CardContent className="pl-1 pr-3">
             <ResponsiveContainer width="100%" height={260}>
@@ -183,7 +181,7 @@ export default function Sales() {
                 <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }} minTickGap={28} />
                 <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--color-text-tertiary)" }} width={44} tickFormatter={(v) => formatCurrencyCompact(v)} />
                 <Tooltip cursor={{ stroke: "var(--color-border)", strokeDasharray: "4 4" }} content={<ChartTooltip formatter={(v) => formatCurrencyCompact(v)} />} />
-                <Area type="monotone" dataKey="Gross Sales" stroke="var(--color-chart-2)" strokeWidth={2} fill="url(#grossFill)" dot={false} />
+                <Area type="monotone" dataKey="Total Sales" stroke="var(--color-chart-2)" strokeWidth={2} fill="url(#grossFill)" dot={false} />
                 <Area type="monotone" dataKey="Net Sales" stroke="var(--color-chart-1)" strokeWidth={2} fill="url(#netFill)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
