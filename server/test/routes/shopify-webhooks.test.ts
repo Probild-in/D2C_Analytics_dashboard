@@ -24,6 +24,7 @@ const SAMPLE_ORDER = {
   id: 7001,
   created_at: "2026-10-14T06:00:00Z",
   total_price: "1200.00",
+  current_total_price: "1200.00",
   financial_status: "paid",
   fulfillment_status: "fulfilled",
   cancelled_at: null,
@@ -66,7 +67,7 @@ describe("POST /api/webhooks/shopify/orders", () => {
     const first = JSON.stringify(SAMPLE_ORDER);
     await postWebhook(first, { hmac: signWebhookBody(first), shopDomain: "abc-fashion.myshopify.com" });
 
-    const updated = JSON.stringify({ ...SAMPLE_ORDER, total_price: "1500.00" });
+    const updated = JSON.stringify({ ...SAMPLE_ORDER, current_total_price: "1500.00" });
     await postWebhook(updated, { hmac: signWebhookBody(updated), shopDomain: "abc-fashion.myshopify.com" });
 
     const orders = await testPool.query("select amount from shopify_orders where shopify_order_id = '7001'");

@@ -20,6 +20,12 @@ export interface ShopifyOrder {
   name: string;
   created_at: string;
   total_price: string;
+  // Reflects refunds and order edits after the fact; total_price does not. Used for
+  // `amount` instead of total_price so a later partial refund is actually deducted —
+  // without this, Net Sales silently overstated revenue on any refunded-but-not-cancelled
+  // order (orders/updated and refunds both re-fire this same webhook topic, so the fix
+  // also self-heals on the next poll/webhook for orders already synced).
+  current_total_price: string;
   financial_status: string;
   fulfillment_status: string | null;
   cancelled_at: string | null;
@@ -150,7 +156,7 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
       order.name,
       customerName,
       order.created_at,
-      Math.round(parseFloat(order.total_price)),
+      Math.round(parseFloat(order.current_total_price)),
       status,
       paymentMethod,
       order.shipping_address?.city ?? null,

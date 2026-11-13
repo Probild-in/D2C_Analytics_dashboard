@@ -166,6 +166,7 @@ describe("shopifyConnector.sync", () => {
                 name: "#VR1001",
                 created_at: "2026-08-15T10:00:00Z",
                 total_price: "1499.00",
+                current_total_price: "1499.00",
                 financial_status: "paid",
                 fulfillment_status: "fulfilled",
                 cancelled_at: null,
@@ -206,6 +207,43 @@ describe("shopifyConnector.sync", () => {
     expect(lineItems.rows[0]).toMatchObject({ product_name: "Cotton Kurta", quantity: 2, price: 750 });
   });
 
+  it("uses current_total_price, not total_price, so a partial refund is deducted from amount", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            orders: [
+              {
+                id: 1005,
+                name: "#VR1005",
+                created_at: "2026-08-21T10:00:00Z",
+                // Original order was ₹1200; a ₹300 partial refund was issued afterwards.
+                // total_price stays frozen at the original value — only current_total_price
+                // reflects the refund — so amount must come from current_total_price.
+                total_price: "1200.00",
+                current_total_price: "900.00",
+                financial_status: "partially_refunded",
+                fulfillment_status: "fulfilled",
+                cancelled_at: null,
+                customer: null,
+                shipping_address: null,
+                payment_gateway_names: ["shopify_payments"],
+                line_items: [],
+              },
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
+
+    const orders = await testPool.query("select amount from shopify_orders where shopify_order_id = '1005'");
+    expect(orders.rows[0].amount).toBe(900);
+  });
+
   it("captures the first fulfillment's tracking number and company", async () => {
     vi.stubGlobal(
       "fetch",
@@ -217,6 +255,7 @@ describe("shopifyConnector.sync", () => {
                 id: 1002,
                 created_at: "2026-08-15T10:00:00Z",
                 total_price: "999.00",
+                current_total_price: "999.00",
                 financial_status: "paid",
                 fulfillment_status: "fulfilled",
                 cancelled_at: null,
@@ -253,6 +292,7 @@ describe("shopifyConnector.sync", () => {
                 id: 1003,
                 created_at: "2026-08-15T10:00:00Z",
                 total_price: "500.00",
+                current_total_price: "500.00",
                 financial_status: "pending",
                 fulfillment_status: null,
                 cancelled_at: null,
@@ -286,6 +326,7 @@ describe("shopifyConnector.sync", () => {
                 id: 1002,
                 created_at: "2026-08-16T10:00:00Z",
                 total_price: "500.00",
+                current_total_price: "500.00",
                 financial_status: "pending",
                 fulfillment_status: null,
                 cancelled_at: null,
@@ -316,6 +357,7 @@ describe("shopifyConnector.sync", () => {
                 id: 1003,
                 created_at: "2026-08-17T10:00:00Z",
                 total_price: "300.00",
+                current_total_price: "300.00",
                 financial_status: "voided",
                 fulfillment_status: null,
                 cancelled_at: "2026-08-17T12:00:00Z",
@@ -344,6 +386,7 @@ describe("shopifyConnector.sync", () => {
               id: 1004,
               created_at: "2026-08-18T10:00:00Z",
               total_price: "800.00",
+              current_total_price: "800.00",
               financial_status: financial,
               fulfillment_status: "fulfilled",
               cancelled_at: null,
@@ -379,6 +422,7 @@ describe("shopifyConnector.sync", () => {
                   id: 2001,
                   created_at: "2026-08-19T10:00:00Z",
                   total_price: "100.00",
+                  current_total_price: "100.00",
                   financial_status: "paid",
                   fulfillment_status: "fulfilled",
                   cancelled_at: null,
@@ -405,6 +449,7 @@ describe("shopifyConnector.sync", () => {
                 id: 2002,
                 created_at: "2026-08-20T10:00:00Z",
                 total_price: "200.00",
+                current_total_price: "200.00",
                 financial_status: "paid",
                 fulfillment_status: "fulfilled",
                 cancelled_at: null,
