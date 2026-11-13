@@ -32,6 +32,7 @@ export function IntegrationCard({
   const [error, setError] = React.useState<string | null>(null);
   const [credentialsOpen, setCredentialsOpen] = React.useState(false);
   const [confirmingDisconnect, setConfirmingDisconnect] = React.useState(false);
+  const [syncing, setSyncing] = React.useState(false);
 
   const Icon = platform.icon;
   const status = connection?.status ?? "disconnected";
@@ -61,6 +62,18 @@ export function IntegrationCard({
     } catch (err) {
       setError(err instanceof Error ? err.message : `Failed to connect ${platform.label}. Please try again.`);
       setBusy(false);
+    }
+  };
+
+  const syncNow = async () => {
+    setSyncing(true);
+    setError(null);
+    try {
+      await apiFetch(`/api/clients/${clientId}/connections/${platform.key}/sync`, { method: "POST" });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to sync ${platform.label}. Please try again.`);
+      setSyncing(false);
     }
   };
 
@@ -131,7 +144,12 @@ export function IntegrationCard({
         </p>
       )}
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {isConnected && !connection?.lastSyncedAt && (
+          <Button size="sm" variant="secondary" onClick={syncNow} disabled={syncing}>
+            {syncing ? "Syncing…" : "Sync now"}
+          </Button>
+        )}
         {isConnected ? (
           <Button size="sm" variant="ghost" onClick={() => setConfirmingDisconnect(true)} disabled={busy}>
             Disconnect
