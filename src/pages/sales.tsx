@@ -127,7 +127,7 @@ function getOrderTimeline(status: OrderStatus): TimelineStep[] {
 
 export default function Sales() {
   const { client, isAllClients } = useApp();
-  const { current, currentSum, previousSum } = usePeriodData();
+  const { current, currentSum, previousSum, days } = usePeriodData();
   const metrics = deriveMetrics(currentSum);
   const prevMetrics = deriveMetrics(previousSum);
   const [query, setQuery] = React.useState("");
@@ -138,7 +138,7 @@ export default function Sales() {
   const filteredOrders = orders.filter(
     (o) => o.customer.toLowerCase().includes(query.toLowerCase()) || o.id.includes(query) || o.product.toLowerCase().includes(query.toLowerCase()),
   );
-  const productsPath = !isAllClients && client ? `/api/clients/${client.id}/products` : null;
+  const productsPath = !isAllClients && client ? `/api/clients/${client.id}/products?days=${days}` : null;
   const { data: products } = useClientResource<Product[]>(productsPath, EMPTY_PRODUCTS);
 
   const chartData = current.map((p) => ({

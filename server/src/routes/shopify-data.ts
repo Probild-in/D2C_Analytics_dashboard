@@ -221,25 +221,36 @@ router.get("/products", requireAuth, async (req, res, next) => {
   try {
     const clientId = req.params.id;
     await assertClientAccess(pool, req.auth!.userId, clientId);
+    const days = Math.max(1, Math.min(730, Number(req.query.days) || 90));
 
     const result = await pool.query(
       `with ${ORDER_RTO_CTES_SINGLE_CLIENT}
        select
          li.product_name,
-         sum(li.quantity)::int as orders,
+         -- Orders containing this product (not units) — matches how Shopify counts
+         -- per-product orders, and how a merchant reads an "Orders" column.
+         count(distinct li.order_id)::int as orders,
          sum(li.quantity * li.price)::int as sales,
-         -- Matches /sales's own definition (discounts, cancellations & RTO value deducted) —
-         -- excludes both cancelled orders and RTO'd orders, not just cancelled ones.
-         sum(li.quantity * li.price) filter (where o.status <> 'Cancelled' and not orr.is_rto)::int as net_sales,
-         coalesce(sum(li.quantity) filter (where orr.is_rto), 0)::int as rto_quantity,
-         coalesce(sum(li.quantity) filter (where o.status = 'Cancelled'), 0)::int as cancelled_quantity
+         -- Per-product net sales: the order-level Shopify-parity net (gross - discounts -
+         -- refunds, see /sales) allocated onto this product's share of the order's line
+         -- revenue. Exact per-line discount/refund attribution would need Shopify's
+         -- discount_allocations/refund_line_items; proportional allocation sums to the
+         -- same period total and tracks Shopify's per-product report closely.
+         coalesce(sum(
+           li.quantity * li.price *
+           (greatest(0, coalesce(o.gross_amount, o.amount) - coalesce(o.discount_amount, 0) - coalesce(o.refunded_amount, 0))::numeric
+             / nullif(coalesce(o.gross_amount, o.amount), 0))
+         ), 0)::int as net_sales,
+         coalesce(count(distinct li.order_id) filter (where orr.is_rto), 0)::int as rto_orders,
+         coalesce(count(distinct li.order_id) filter (where o.status = 'Cancelled'), 0)::int as cancelled_orders
        from shopify_order_line_items li
        join shopify_orders o on o.id = li.order_id
        join order_rto orr on orr.order_id = o.id
        where o.client_id = $1
+         and o.order_date >= ${IST_DAY_START} - interval '1 day' * ($2::int - 1)
        group by li.product_name
        order by sales desc`,
-      [clientId],
+      [clientId, days],
     );
 
     res.json(
@@ -251,8 +262,8 @@ router.get("/products", requireAuth, async (req, res, next) => {
         orders: r.orders,
         sales: r.sales,
         netSales: r.net_sales ?? 0,
-        rtoPercent: r.orders > 0 ? (r.rto_quantity / r.orders) * 100 : 0,
-        cancellationPercent: r.orders > 0 ? (r.cancelled_quantity / r.orders) * 100 : 0,
+        rtoPercent: r.orders > 0 ? (r.rto_orders / r.orders) * 100 : 0,
+        cancellationPercent: r.orders > 0 ? (r.cancelled_orders / r.orders) * 100 : 0,
         trend: [],
       })),
     );

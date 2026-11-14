@@ -7,6 +7,8 @@ import { ChartTooltip } from "@/components/dashboard/chart-tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useApp } from "@/store/app-context";
 import { useClientResource } from "@/hooks/use-client-resource";
+import { usePeriodData } from "@/hooks/use-period-data";
+import { rangeToDays } from "@/lib/date-range";
 import type { Product } from "@/data/types";
 import { formatCurrencyCompact, formatNumber, formatPercent, cn } from "@/lib/utils";
 import { Package, ShoppingBag, TrendingUp, Undo2 } from "lucide-react";
@@ -14,22 +16,23 @@ import { Package, ShoppingBag, TrendingUp, Undo2 } from "lucide-react";
 const EMPTY_PRODUCTS: Product[] = [];
 
 export default function Products() {
-  const { client, isAllClients } = useApp();
+  const { client, isAllClients, dateRange } = useApp();
+  const days = rangeToDays(dateRange);
+  const { currentSum } = usePeriodData();
   const { data: products } = useClientResource<Product[]>(
-    !isAllClients && client ? `/api/clients/${client.id}/products` : null,
+    !isAllClients && client ? `/api/clients/${client.id}/products?days=${days}` : null,
     EMPTY_PRODUCTS,
   );
   const [selectedProduct, setSelectedProduct] = React.useState<Product | null>(null);
 
-  const totalOrders = products.reduce((s, p) => s + p.orders, 0);
   const totalNetSales = products.reduce((s, p) => s + p.netSales, 0);
   const avgRto = products.length > 0 ? products.reduce((s, p) => s + p.rtoPercent, 0) / products.length : 0;
 
   return (
     <Page title="Products" description={isAllClients ? "Aggregated product performance" : `${client?.name} — product performance`}>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KpiCard label="Active Products" value={String(products.length)} icon={<Package />} accent="brand" />
-        <KpiCard label="Total Orders" value={formatNumber(totalOrders)} icon={<ShoppingBag />} accent="cyan" />
+        <KpiCard label="Products Sold" value={String(products.length)} icon={<Package />} accent="brand" />
+        <KpiCard label="Total Orders" value={formatNumber(currentSum.orders)} icon={<ShoppingBag />} accent="cyan" />
         <KpiCard label="Net Sales" value={formatCurrencyCompact(totalNetSales)} icon={<TrendingUp />} accent="positive" />
         <KpiCard label="Avg RTO %" value={formatPercent(avgRto)} invertColor icon={<Undo2 />} accent="warning" />
       </div>

@@ -425,10 +425,14 @@ describe("GET /api/clients/:id/products", () => {
     expect(res.body).toHaveLength(1);
     expect(res.body[0]).toMatchObject({
       name: "Cotton Kurta",
-      orders: 3,
+      // Orders containing the product (2 orders), not units sold (3) — matches how
+      // Shopify counts per-product orders.
+      orders: 2,
       sales: 2000,
-      netSales: 1500,
-      cancellationPercent: expect.closeTo(33.33, 1),
+      // Shopify-parity net: both orders have no recorded discounts/refunds, so the
+      // full line revenue stays — the cancelled order is still booked (no refund).
+      netSales: 2000,
+      cancellationPercent: 50,
     });
   });
 
@@ -462,10 +466,37 @@ describe("GET /api/clients/:id/products", () => {
 
     expect(res.status).toBe(200);
     const linenShirt = res.body.find((p: { name: string }) => p.name === "Linen Shirt");
-    // sales (gross) still counts both orders (2000); netSales excludes order 501's
-    // value (1000) since it's RTO via the linked shipment — proves the "Top products"
-    // panel's own net sales figure deducts RTO value, not just gross.
-    expect(linenShirt).toMatchObject({ orders: 2, sales: 2000, netSales: 1000, rtoPercent: 50 });
+    // netSales stays un-deducted (Shopify parity — no refund recorded on the RTO'd
+    // order); the RTO still surfaces through rtoPercent via the linked shipment.
+    expect(linenShirt).toMatchObject({ orders: 2, sales: 2000, netSales: 2000, rtoPercent: 50 });
+  });
+
+  it("allocates order-level discounts/refunds proportionally onto products and respects the days window", async () => {
+    await testPool.query(
+      `insert into shopify_orders (id, client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method,
+         gross_amount, discount_amount, refunded_amount) values
+       ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '701', 'Priya Shah', now(), 800, 'Delivered', 'Prepaid', 1000, 200, 0),
+       ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'abc-fashion', '55555555-5555-5555-5555-555555555555', '702', 'Old Order', now() - interval '40 days', 999, 'Delivered', 'Prepaid', 999, 0, 0)`,
+    );
+    await testPool.query(
+      `insert into shopify_order_line_items (order_id, shopify_line_item_id, product_name, quantity, price) values
+       ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'li-701a', 'Desk Mat', 1, 600),
+       ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'li-701b', 'Cable Tray', 1, 400),
+       ('ffffffff-ffff-ffff-ffff-ffffffffffff', 'li-702', 'Desk Mat', 1, 999)`,
+    );
+
+    const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
+    const res = await request(app)
+      .get("/api/clients/abc-fashion/products?days=30")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(res.status).toBe(200);
+    const deskMat = res.body.find((p: { name: string }) => p.name === "Desk Mat");
+    const cableTray = res.body.find((p: { name: string }) => p.name === "Cable Tray");
+    // Order 701's net factor is (1000-200-0)/1000 = 0.8, allocated onto each line's
+    // revenue share; the 40-day-old order is outside the 30-day window entirely.
+    expect(deskMat).toMatchObject({ orders: 1, sales: 600, netSales: 480 });
+    expect(cableTray).toMatchObject({ orders: 1, sales: 400, netSales: 320 });
   });
 });
 
