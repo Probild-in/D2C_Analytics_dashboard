@@ -32,7 +32,22 @@ router.post("/:platform/sync", requireAuth, async (req, res, next) => {
       throw new HttpError(429, "sync_rate_limited", "This connection was synced less than 5 minutes ago");
     }
 
-    const result = await connector.sync(id);
+    let result;
+    try {
+      result = await connector.sync(id);
+    } catch (syncErr) {
+      // Connector sync errors carry user-actionable messages ("Delhivery rejected the
+      // stored API token. Reconnect with a current token."); without this they fall
+      // into the generic 500 handler and the UI shows "Something went wrong", which
+      // hides the fix from the person looking at it. Mark the connection like the
+      // scheduler's failure path does, so the card shows "Needs attention" too.
+      await pool.query("update platform_connections set status = 'error' where id = $1 and status <> 'disconnected'", [id]);
+      throw new HttpError(
+        502,
+        "sync_failed",
+        syncErr instanceof Error ? syncErr.message : "The sync failed. Please try again.",
+      );
+    }
     res.json(result);
   } catch (err) {
     next(err);
