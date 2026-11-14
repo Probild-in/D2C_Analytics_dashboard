@@ -41,10 +41,12 @@ async function post(path: string, body: Record<string, string>): Promise<unknown
 // a successful auth.
 export async function getCarriers(username: string, licenseKey: string): Promise<ShipwayCarrier[]> {
   const body = await post("carriers", { username, password: licenseKey });
+  // Observed live: the real response is {"status":"success","couriers":[{id, courier_name,
+  // image}, ...]} — "couriers", not "carriers" as the doc's method name suggests.
   const list = Array.isArray(body)
     ? body
     : isRecord(body)
-      ? [body.response, body.carriers, body.data].find(Array.isArray) ?? []
+      ? [body.couriers, body.response, body.carriers, body.data].find(Array.isArray) ?? []
       : [];
   const carriers: ShipwayCarrier[] = [];
   for (const entry of list) {
