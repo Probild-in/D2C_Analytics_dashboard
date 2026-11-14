@@ -95,9 +95,9 @@ export const PLATFORMS: PlatformMeta[] = [
     icon: Truck,
     authType: "credentials",
     helper:
-      "Enter your Shipway username and licence key (both are in the welcome email from Shipway, or under your Shipway profile). Orders with tracking numbers are pushed to Shipway automatically with no customer contact details, so your customers never get notified by this sync. Connect Shopify first — shipments are matched from the tracking numbers your Shopify orders carry.",
+      "Use the API username and licence key from Shipway (Settings → API, or the welcome email Shipway sent you) — the API username is often not your login email, and the licence key is not your password. Orders with tracking numbers are pushed to Shipway with no customer contact details, so this sync never triggers Shipway's customer emails or SMS. Connect Shopify first — shipments are matched from the tracking numbers your Shopify orders already carry.",
     fields: [
-      { name: "username", label: "Username", type: "text", placeholder: "your-shipway-username" },
+      { name: "username", label: "API username", type: "text", placeholder: "your-shipway-api-username" },
       { name: "licenseKey", label: "Licence key", type: "password" },
     ],
   },

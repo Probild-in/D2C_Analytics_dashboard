@@ -125,9 +125,26 @@ describe("shipwayConnector.connectWithCredentials", () => {
   });
 
   it("rejects when Shipway answers 401", async () => {
-    stubShipway({ carriersStatus: 401 });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("{}", { status: 401 })),
+    );
     await expect(
       shipwayConnector.connectWithCredentials("abc-fashion", { username: "acme", licenseKey: "wrong" }),
+    ).rejects.toBeInstanceOf(CredentialsRejectedError);
+  });
+
+  it("rejects the in-body 'Invalid Username or Password' that Shipway returns with HTTP 200", async () => {
+    // Observed live. /api/carriers answers for junk credentials too, so validating there
+    // let a wrong licence key show as "Connected" and then silently sync nothing.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () => new Response(JSON.stringify({ status: "Failed", msg: "Invalid Username or Password" }), { status: 200 }),
+      ),
+    );
+    await expect(
+      shipwayConnector.connectWithCredentials("abc-fashion", { username: "wrong", licenseKey: "wrong" }),
     ).rejects.toBeInstanceOf(CredentialsRejectedError);
   });
 
@@ -243,6 +260,20 @@ describe("shipwayConnector.sync", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn(async () => new Response("{}", { status: 401 })),
+    );
+
+    await expect(shipwayConnector.sync(CONN)).rejects.toThrow(/reconnect/i);
+  });
+
+  it("fails with a reconnect message when the licence key stops working mid-sync", async () => {
+    await insertConnection();
+    await insertShopifyConnection();
+    await insertShopifyOrder("3002", "AWB5", "Blue Dart");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () => new Response(JSON.stringify({ status: "Failed", msg: "Invalid Username or Password" }), { status: 200 }),
+      ),
     );
 
     await expect(shipwayConnector.sync(CONN)).rejects.toThrow(/reconnect/i);

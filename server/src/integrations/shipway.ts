@@ -2,7 +2,14 @@ import type { CredentialsConnector } from "./types.js";
 import { CredentialsRejectedError } from "./types.js";
 import pool from "../db.js";
 import { decryptToken } from "../lib/crypto.js";
-import { getCarriers, getOrderShipmentDetails, pushOrderData, ShipwayAuthError, type ShipwayCarrier } from "./shipway-api.js";
+import {
+  getCarriers,
+  getOrderShipmentDetails,
+  pushOrderData,
+  verifyCredentials,
+  ShipwayAuthError,
+  type ShipwayCarrier,
+} from "./shipway-api.js";
 import { mapShipwayStatus } from "./shipway-status.js";
 
 // Same bounds as the Delhivery connector, for the same reason: one tracked order per
@@ -37,13 +44,15 @@ export const shipwayConnector: CredentialsConnector = {
     if (!username || !licenseKey) {
       throw new CredentialsRejectedError("Enter your Shipway username and licence key.");
     }
-    // Unlike Delhivery, Shipway has a cheap authenticated endpoint (carriers list), so
-    // the credentials are checked live here rather than deferred to the first sync.
+    // Checked against an endpoint that actually authenticates — /api/carriers answers
+    // for junk credentials too, so validating there let bad keys show as "Connected".
     try {
-      await getCarriers(username, licenseKey);
+      await verifyCredentials(username, licenseKey);
     } catch (err) {
       if (err instanceof ShipwayAuthError) {
-        throw new CredentialsRejectedError("Shipway rejected this username/licence key. Check both and try again.");
+        throw new CredentialsRejectedError(
+          "Shipway rejected this username and licence key. Use the API username from Shipway (Settings → API, or your Shipway welcome email) — it may not be your login email.",
+        );
       }
       throw err;
     }
