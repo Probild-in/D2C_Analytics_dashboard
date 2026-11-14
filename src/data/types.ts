@@ -23,6 +23,7 @@ export interface SalesPoint {
   totalSales?: number;
   cancelledValue?: number;
   rtoValue?: number;
+  salesOrders?: number;
   orders: number;
   adSpend: number;
   newCustomers: number;

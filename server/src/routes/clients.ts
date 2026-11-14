@@ -95,13 +95,12 @@ router.get("/summary", requireAuth, async (req, res, next) => {
            so.client_id,
            count(*) as orders,
            -- Same Shopify-report formula as shopify-data.ts's /sales (gross - discounts -
-           -- refunds, cancelled excluded, legacy nulls degrading to amount): the two pages
-           -- must agree with each other and with Shopify's own analytics. RTO is NOT
-           -- deducted here any more — Shopify has no RTO concept, and deducting it made
-           -- this number irreconcilable against Shopify's; RTO stays visible via
-           -- rto_orders below and the Operations page.
-           coalesce(sum(coalesce(so.gross_amount, so.amount) - coalesce(so.discount_amount, 0) - coalesce(so.refunded_amount, 0))
-             filter (where so.status <> 'Cancelled'), 0) as net_sales,
+           -- product refunds, ALL orders including cancelled, legacy nulls degrading to
+           -- amount): the two pages must agree with each other and with Shopify's own
+           -- analytics. Neither RTO nor cancellation is deducted beyond recorded refunds —
+           -- that's Shopify's model (sale booked at creation, reversal only when refunded);
+           -- RTO stays visible via rto_orders below and the Operations page.
+           coalesce(sum(coalesce(so.gross_amount, so.amount) - coalesce(so.discount_amount, 0) - coalesce(so.refunded_amount, 0)), 0) as net_sales,
            count(*) filter (
              where case
                when chs.client_id is not null then exists (

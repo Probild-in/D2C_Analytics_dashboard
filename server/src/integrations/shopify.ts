@@ -31,9 +31,19 @@ export interface ShopifyOrder {
   // Shopify's exact formulas instead of approximating everything from the charged
   // total. Optional: webhook payloads from very old API versions may omit them.
   total_line_items_price?: string;
-  current_total_discounts?: string;
+  // total_discounts, not current_total_discounts: Shopify's Discounts report line uses
+  // the original figure, and current_total_discounts zeroes out when a cancelled
+  // order's items are restocked (verified against a live store's own breakdown).
+  total_discounts?: string;
   current_total_tax?: string;
+  total_tax?: string;
+  // True when product prices include tax (Indian GST stores) — Shopify's Gross sales
+  // backs the included tax out of the line-item total.
+  taxes_included?: boolean;
   total_shipping_price_set?: { shop_money: { amount: string } };
+  // Shipping refunds live in refunds[].order_adjustments (kind "shipping_refund"),
+  // and Shopify reports them under Shipping, not Sales reversals.
+  refunds?: { order_adjustments?: { kind: string; amount: string }[] }[];
   financial_status: string;
   fulfillment_status: string | null;
   cancelled_at: string | null;
@@ -154,8 +164,29 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
   };
   const amount = money(order.current_total_price);
   // Shopify never decreases total_price after a refund; current_total_price is the
-  // only field that does — their difference is the refunded (sales-reversal) value.
-  const refunded = Math.max(0, money(order.total_price) - amount);
+  // only field that does — their difference is the total refunded value. The shipping
+  // portion of that is split out (Shopify books it under Shipping, not Sales
+  // reversals), leaving refunded = product-value reversals only.
+  const totalRefunded = Math.max(0, money(order.total_price) - amount);
+  const shippingOriginal = money(order.total_shipping_price_set?.shop_money?.amount);
+  const shippingRefunded = Math.min(
+    shippingOriginal,
+    (order.refunds ?? []).reduce(
+      (sum, refund) =>
+        sum +
+        (refund.order_adjustments ?? [])
+          .filter((adj) => adj.kind === "shipping_refund")
+          .reduce((s, adj) => s + Math.abs(money(adj.amount)), 0),
+      0,
+    ),
+  );
+  const refunded = Math.max(0, totalRefunded - shippingRefunded);
+  // Gross sales per Shopify: line-item total at original prices, with included tax
+  // backed out when the store's prices are tax-inclusive.
+  const gross =
+    order.total_line_items_price != null
+      ? money(order.total_line_items_price) - (order.taxes_included ? money(order.total_tax) : 0)
+      : null;
 
   const orderResult = await pool.query(
     `insert into shopify_orders
@@ -186,10 +217,11 @@ export async function upsertShopifyOrder(clientId: string, connectionId: string,
       trackingCompany,
       // null (not 0) when Shopify omitted the field, so read-side coalesces
       // (gross_amount -> amount) can tell "absent" apart from "actually zero".
-      order.total_line_items_price != null ? money(order.total_line_items_price) : null,
-      order.current_total_discounts != null ? money(order.current_total_discounts) : null,
+      gross,
+      order.total_discounts != null ? money(order.total_discounts) : null,
       order.current_total_tax != null ? money(order.current_total_tax) : null,
-      order.total_shipping_price_set?.shop_money?.amount != null ? money(order.total_shipping_price_set.shop_money.amount) : null,
+      // Net shipping (original minus refunded) — the figure Shopify's Shipping line reports.
+      order.total_shipping_price_set?.shop_money?.amount != null ? shippingOriginal - shippingRefunded : null,
       refunded,
     ],
   );

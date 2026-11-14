@@ -39,7 +39,9 @@ describe("GET /api/clients/:id/sales", () => {
     expect(res.body).toHaveLength(3);
     const today = res.body[res.body.length - 1];
     expect(today.orders).toBe(2);
-    expect(today.netSales).toBe(500);
+    // 500 (Delivered) + 800 (Cancelled, no refund recorded): Shopify's model books the
+    // cancelled sale and only subtracts recorded refunds, so it stays in net sales.
+    expect(today.netSales).toBe(1300);
     expect(today.cancelledOrders).toBe(1);
     expect(today.newCustomers).toBe(1);
     expect(today.returningCustomers).toBe(1);
@@ -204,17 +206,21 @@ describe("GET /api/clients/:id/sales", () => {
   });
 
   it("computes gross/net/total sales with Shopify's own formulas from the per-order components", async () => {
-    // Mirrors Shopify's Total sales breakdown: gross = pre-discount product revenue;
-    // net = gross - discounts - refunds; total = net + shipping + taxes. The cancelled
-    // order contributes only to cancelledValue, and a legacy row (null components)
-    // falls back to amount for gross/net/total.
+    // Mirrors Shopify's Total sales breakdown (verified to the rupee against a live
+    // store): gross = line-item total; net = gross - discounts - product refunds;
+    // total = sum(amount), since amount (current_total_price) is what the customer
+    // still pays after refunds. Cancelled orders are INCLUDED — Shopify books the
+    // sale and only subtracts recorded refunds. A legacy row (null components) falls
+    // back to amount. Order 604 is cancelled + fully refunded: it nets out of
+    // total/salesOrders but still contributes its gross.
     await testPool.query(
       `insert into shopify_orders
          (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method,
           gross_amount, discount_amount, tax_amount, shipping_amount, refunded_amount) values
        ('abc-fashion', '55555555-5555-5555-5555-555555555555', '601', 'Priya Shah', now(), 1070, 'Delivered', 'Prepaid', 1500, 300, 50, 120, 300),
        ('abc-fashion', '55555555-5555-5555-5555-555555555555', '602', 'Amit Rao', now(), 500, 'Cancelled', 'COD', 600, 100, 0, 0, 0),
-       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '603', 'Legacy Row', now(), 400, 'Delivered', 'Prepaid', null, null, null, null, null)`,
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '603', 'Legacy Row', now(), 400, 'Delivered', 'Prepaid', null, null, null, null, null),
+       ('abc-fashion', '55555555-5555-5555-5555-555555555555', '604', 'Neha Singh', now(), 0, 'Cancelled', 'Prepaid', 800, 0, 0, 0, 800)`,
     );
 
     const token = signTestJwt({ sub: "11111111-1111-1111-1111-111111111111", email: "riya@agency.com" });
@@ -223,14 +229,17 @@ describe("GET /api/clients/:id/sales", () => {
       .set("Authorization", `Bearer ${token}`);
 
     expect(res.status).toBe(200);
-    // gross: 1500 (601) + 400 (603 fallback to amount); 602 cancelled, excluded
-    expect(res.body[0].grossSales).toBe(1900);
-    // net: (1500 - 300 - 300) + 400 = 1300
-    expect(res.body[0].netSales).toBe(1300);
-    // total: net + shipping 120 + tax 50 = 1470
-    expect(res.body[0].totalSales).toBe(1470);
-    // cancelledValue = the cancelled order's charged amount
-    expect(res.body[0].cancelledValue).toBe(500);
+    // gross: 1500 (601) + 600 (602, cancelled but booked) + 400 (603 fallback) + 800 (604)
+    expect(res.body[0].grossSales).toBe(3300);
+    // net: (1500-300-300) + (600-100-0) + 400 + (800-0-800) = 900 + 500 + 400 + 0
+    expect(res.body[0].netSales).toBe(1800);
+    // total = sum(amount): 1070 + 500 + 400 + 0
+    expect(res.body[0].totalSales).toBe(1970);
+    // cancelledValue = original charged value of cancelled orders: (500+0) + (0+800)
+    expect(res.body[0].cancelledValue).toBe(1300);
+    // salesOrders: orders still carrying value (604's amount is 0 -> dropped)
+    expect(res.body[0].salesOrders).toBe(3);
+    expect(res.body[0].orders).toBe(4);
   });
 
   it("sums real Meta and Google ad spend for the correct day, scoped to this client", async () => {

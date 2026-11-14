@@ -218,11 +218,20 @@ describe("shopifyConnector.sync", () => {
                 id: 1005,
                 name: "#VR1005",
                 created_at: "2026-08-21T10:00:00Z",
-                // Original order was ₹1200; a ₹300 partial refund was issued afterwards.
-                // total_price stays frozen at the original value — only current_total_price
-                // reflects the refund — so amount must come from current_total_price.
+                // Original order was ₹1200; a ₹300 partial refund was issued afterwards,
+                // of which ₹50 was refunded shipping. total_price stays frozen at the
+                // original value — only current_total_price reflects the refund.
                 total_price: "1200.00",
                 current_total_price: "900.00",
+                // Tax-inclusive store: gross backs the included ₹100 tax out of the
+                // ₹1300 line-item total.
+                total_line_items_price: "1300.00",
+                taxes_included: true,
+                total_tax: "100.00",
+                current_total_tax: "80.00",
+                total_discounts: "200.00",
+                total_shipping_price_set: { shop_money: { amount: "100.00" } },
+                refunds: [{ order_adjustments: [{ kind: "shipping_refund", amount: "-50.00" }] }],
                 financial_status: "partially_refunded",
                 fulfillment_status: "fulfilled",
                 cancelled_at: null,
@@ -240,8 +249,17 @@ describe("shopifyConnector.sync", () => {
 
     await shopifyConnector.sync("55555555-5555-5555-5555-555555555555");
 
-    const orders = await testPool.query("select amount from shopify_orders where shopify_order_id = '1005'");
-    expect(orders.rows[0].amount).toBe(900);
+    const orders = await testPool.query(
+      "select amount, gross_amount, discount_amount, tax_amount, shipping_amount, refunded_amount from shopify_orders where shopify_order_id = '1005'",
+    );
+    expect(orders.rows[0]).toMatchObject({
+      amount: 900,
+      gross_amount: 1200, // 1300 line items - 100 included tax
+      discount_amount: 200, // frozen total_discounts, not current_total_discounts
+      tax_amount: 80, // current_total_tax (net of tax reversed with refunds)
+      shipping_amount: 50, // 100 original - 50 refunded (Shopify books it under Shipping)
+      refunded_amount: 250, // 300 total refunded - 50 shipping portion = product reversals
+    });
   });
 
   it("captures the first fulfillment's tracking number and company", async () => {
