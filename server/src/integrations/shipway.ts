@@ -74,9 +74,10 @@ export const shipwayConnector: CredentialsConnector = {
       tracking_number: string;
       tracking_company: string | null;
       shopify_order_id: string;
+      order_name: string | null;
       order_date: Date;
     }>(
-      `select o.tracking_number, o.tracking_company, o.shopify_order_id, o.order_date
+      `select o.tracking_number, o.tracking_company, o.shopify_order_id, o.order_name, o.order_date
        from shopify_orders o
        left join shipments s on s.client_id = o.client_id and s.awb = o.tracking_number
        where o.client_id = $1
@@ -92,10 +93,29 @@ export const shipwayConnector: CredentialsConnector = {
     let carriers: ShipwayCarrier[] | null = null;
     let recordsSynced = 0;
 
-    for (const { tracking_number: awb, tracking_company: company, shopify_order_id: orderRef, order_date: orderedAt } of candidates.rows) {
-      let tracked;
+    for (const {
+      tracking_number: awb,
+      tracking_company: company,
+      shopify_order_id: shopifyOrderId,
+      order_name: orderName,
+      order_date: orderedAt,
+    } of candidates.rows) {
+      // Shipway identifies an order by the merchant-facing order number the store (or its
+      // Shipway/Shopify integration) pushed — e.g. "1114585" — not by Shopify's internal
+      // numeric id. Try the order name first (minus Shopify's "#" prefix), then fall back
+      // to the internal id for orders synced before order_name was captured.
+      const lookupIds = [...new Set([orderName?.replace(/^#/, "").trim(), shopifyOrderId].filter((v): v is string => !!v))];
+
+      let tracked = null;
+      let matchedId = lookupIds[0];
       try {
-        tracked = await getOrderShipmentDetails(username, licenseKey, orderRef);
+        for (const candidateId of lookupIds) {
+          tracked = await getOrderShipmentDetails(username, licenseKey, candidateId);
+          if (tracked) {
+            matchedId = candidateId;
+            break;
+          }
+        }
       } catch (err) {
         if (err instanceof ShipwayAuthError) throw new Error(RECONNECT_MESSAGE);
         throw err;
@@ -109,11 +129,11 @@ export const shipwayConnector: CredentialsConnector = {
           carriers ??= await getCarriers(username, licenseKey);
           const carrier = company ? matchCarrier(company, carriers) : null;
           if (carrier) {
-            await pushOrderData(username, licenseKey, { carrierId: carrier.id, awb, orderId: orderRef });
+            await pushOrderData(username, licenseKey, { carrierId: carrier.id, awb, orderId: matchedId });
           }
         } catch (err) {
           if (err instanceof ShipwayAuthError) throw new Error(RECONNECT_MESSAGE);
-          console.warn(`Shipway: push failed for order ${orderRef}: ${err instanceof Error ? err.message : String(err)}`);
+          console.warn(`Shipway: push failed for order ${matchedId}: ${err instanceof Error ? err.message : String(err)}`);
         }
         continue;
       }
@@ -128,9 +148,12 @@ export const shipwayConnector: CredentialsConnector = {
          on conflict (client_id, awb)
          do update set connection_id = excluded.connection_id, order_ref = excluded.order_ref,
            courier_name = excluded.courier_name, status = excluded.status, synced_at = now()`,
-        // destination_state stays null: Shipway's "to" field is a city, and writing a
-        // city into a state column would corrupt state-level geography grouping.
-        [conn.client_id, connectionId, awb, orderRef, company ?? "Shipway", mapped ?? "In Transit", orderedAt],
+        // order_ref is deliberately the Shopify internal id, NOT the id Shipway was
+        // looked up by: rto-status.ts joins shipments.order_ref = shopify_orders.
+        // shopify_order_id, so storing Shipway's order number here would silently break
+        // every RTO metric. destination_state stays null because Shipway's "to" field is
+        // a city, and a city in a state column would corrupt geography grouping.
+        [conn.client_id, connectionId, awb, shopifyOrderId, company ?? "Shipway", mapped ?? "In Transit", orderedAt],
       );
       recordsSynced++;
     }

@@ -38,12 +38,17 @@ async function insertShopifyConnection() {
   );
 }
 
-async function insertShopifyOrder(orderId: string, trackingNumber: string | null, trackingCompany: string | null) {
+async function insertShopifyOrder(
+  orderId: string,
+  trackingNumber: string | null,
+  trackingCompany: string | null,
+  orderName: string | null = null,
+) {
   await testPool.query(
     `insert into shopify_orders
-       (client_id, connection_id, shopify_order_id, customer_name, order_date, amount, status, payment_method, tracking_number, tracking_company)
-     values ('abc-fashion', '${SHOPIFY_CONN}', $1, 'Priya Shah', now(), 1000, 'Dispatched', 'Prepaid', $2, $3)`,
-    [orderId, trackingNumber, trackingCompany],
+       (client_id, connection_id, shopify_order_id, order_name, customer_name, order_date, amount, status, payment_method, tracking_number, tracking_company)
+     values ('abc-fashion', '${SHOPIFY_CONN}', $1, $4, 'Priya Shah', now(), 1000, 'Dispatched', 'Prepaid', $2, $3)`,
+    [orderId, trackingNumber, trackingCompany, orderName],
   );
 }
 
@@ -149,6 +154,49 @@ describe("shipwayConnector.sync", () => {
 
     const result = await shipwayConnector.sync(CONN);
     expect(result.recordsSynced).toBe(0);
+  });
+
+  it("looks the order up by its merchant-facing order number, but stores the Shopify id as order_ref", async () => {
+    // Shipway knows orders by the number the store pushed ("1114585"), not Shopify's
+    // internal id — but shipments.order_ref must stay the internal id, because
+    // rto-status.ts joins on it. Getting either wrong silently zeroes RTO metrics.
+    await insertConnection();
+    await insertShopifyConnection();
+    await insertShopifyOrder("5678901234567", "AWB7", "Delhivery", "#1114585");
+    const fetchMock = stubShipway({
+      details: (orderId) =>
+        orderId === "1114585"
+          ? { status: "Success", response: { current_status_code: "RTD", current_status: "RTO Delivered" } }
+          : { status: "Failed" },
+    });
+
+    const result = await shipwayConnector.sync(CONN);
+    expect(result.recordsSynced).toBe(1);
+
+    const rows = await testPool.query("select awb, order_ref, status from shipments where client_id = 'abc-fashion'");
+    expect(rows.rows).toEqual([{ awb: "AWB7", order_ref: "5678901234567", status: "RTO Delivered" }]);
+
+    // The "#" prefix must be stripped before asking Shipway.
+    const asked = fetchMock.mock.calls
+      .filter(([url]) => String(url).endsWith("/getOrderShipmentDetails"))
+      .map(([, init]) => JSON.parse(String((init as RequestInit).body)).order_id);
+    expect(asked).toContain("1114585");
+    expect(asked).not.toContain("#1114585");
+  });
+
+  it("falls back to the Shopify id when an order has no captured order_name", async () => {
+    await insertConnection();
+    await insertShopifyConnection();
+    await insertShopifyOrder("5678901234567", "AWB8", "Delhivery", null);
+    stubShipway({
+      details: (orderId) =>
+        orderId === "5678901234567"
+          ? { status: "Success", response: { current_status_code: "DEL", current_status: "Delivered" } }
+          : { status: "Failed" },
+    });
+
+    const result = await shipwayConnector.sync(CONN);
+    expect(result.recordsSynced).toBe(1);
   });
 
   it("upserts a shipment for an order Shipway already tracks", async () => {
