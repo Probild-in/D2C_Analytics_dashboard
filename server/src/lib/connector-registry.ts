@@ -4,6 +4,7 @@ import { metaConnector } from "../integrations/meta.js";
 import { googleConnector } from "../integrations/google.js";
 import { shiprocketConnector } from "../integrations/shiprocket.js";
 import { delhiveryConnector } from "../integrations/delhivery.js";
+import { shipwayConnector } from "../integrations/shipway.js";
 
 export const connectors: Record<string, Connector> = {
   shopify: shopifyConnector,
@@ -11,4 +12,5 @@ export const connectors: Record<string, Connector> = {
   google: googleConnector,
   courier_shiprocket: shiprocketConnector,
   courier_delhivery: delhiveryConnector,
+  courier_shipway: shipwayConnector,
 };

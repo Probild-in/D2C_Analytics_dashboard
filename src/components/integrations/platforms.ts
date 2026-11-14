@@ -88,6 +88,19 @@ export const PLATFORMS: PlatformMeta[] = [
       "Paste your Delhivery API token (from the Delhivery portal). Delhivery has no bulk order list, so shipments are matched from the tracking numbers your Shopify orders already carry — connect Shopify first for this to find anything. Connecting only checks that you entered something, not that the token actually works with Delhivery — the first sync will reveal whether it's valid, and a bad token will show the connection as \"Needs attention\".",
     fields: [{ name: "token", label: "API token", type: "password" }],
   },
+  {
+    key: "courier_shipway",
+    label: "Shipway",
+    description: "Shipments, delivery status, NDR and RTO by courier",
+    icon: Truck,
+    authType: "credentials",
+    helper:
+      "Enter your Shipway username and licence key (both are in the welcome email from Shipway, or under your Shipway profile). Orders with tracking numbers are pushed to Shipway automatically with no customer contact details, so your customers never get notified by this sync. Connect Shopify first — shipments are matched from the tracking numbers your Shopify orders carry.",
+    fields: [
+      { name: "username", label: "Username", type: "text", placeholder: "your-shipway-username" },
+      { name: "licenseKey", label: "Licence key", type: "password" },
+    ],
+  },
 ];
 
 // A client can have several rows per platform over time (reconnects, old disconnects).
