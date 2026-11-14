@@ -137,6 +137,20 @@ describe("shipwayConnector.connectWithCredentials", () => {
 });
 
 describe("shipwayConnector.sync", () => {
+  it("treats Shipway's empty-body 200 responses as 'nothing tracked', not an error", async () => {
+    // Observed live: unknown order_id and rejected pushes answer 200 with an empty body.
+    await insertConnection();
+    await insertShopifyConnection();
+    await insertShopifyOrder("4001", "AWB9", "Blue Dart");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 200 })),
+    );
+
+    const result = await shipwayConnector.sync(CONN);
+    expect(result.recordsSynced).toBe(0);
+  });
+
   it("upserts a shipment for an order Shipway already tracks", async () => {
     await insertConnection();
     await insertShopifyConnection();

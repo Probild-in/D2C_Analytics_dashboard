@@ -32,7 +32,16 @@ async function post(path: string, body: Record<string, string>): Promise<unknown
   if (!res.ok) {
     throw new Error(`Shipway ${path} request failed: ${res.status}`);
   }
-  return res.json();
+  // Observed live: Shipway answers 200 with a COMPLETELY EMPTY body (Content-Length: 0)
+  // for an unknown order_id and for a rejected push — that's their "no", not an outage.
+  // Treat empty/unparseable as null; each caller already handles null as "nothing here".
+  const text = await res.text();
+  if (!text.trim()) return null;
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return null;
+  }
 }
 
 // Doubles as the live credentials check at connect time (Shipway, unlike Delhivery, has
