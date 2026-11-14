@@ -36,10 +36,7 @@ export function usePeriodData() {
 }
 
 export function deriveMetrics(sum: ReturnType<typeof sumSeries>) {
-  // Shopify's AOV = total sales / orders still carrying value after refunds (a
-  // fully-refunded cancellation drops out, an unrefunded one stays) — matching
-  // their denominator so the tile reconciles with their admin.
-  const aov = sum.salesOrders > 0 ? sum.totalSales / sum.salesOrders : 0;
+  const aov = sum.orders > 0 ? sum.totalSales / sum.orders : 0;
   const codPercent = sum.orders > 0 ? (sum.codOrders / sum.orders) * 100 : 0;
   const prepaidPercent = sum.orders > 0 ? (sum.prepaidOrders / sum.orders) * 100 : 0;
   const cancellationPercent = sum.orders > 0 ? (sum.cancelledOrders / sum.orders) * 100 : 0;
