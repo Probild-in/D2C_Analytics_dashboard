@@ -40,9 +40,12 @@ export async function trackShipment(token: string, awb: string): Promise<Delhive
     throw new Error(`Delhivery track request failed: ${res.status}`);
   }
   const body: unknown = await res.json();
-  if (!isRecord(body) || !Array.isArray(body.ShipmentData)) {
-    throw new Error("Delhivery returned an unexpected tracking response (no ShipmentData array)");
-  }
+  // A 200 with no ShipmentData array is how Delhivery answers for an AWB it does not
+  // recognize (e.g. {"Error": ...}) — observed live, not just an empty list. Treat it
+  // the same as an empty list: this AWB has nothing to track (yet), skip it. Auth and
+  // transport failures are already distinguished above by status code, so a missing
+  // array here never masks a real outage.
+  if (!isRecord(body) || !Array.isArray(body.ShipmentData)) return null;
   if (body.ShipmentData.length === 0) return null;
 
   const entry = body.ShipmentData[0];

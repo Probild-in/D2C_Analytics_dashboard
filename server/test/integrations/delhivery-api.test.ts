@@ -52,9 +52,12 @@ describe("trackShipment", () => {
     expect(err).not.toBeInstanceOf(DelhiveryAuthError);
   });
 
-  it("throws on an unexpected response shape rather than guessing", async () => {
-    stubFetch({ unexpected: true });
-    await expect(trackShipment("tok-1", "AWB123")).rejects.toThrow(/unexpected/i);
+  it("treats a 200 without a ShipmentData array as an unrecognized AWB, not an error", async () => {
+    // Observed live: Delhivery answers 200 with e.g. {"Error": ...} for an AWB it does
+    // not know. One foreign/mistyped AWB must not fail the whole sync — auth and
+    // transport failures are distinguished by status code, not body shape.
+    stubFetch({ Error: "no data found" });
+    expect(await trackShipment("tok-1", "AWB123")).toBeNull();
   });
 
   it("tolerates a missing Status or Destination without throwing", async () => {
